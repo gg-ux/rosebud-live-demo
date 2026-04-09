@@ -1,0 +1,326 @@
+/* ==========================================================================
+   Rosebud Design Tokens — Complete
+   Extracted from Figma: Rosebud Design System (Full Audit)
+   Theme-aware: light/dark via data-theme attribute
+   ========================================================================== */
+
+@font-face {
+  font-family: 'Circular Std';
+  src: url('./fonts/CircularStd-Medium.ttf') format('truetype');
+  font-weight: 400 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Circular Std';
+  src: url('./fonts/CircularStd-BookItalic.ttf') format('truetype');
+  font-weight: 400 450;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Circular Std';
+  src: url('./fonts/CircularStd-MediumItalic.ttf') format('truetype');
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Circular Std';
+  src: url('./fonts/CircularStd-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Static tokens (theme-independent) ── */
+
+@theme {
+  /* ── Brand: Rose Pink (10 shades) ── */
+  --color-rose-pink-900: #630025;
+  --color-rose-pink-800: #7E0230;
+  --color-rose-pink-700: #A40742;
+  --color-rose-pink-600: #C50C51;
+  --color-rose-pink-500: #D6165B;
+  --color-rose-pink-400: #E31665;
+  --color-rose-pink-300: #F47EAC;
+  --color-rose-pink-200: #FFBDD6;
+  --color-rose-pink-100: #FFD8E7;
+  --color-rose-pink-50: #FFE2ED;
+
+  /* ── Brand: Sage Green (10 shades) ── */
+  --color-sage-green-900: #235E4D;
+  --color-sage-green-800: #36846C;
+  --color-sage-green-700: #479980;
+  --color-sage-green-600: #4FA58B;
+  --color-sage-green-500: #5ABA9D;
+  --color-sage-green-400: #7CC4AF;
+  --color-sage-green-300: #93CCBB;
+  --color-sage-green-200: #AAD5C8;
+  --color-sage-green-100: #C2E6DB;
+  --color-sage-green-50: #F0FFF4;
+
+  /* ── Brand: Soft Ivory (10 shades) ── */
+  --color-soft-ivory-900: #AF730D;
+  --color-soft-ivory-800: #D28D1A;
+  --color-soft-ivory-700: #DD9D34;
+  --color-soft-ivory-600: #E4AD51;
+  --color-soft-ivory-500: #EBBC6F;
+  --color-soft-ivory-400: #F4CC89;
+  --color-soft-ivory-300: #FAD8A1;
+  --color-soft-ivory-200: #FFE3B5;
+  --color-soft-ivory-100: #FFEDCF;
+  --color-soft-ivory-50: #FFF6E8;
+
+  /* ── Brand: Charcoal Gray (10 shades) ── */
+  --color-charcoal-gray-900: #0F0E0E;
+  --color-charcoal-gray-800: #332F2F;
+  --color-charcoal-gray-700: #5C5555;
+  --color-charcoal-gray-600: #7F7676;
+  --color-charcoal-gray-500: #8B807F;
+  --color-charcoal-gray-400: #CCBEBE;
+  --color-charcoal-gray-300: #DED5D5;
+  --color-charcoal-gray-200: #EDE4E4;
+  --color-charcoal-gray-100: #F9F3F3;
+  --color-charcoal-gray-50: #FFFAFA;
+
+  /* ── Accent (invariant) ── */
+  --color-accent-blue: #0A84FF;
+  --color-accent-yellow: #FDCF08;
+
+  /* ── Typography ── */
+  --font-sans: 'Circular Std', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+
+  --font-size-display-lg: 1.5rem;     /* 24px */
+  --font-size-display-md: 1.375rem;   /* 22px */
+  --font-size-display-sm: 1.25rem;    /* 20px */
+  --font-size-title-lg: 1.0625rem;    /* 17px */
+  --font-size-title-md: 1rem;         /* 16px */
+  --font-size-title-sm: 0.9375rem;    /* 15px */
+  --font-size-body-lg: 1.0625rem;     /* 17px */
+  --font-size-body-md: 1rem;          /* 16px */
+  --font-size-body-sm: 0.9375rem;     /* 15px */
+  --font-size-label-lg: 0.875rem;     /* 14px */
+  --font-size-label-md: 0.8125rem;    /* 13px */
+  --font-size-label-sm: 0.75rem;      /* 12px */
+  --font-size-caption: 0.75rem;       /* 12px */
+
+  --line-height-display-lg: 2rem;       /* 32px */
+  --line-height-display-md: 1.875rem;   /* 30px */
+  --line-height-display-sm: 1.75rem;    /* 28px */
+  --line-height-title-lg: 1.4375rem;    /* 23px */
+  --line-height-title-md: 1.375rem;     /* 22px */
+  --line-height-title-sm: 1.3125rem;    /* 21px */
+  --line-height-body-lg: 1.4375rem;     /* 23px */
+  --line-height-body-md: 1.375rem;      /* 22px */
+  --line-height-body-sm: 1.25rem;       /* 20px */
+  --line-height-label-lg: 1.25rem;      /* 20px */
+  --line-height-label-md: 1.125rem;     /* 18px */
+  --line-height-label-sm: 1.0625rem;    /* 17px */
+  --line-height-caption: 1rem;          /* 16px */
+
+  --font-weight-book: 450;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+
+  /* ── Spacing: 4px modular scale ── */
+  --spacing-1: 4px;
+  --spacing-1_5: 6px;
+  --spacing-2: 8px;
+  --spacing-2_5: 10px;
+  --spacing-3: 12px;
+  --spacing-3_5: 14px;
+  --spacing-4: 16px;
+  --spacing-4_5: 18px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-7: 28px;
+  --spacing-8: 32px;
+  --spacing-9: 36px;
+  /* Extended / Component sizing */
+  --spacing-10: 40px;
+  --spacing-11: 44px;
+  --spacing-12: 48px;
+  --spacing-14: 56px;
+  --spacing-16: 64px;
+  --spacing-18: 72px;
+  --spacing-20: 80px;
+  --spacing-22: 88px;
+  --spacing-24: 96px;
+  --spacing-26: 104px;
+  --spacing-28: 112px;
+  --spacing-30: 120px;
+
+  /* ── Border Radius ── */
+  --radius-none: 0px;
+  --radius-xxs: 4px;
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 18px;
+  --radius-3xl: 24px;
+  --radius-full: 999px;
+
+  /* ── Border Width ── */
+  --border-xs: 1px;
+  --border-sm: 2px;
+  --border-md: 4px;
+  --border-lg: 6px;
+  --border-xl: 8px;
+
+  /* ── Layout Grid: Mobile ── */
+  --grid-mobile-columns: 4;
+  --grid-mobile-gutter: 12px;
+  --grid-mobile-margin: 12px;
+
+  /* ── Layout Grid: Desktop ── */
+  --grid-desktop-columns: 12;
+  --grid-desktop-gutter: 16px;
+  --grid-desktop-margin: 0px;
+
+  /* ── Component Sizes ── */
+  --btn-height-sm: 36px;
+  --btn-height-md: 44px;
+  --btn-height-lg: 48px;
+  --input-height: 56px;
+  --switch-width: 51px;
+  --switch-height: 30px;
+  --segmented-height: 40px;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 2px var(--color-shadow);
+  --shadow-md: 0 4px 12px var(--color-shadow);
+  --shadow-lg: 0 4px 16px var(--color-shadow);
+}
+
+/* ══════════════════════════════════════════════════════════
+   DARK THEME
+   ══════════════════════════════════════════════════════════ */
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-primary: #DCDCDC;
+  --color-on-primary: #000000;
+  --color-primary-container: #00522D;
+  --color-on-primary-container: #97F7B7;
+
+  --color-secondary: #B6CCB9;
+  --color-on-secondary: #223527;
+  --color-secondary-container: #1E1E1E;
+  --color-on-secondary-container: #D1E8D4;
+
+  --color-tertiary: #A3CDDA;
+  --color-on-tertiary: #023640;
+  --color-tertiary-container: #214C57;
+  --color-on-tertiary-container: #BEEAF7;
+
+  --color-error: #FFB4AB;
+  --color-on-error: #690005;
+  --color-error-container: #93000A;
+  --color-on-error-container: #FFB4AB;
+
+  --color-background: #0A0C0A;
+  --color-on-background: #E1E3DE;
+  --color-surface: #242428;
+  --color-on-surface: #E1E3DE;
+  --color-surface-variant: #141416;
+  --color-on-surface-variant: #C0C9BF;
+
+  --color-outline: #414942;
+  --color-outline-light: #323234;
+  --color-outline-variant: #414942;
+
+  --color-inverse-surface: #E1E3DE;
+  --color-inverse-on-surface: #2E312E;
+  --color-inverse-primary: #006D3D;
+
+  --color-surface-level-0: #FFFFFF;
+  --color-surface-level-1: #1E261F;
+  --color-surface-level-2: #212B25;
+  --color-surface-level-3: #243128;
+  --color-surface-level-4: #25332A;
+
+  --color-surface-disabled: rgba(225, 227, 222, 0.12);
+  --color-on-surface-disabled: rgba(225, 227, 222, 0.38);
+  --color-backdrop: rgba(43, 50, 44, 0.4);
+
+  --color-assistant: #63B3ED;
+  --color-background-on-surface: #0E0C0E;
+  --color-secondary-text: #646C6A;
+  --color-secondary-text-on-surface: #878887;
+  --color-secondary-text-on-surface-variant: #80817F;
+
+  --color-accent-green: #40AC1A;
+
+  --color-shadow: rgba(0, 0, 0, 0.3);
+}
+
+/* ══════════════════════════════════════════════════════════
+   LIGHT THEME
+   ══════════════════════════════════════════════════════════ */
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  --color-primary: #000000;
+  --color-on-primary: #FAFAFA;
+  --color-primary-container: #97F7B7;
+  --color-on-primary-container: #00210F;
+
+  --color-secondary: #4F6354;
+  --color-on-secondary: #FFFFFF;
+  --color-secondary-container: #FFFFFF;
+  --color-on-secondary-container: #000000;
+
+  --color-tertiary: #3B6470;
+  --color-on-tertiary: #FFFFFF;
+  --color-tertiary-container: #BEEAF7;
+  --color-on-tertiary-container: #001F26;
+
+  --color-error: #BA1A1A;
+  --color-on-error: #FFFFFF;
+  --color-error-container: #FFDAD6;
+  --color-on-error-container: #410002;
+
+  --color-background: #F6F6F6;
+  --color-on-background: #191C1A;
+  --color-surface: #FFFFFF;
+  --color-on-surface: #191C1A;
+  --color-surface-variant: #FCFCFC;
+  --color-on-surface-variant: #414942;
+
+  --color-outline: #C0C0BF;
+  --color-outline-light: #DEDEDE;
+  --color-outline-variant: #C9CAC9;
+
+  --color-inverse-surface: #2E312E;
+  --color-inverse-on-surface: #F0F1EC;
+  --color-inverse-primary: #7BDA9D;
+
+  --color-surface-level-0: #FFFFFF;
+  --color-surface-level-1: #EEF6EF;
+  --color-surface-level-2: #E7F2E9;
+  --color-surface-level-3: #DFEDE3;
+  --color-surface-level-4: #DDECE2;
+
+  --color-surface-disabled: rgba(25, 28, 26, 0.12);
+  --color-on-surface-disabled: rgba(25, 28, 26, 0.38);
+  --color-backdrop: rgba(43, 50, 44, 0.4);
+
+  --color-assistant: #2B6CB0;
+  --color-background-on-surface: #F8F8F8;
+  --color-secondary-text: #6D6C6A;
+  --color-secondary-text-on-surface: #8B828B;
+  --color-secondary-text-on-surface-variant: #8B8D8C;
+
+  --color-accent-green: #207B00;
+
+  --color-shadow: rgba(0, 0, 0, 0.16);
+}

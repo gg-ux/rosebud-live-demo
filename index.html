@@ -1,12 +1,117 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon-rosebud.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>live-demo</title>
+    <title>Rosebud</title>
+    <style>
+      #preloader {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #FAFAFA;
+      }
+      #preloader.hide {
+        opacity: 0;
+        transition: opacity 0.5s ease-out;
+        pointer-events: none;
+      }
+      .pre-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 28px;
+      }
+      .pre-wrap {
+        position: relative;
+        width: 88px;
+        height: 88px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .pre-text {
+        font-family: 'Circular Std', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 15px;
+        font-weight: 450;
+        color: #8B828B;
+        letter-spacing: 0.01em;
+        transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+      }
+      @keyframes pre-text-in {
+        from { opacity: 0; transform: translateY(4px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .pre-wrap svg.logo {
+        width: 36px;
+        height: 36px;
+        animation: pre-pulse 1.8s ease-in-out infinite;
+      }
+      .pre-ring {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        border: 5px solid #F0F0F0;
+      }
+      .pre-ring::after {
+        content: '';
+        position: absolute;
+        inset: -5px;
+        border-radius: 50%;
+        border: 5px solid transparent;
+        border-top-color: #E31665;
+        animation: pre-spin 1.1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      }
+      @keyframes pre-spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      @keyframes pre-pulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.06); opacity: 0.85; }
+      }
+    </style>
   </head>
   <body>
+    <!-- Instant preloader — visible before JS loads -->
+    <div id="preloader">
+      <div class="pre-inner">
+        <div class="pre-wrap">
+          <div class="pre-ring"></div>
+          <svg class="logo" viewBox="0 0 624 624" fill="none">
+            <path d="M312.117 606C445.835 606 554.234 497.6 554.234 363.883C312.117 363.883 312.117 156.354 70 156.354V363.883C70 497.6 178.399 606 312.117 606Z" fill="#E31665"/>
+            <path d="M127.602 520.669C172.012 572.875 238.188 605.993 312.099 605.993C338.621 605.993 364.146 601.728 388.028 593.848C364.147 601.729 338.622 605.996 312.1 605.996C269.484 605.996 229.439 594.986 194.656 575.655L188.855 572.325C184.901 569.979 181.162 567.618 177.493 565.159L170.191 560.069C166.998 557.752 164.083 555.531 161.22 553.247L157.742 550.42L154.332 547.541C151.982 545.518 149.809 543.577 147.671 541.599L145.844 539.89C143.76 537.92 141.71 535.914 139.697 533.872C138.606 532.766 137.526 531.65 136.457 530.523L133.223 527.048C132.313 526.051 131.411 525.046 130.517 524.034C129.535 522.922 128.564 521.8 127.602 520.669ZM112.584 501.082C117.207 507.791 122.159 514.255 127.417 520.451L124.707 517.201C122.76 514.824 120.857 512.41 119 509.959L114.916 504.406C114.163 503.352 113.418 502.291 112.682 501.224L112.584 501.082ZM554.218 329.291H554.216C446.368 329.291 394.099 284.844 334.609 233.853L334.042 233.366C323.507 224.337 312.756 215.122 301.498 206.051C365.775 114.849 426.1 18 554.218 18V329.291Z" fill="#E31665"/>
+            <path opacity="0.6" d="M123.006 184.166C123.006 176.024 123.319 167.881 123.789 159.739C107.348 157.077 89.497 155.511 70.081 155.198V362.826C70.081 496.86 179.219 605.997 313.409 605.997C358.192 605.997 400.156 593.784 436.169 572.645C257.196 533.969 123.006 374.726 123.006 184.166Z" fill="#B81457"/>
+          </svg>
+        </div>
+        <p id="pre-text" class="pre-text">Reading between the lines...</p>
+      </div>
+    </div>
+    <script>
+      (function() {
+        var phrases = [
+          'Reading between the lines...',
+          'Tracing your patterns...',
+          'Making the invisible visible...'
+        ];
+        var i = 0;
+        var el = document.getElementById('pre-text');
+        setInterval(function() {
+          i = (i + 1) % phrases.length;
+          el.style.opacity = '0';
+          el.style.transform = 'translateY(4px)';
+          setTimeout(function() {
+            el.textContent = phrases[i];
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+          }, 250);
+        }, 1800);
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
