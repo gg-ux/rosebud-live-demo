@@ -2,9 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
 const NAV_ITEMS = [
-  { path: '/', label: 'For Therapists' },
-  { path: '/concepts', label: 'Patterns' },
+  { path: '/', label: 'Patterns' },
   { path: '/design-system', label: 'Design System' },
+  { path: '/therapist', label: 'For Therapists' },
 ];
 
 export function TopNav({ rightSlot, alwaysVisible = false, sticky = true, className = '' }) {

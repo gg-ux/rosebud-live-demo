@@ -178,9 +178,9 @@ const slides = [
     type: 'bridge',
     eyebrow: 'The work',
     title: 'The prototypes are live. Let\u2019s walk through them.',
-    body: 'Everything you\u2019ve heard about—V5 onboarding, mid-conversation flows, V3 Adaptive Patterns, History & Bookmarks—is built and navigable on the concepts site. Let\u2019s open it up.',
-    ctaLabel: 'Open concepts site',
-    ctaHref: '/concepts',
+    body: 'Everything you\u2019ve heard about—V5 onboarding, mid-conversation flows, V3 Adaptive Patterns, History & Bookmarks—is built and navigable on the Patterns site. Let\u2019s open it up.',
+    ctaLabel: 'Open Patterns site',
+    ctaHref: '/',
     helper: 'Opens in a new tab. Switch back here when we\u2019re done—we\u2019ll talk about what I\u2019d ship next.',
   },
 
@@ -270,7 +270,7 @@ export function Presentation() {
           setCurrentSlide(totalSlides - 1);
           break;
         case 'Escape':
-          navigate('/concepts');
+          navigate('/');
           break;
         case 'f':
         case 'F':
@@ -329,9 +329,9 @@ export function Presentation() {
 
       {/* Back button (top-left) */}
       <button
-        onClick={() => navigate('/concepts')}
+        onClick={() => navigate('/')}
         className="fixed top-6 left-8 p-2 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] transition-colors z-50 cursor-pointer"
-        title="Back to concepts (Esc)"
+        title="Back to Patterns (Esc)"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-[18px] h-[18px] text-white/60">
           <line x1="19" y1="12" x2="5" y2="12" />

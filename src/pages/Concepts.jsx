@@ -87,6 +87,20 @@ function ReplayButton({ onClick, className = '' }) {
 }
 
 export function Concepts() {
+  // Always start at the top of the page when navigating in. Without
+  // this, browser scroll restoration (or a stale hash from the
+  // anchor scroll spy) can drop users somewhere in the middle of the
+  // page when they click "Patterns" in the nav.
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Strip any leftover hash so it doesn't auto-scroll to anchor
+      if (window.location.hash) {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+      window.scrollTo(0, 0);
+    }
+  }, []);
+
   const onboarding = useFlowStepper(6, { patterns: [], customItems: [], loggingPref: '', reviewInterval: 'weekly' });
   const onboardingV2 = useFlowStepper(4, { intents: [], logMethod: 'mention', customWatch: '', cadence: 'weekly', minHistory: '2weeks' });
   const onboardingV5 = useFlowStepper(4, { goals: ['honest', 'returning', 'sleep', 'meds-supps'], takingDetail: '' });

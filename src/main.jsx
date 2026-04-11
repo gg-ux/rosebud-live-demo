@@ -19,9 +19,15 @@ function Root() {
       <BrowserRouter>
         <Suspense fallback={null}>
           <Routes>
-            <Route path="/" element={<App />} />
+            {/* Patterns is the new landing page. /patterns is the
+                renamed canonical slug (was /concepts before this
+                refactor); both / and /patterns serve the same page so
+                "Patterns" in the top nav and direct /patterns links
+                both work. */}
+            <Route path="/" element={<Concepts />} />
+            <Route path="/patterns" element={<Concepts />} />
             <Route path="/design-system" element={<DesignSystem />} />
-            <Route path="/concepts" element={<Concepts />} />
+            <Route path="/therapist" element={<App />} />
             <Route path="/presentation" element={<Presentation />} />
           </Routes>
         </Suspense>
