@@ -1,4 +1,5 @@
 import { Button } from '../../../../components/Button';
+import joySvg from '../../../../symbols/emotes/joy.svg';
 
 /* ══════════════════════════════════════════════════════════
    V5 · Confirmation — celebration + feature promises
@@ -54,7 +55,7 @@ export function OnboardingV5Confirmation({ onBack, step = 3, total = 4 }) {
             under the sticker rather than floating separately. */}
         <div className="flex justify-center mb-[8px]">
           <img
-            src="/src/symbols/emotes/joy.svg"
+            src={joySvg}
             alt=""
             className="w-[100px] h-[100px]"
           />

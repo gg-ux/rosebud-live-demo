@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { PhoneFrame } from '../components/PhoneFrame';
 import { TopNav } from '../components/TopNav';
 import { ExportModal } from '../components/ExportModal';
+import joySvg from '../symbols/emotes/joy.svg';
+import moodUnimpressedSvg from '../symbols/emotes/mood-unimpressed.svg';
 import { useFlowStepper } from './concepts/useFlowStepper';
 import { OnboardingWelcome } from './concepts/screens/OnboardingWelcome';
 import { OnboardingPatterns } from './concepts/screens/OnboardingPatterns';
@@ -754,8 +756,8 @@ export function Concepts() {
                   const maxIdx = moodData.reduce((m, d, i, a) => (d.score > a[m].score ? i : m), 0);
                   return moodData.map((d, i) => {
                     const emote =
-                      i === minIdx ? '/src/symbols/emotes/mood-unimpressed.svg' :
-                      i === maxIdx ? '/src/symbols/emotes/joy.svg' :
+                      i === minIdx ? moodUnimpressedSvg :
+                      i === maxIdx ? joySvg :
                       null;
                     return (
                       <g key={i} className="animate-hero-dot" style={{ animationDelay: `${2.2 + i * 0.08}s` }}>

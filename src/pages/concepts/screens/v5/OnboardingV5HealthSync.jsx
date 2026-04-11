@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Button } from '../../../../components/Button';
+import heartSvg from '../../../../symbols/emotes/heart.svg';
 
 /* Each syncable body goal maps to one Apple Health data type. In a
    real build we'd request multiple types per goal (sleep analysis +
@@ -247,7 +248,7 @@ export function OnboardingV5HealthSync({ data, onNext, onBack, step = 2, total =
         <div className="flex justify-center mb-[14px]">
           <div className="w-[96px] h-[96px] rounded-[24px] bg-[#FFE5EB] flex items-center justify-center">
             <img
-              src="/src/symbols/emotes/heart.svg"
+              src={heartSvg}
               alt=""
               className="w-[60px] h-[60px]"
             />

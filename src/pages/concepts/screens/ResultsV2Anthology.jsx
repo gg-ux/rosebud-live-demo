@@ -9,6 +9,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import joySvg from '../../../symbols/emotes/joy.svg';
+import moodUnimpressedSvg from '../../../symbols/emotes/mood-unimpressed.svg';
 import { StoryOfYouTakeover } from './StoryOfYouTakeover';
 import { Button } from '../../../components/Button';
 
@@ -2056,8 +2058,8 @@ const EMOTION_COLORS = {
 // Pick a sticker based on mood score: low scores get mood-unimpressed,
 // high scores get joy (matching the V1 hero chart's global min/max pattern)
 const moodSticker = (score) => {
-  if (score >= 7) return '/src/symbols/emotes/joy.svg';
-  if (score <= 3) return '/src/symbols/emotes/mood-unimpressed.svg';
+  if (score >= 7) return joySvg;
+  if (score <= 3) return moodUnimpressedSvg;
   return null;
 };
 

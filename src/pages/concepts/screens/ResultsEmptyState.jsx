@@ -5,6 +5,7 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 import { Button } from '../../../components/Button';
+import roseBudThornSvg from '../../../illustrations/rose-bud-thorn.svg';
 
 const CURRENT_WORDS = 2134;
 const TARGET_WORDS = 5000;
@@ -34,7 +35,7 @@ export function ResultsEmptyState() {
       <div className="px-[16px]">
         <div className="rounded-[20px] bg-[#F6F5F1] border border-[#EAE7DE] p-[24px] flex flex-col items-center text-center">
           <img
-            src="/src/illustrations/rose-bud-thorn.svg"
+            src={roseBudThornSvg}
             alt=""
             className="w-[128px] h-[128px] mb-[8px]"
           />
