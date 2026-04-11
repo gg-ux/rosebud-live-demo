@@ -1,7 +1,6 @@
 import { ArrowLeft } from 'lucide-react';
 
 const INTERVALS = [
-  { id: 'daily', label: 'Daily', desc: 'Quick daily pattern summary each evening.' },
   { id: 'weekly', label: 'Weekly', desc: 'A weekly report connecting the dots across your week.' },
   { id: 'monthly', label: 'Monthly', desc: 'Monthly deep-dive into long-term trends and themes.' },
 ];

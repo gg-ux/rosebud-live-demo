@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>rosebud · Pattern Discovery · Project Overview</title>
+<style>
+  /* ── Circular Std — absolute file:// paths so Chrome PDF loads them ── */
+  @font-face {
+    font-family: 'Circular Std';
+    src: url('file:///Users/grace/rosebud-live-demo/src/fonts/CircularStd-Medium.ttf') format('truetype');
+    font-weight: 400 500;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: 'Circular Std';
+    src: url('file:///Users/grace/rosebud-live-demo/src/fonts/CircularStd-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+  }
+  @page {
+    size: Letter;
+    margin: 0.35in 0.45in;
+  }
+  * {
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Circular Std', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 8.5pt;
+    line-height: 1.38;
+    color: #0F0E0E;
+    background: #FFFFFF;
+    font-weight: 450;
+  }
+  /* Body paragraphs and list items render in the lede gray so the doc
+     reads as an editorial layout instead of heavy bolded text. Strong
+     emphasis stays in full black so it still pops. */
+  p {
+    color: #6D6C6A;
+    margin: 0 0 5pt 0;
+  }
+  ul {
+    color: #6D6C6A;
+  }
+  strong, b {
+    font-weight: 700;
+    color: #0F0E0E;
+  }
+  /* ── Header ── */
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 7pt;
+    padding-bottom: 7pt;
+    border-bottom: 2pt solid #E31665;
+    margin-bottom: 10pt;
+  }
+  .brand svg {
+    width: 15pt;
+    height: 15pt;
+    display: block;
+  }
+  .brand-name {
+    font-weight: 700;
+    font-size: 11pt;
+    letter-spacing: -0.01em;
+    color: #0F0E0E;
+  }
+  .brand-sep {
+    color: #C0C0BF;
+    font-weight: 500;
+  }
+  .brand-crumb {
+    font-weight: 700;
+    font-size: 7.5pt;
+    color: #6D6C6A;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  /* ── Title block ── */
+  h1 {
+    font-size: 16pt;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    margin: 0 0 4pt 0;
+    font-weight: 700;
+  }
+  .lede {
+    font-size: 9.5pt;
+    line-height: 1.38;
+    color: #6D6C6A;
+    font-weight: 500;
+    margin: 0 0 8pt 0;
+  }
+  .meta {
+    display: flex;
+    gap: 18pt;
+    font-size: 7.5pt;
+    color: #6D6C6A;
+    padding: 6pt 0 8pt 0;
+    border-top: 0.75pt solid #EDEDED;
+    border-bottom: 0.75pt solid #EDEDED;
+    margin-bottom: 10pt;
+  }
+  .meta b {
+    color: #0F0E0E;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 6.5pt;
+    margin-bottom: 1pt;
+    font-weight: 700;
+  }
+  /* ── Sections ── */
+  h2 {
+    font-size: 8pt;
+    font-weight: 700;
+    margin: 8pt 0 2pt 0;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #0F0E0E;
+  }
+  ul {
+    margin: 2pt 0 0 0;
+    padding-left: 12pt;
+  }
+  li {
+    margin-bottom: 2.5pt;
+  }
+  /* ── Tables (shared) ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2pt 0 0 0;
+    font-size: 8pt;
+  }
+  th, td {
+    text-align: left;
+    padding: 3pt 0;
+    border-bottom: 0.5pt solid #EDEDED;
+    vertical-align: top;
+    font-weight: 450;
+  }
+  th {
+    font-size: 6.5pt;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #6D6C6A;
+    border-bottom: 0.75pt solid #CCCCCC;
+  }
+  /* ── Scope table ── */
+  .scope th:last-child, .scope td:last-child {
+    text-align: right;
+    width: 48pt;
+  }
+  .scope td .desc {
+    color: #6D6C6A;
+    font-size: 7.5pt;
+    display: block;
+    margin-top: 0.5pt;
+  }
+  .effort {
+    display: inline-block;
+    font-size: 6.5pt;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 1pt 5pt;
+    border-radius: 8pt;
+  }
+  .effort.high {
+    background: #FFE2ED;
+    color: #A40742;
+  }
+  .effort.low {
+    background: #F0FFF4;
+    color: #235E4D;
+  }
+  /* ── Metrics table ── */
+  .metrics th, .metrics td {
+    padding-right: 8pt;
+  }
+  .metrics th:first-child, .metrics td:first-child {
+    width: 38%;
+  }
+  .metrics th:nth-child(2), .metrics td:nth-child(2) {
+    width: 28%;
+  }
+  .metrics td b {
+    font-weight: 700;
+  }
+  /* ── Exploration blocks — story-driven content ── */
+  .success {
+    margin: 2pt 0 0 0;
+    padding-left: 12pt;
+    color: #6D6C6A;
+  }
+  .success li {
+    margin-bottom: 2.5pt;
+  }
+  .explore-block {
+    margin: 4pt 0 7pt 0;
+  }
+  .explore-eyebrow {
+    font-size: 6.5pt;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #0F0E0E;
+    margin-bottom: 3pt;
+  }
+  .iteration {
+    display: flex;
+    align-items: center;
+    gap: 4pt;
+    flex-wrap: wrap;
+    margin: 0 0 3pt 0;
+  }
+  .iter-pill {
+    display: inline-block;
+    font-size: 6pt;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 1pt 5pt;
+    border-radius: 8pt;
+    background: #F0F0F0;
+    color: #6D6C6A;
+    white-space: nowrap;
+  }
+  .iter-pill.latest {
+    background: #FFE2ED;
+    color: #A40742;
+  }
+  .iter-arrow {
+    color: #C0C0BF;
+    font-size: 7pt;
+    font-weight: 700;
+  }
+  .explore-block p {
+    margin: 0;
+  }
+  /* ── Footer ── */
+  .footer {
+    margin-top: 10pt;
+    padding-top: 5pt;
+    border-top: 0.75pt solid #EDEDED;
+    font-size: 6.5pt;
+    color: #6D6C6A;
+    display: flex;
+    justify-content: space-between;
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+  <!-- Brand header (the wordmark is lowercase rosebud by brand standard) -->
+  <div class="brand">
+    <svg viewBox="0 0 624 625" xmlns="http://www.w3.org/2000/svg">
+      <path d="M311.967 624.001C453.872 624.001 568.909 508.965 568.909 367.06C311.967 367.06 311.967 146.825 55.0264 146.825V367.06C55.0264 508.965 170.063 624.001 311.967 624.001Z" fill="#E31665"/>
+      <path d="M568.892 330.351H568.89C454.438 330.351 398.969 283.183 335.836 229.069L335.234 228.554C324.055 218.971 312.645 209.192 300.698 199.565C368.911 102.779 432.929 9.22867e-05 568.892 0V330.351Z" fill="#E31665"/>
+      <path opacity="0.6" d="M111.278 176.34C111.278 167.699 111.61 159.059 112.109 150.418C94.661 147.593 75.7177 145.931 55.1128 145.599V365.939C55.1128 508.179 170.932 623.999 313.339 623.999C360.863 623.999 405.397 611.038 443.615 588.605C253.684 547.561 111.278 378.568 111.278 176.34Z" fill="#B81457"/>
+    </svg>
+    <span class="brand-name">rosebud</span>
+    <span class="brand-sep">·</span>
+    <span class="brand-crumb">Pattern Discovery · Project Overview</span>
+  </div>
+
+  <!-- Title -->
+  <h1>Helping Rosebud users see the patterns in their own writing.</h1>
+  <p class="lede">A 3-day design trial. Scope, proposed solution, effort estimates, and how we&rsquo;d measure whether it worked.</p>
+
+  <!-- Meta strip -->
+  <div class="meta">
+    <div><b>Designer</b>Grace Guo</div>
+    <div><b>Duration</b>3-day design trial</div>
+    <div><b>Structure</b>Problem &rarr; Solution &rarr; Scope &rarr; Metrics</div>
+    <div><b>Delivery</b>Interactive prototype + live walkthrough</div>
+  </div>
+
+  <!-- Problem -->
+  <h2>Problem</h2>
+  <p>Journaling tools stop at the entry: notebook in, nothing out. Users rarely re-read, rarely spot their own patterns, rarely feel the accumulation of months of writing. The challenge is turning a pile of text into something a user can see themselves in, without making the writing feel surveilled in the moment.</p>
+
+  <!-- Proposed Solution -->
+  <h2>Proposed solution</h2>
+  <p>Rosebud becomes an <b>anthology</b> of your own writing. History stays archival and unmonitored. Patterns is a separate destination, story cards, behavioral highlights, people, echoes, and a third-person &ldquo;Story of You&rdquo; read in audiobook format, bridged back to History by quoted fragments from real entries. Onboarding asks one goal-oriented question and routes the answer to loggers and patterns behind the scenes, so users never learn the app&rsquo;s taxonomy.</p>
+
+  <!-- Scope & Effort -->
+  <h2>Scope &amp; effort</h2>
+  <table class="scope">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Effort</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <b>Anthology Results surface (week + quarter view)</b>
+          <span class="desc">Story cards, emotional arc, people donut, echoes, Story of You.</span>
+        </td>
+        <td><span class="effort high">High</span></td>
+      </tr>
+      <tr>
+        <td>
+          <b>Pattern tracking onboarding (intent-first)</b>
+          <span class="desc">One goal picker, opinionated weekly summary, Apple Health sync offered on the confirmation screen.</span>
+        </td>
+        <td><span class="effort low">Low</span></td>
+      </tr>
+      <tr>
+        <td>
+          <b>History archive + Bookmarks</b>
+          <span class="desc">Chronological list and entry detail sheet. No analysis overlay.</span>
+        </td>
+        <td><span class="effort low">Low</span></td>
+      </tr>
+      <tr>
+        <td>
+          <b>Post-entry tracking chip/sheet</b>
+          <span class="desc">Lightweight tagging after Finish Entry.</span>
+        </td>
+        <td><span class="effort low">Low</span></td>
+      </tr>
+      <tr>
+        <td>
+          <b>Real Apple Health integration</b>
+          <span class="desc">Out of trial scope. Prototype shows the sync option in the UI but doesn&rsquo;t pull real data.</span>
+        </td>
+        <td><span class="effort high">High</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- High-Level Requirements -->
+  <h2>High-level requirements</h2>
+  <ul>
+    <li><b>History is unwatched.</b> No inline analysis on raw entries.</li>
+    <li><b>Patterns is editorial, not clinical.</b> Every insight is grounded in quoted fragments from real entries.</li>
+    <li><b>Hide the taxonomy.</b> Users never see &ldquo;logger&rdquo; or &ldquo;pattern&rdquo; during setup. The split happens in the backend.</li>
+    <li><b>Opinionated defaults.</b> Weekly summary is a stated fact, not a user decision.</li>
+    <li><b>Timeframe-aware results.</b> Week view and 3-month view are different reads, not the same view with different numbers.</li>
+  </ul>
+
+  <!-- Success Metrics -->
+  <h2>Success metrics &amp; how we&rsquo;d test</h2>
+  <table class="metrics">
+    <thead>
+      <tr>
+        <th>KPI</th>
+        <th>Target</th>
+        <th>How we&rsquo;d test</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><b>Onboarding completion</b></td>
+        <td>&gt; 70%</td>
+        <td>Funnel instrumentation, A/B vs current flow, 4-week cohort.</td>
+      </tr>
+      <tr>
+        <td><b>Day-7 Patterns visit rate</b></td>
+        <td>&gt; 40%</td>
+        <td>Tab-open events, segmented by onboarding version.</td>
+      </tr>
+      <tr>
+        <td><b>Weekly summary open rate</b></td>
+        <td>&gt; 50%</td>
+        <td>Notification + in-app reads, benchmarked against email norms.</td>
+      </tr>
+      <tr>
+        <td><b>Pattern save/share per week</b></td>
+        <td>&gt; 1 / user</td>
+        <td>CTA events on bookmark and share. Proxy for emotional resonance.</td>
+      </tr>
+      <tr>
+        <td><b>4-week retention lift</b></td>
+        <td>+ 15%</td>
+        <td>Cohort retention A/B, plus 5&ndash;8 qualitative user interviews.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="footer">
+    <span>rosebud · Pattern Discovery · Project Overview</span>
+    <span>Grace Guo · 2026</span>
+  </div>
+</body>
+</html>

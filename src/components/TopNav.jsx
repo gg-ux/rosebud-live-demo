@@ -2,17 +2,18 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
 const NAV_ITEMS = [
-  { path: '/concepts', label: 'Concepts' },
+  { path: '/', label: 'For Therapists' },
+  { path: '/concepts', label: 'Patterns' },
   { path: '/design-system', label: 'Design System' },
 ];
 
-export function TopNav({ rightSlot, alwaysVisible = false, className = '' }) {
+export function TopNav({ rightSlot, alwaysVisible = false, sticky = true, className = '' }) {
   const { pathname } = useLocation();
   const [visible, setVisible] = useState(true);
   const lastScrollY = useRef(0);
 
   useEffect(() => {
-    if (alwaysVisible) return;
+    if (alwaysVisible || !sticky) return;
     function onScroll() {
       const y = window.scrollY;
       if (y < 10) {
@@ -27,13 +28,17 @@ export function TopNav({ rightSlot, alwaysVisible = false, className = '' }) {
 
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, [alwaysVisible]);
+  }, [alwaysVisible, sticky]);
+
+  const stickyClasses = sticky
+    ? `sticky top-0 z-50 backdrop-blur shadow-[0_2px_8px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.03)] transition-transform duration-300 ease-out ${
+        visible ? 'translate-y-0' : '-translate-y-full'
+      }`
+    : 'relative';
 
   return (
     <header
-      className={`sticky top-0 z-50 backdrop-blur shadow-[0_2px_8px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.03)] transition-transform duration-300 ease-out ${
-        visible ? 'translate-y-0' : '-translate-y-full'
-      } ${className}`}
+      className={`${stickyClasses} ${className}`}
     >
       <div className="max-w-[1400px] mx-auto px-[16px] md:px-[24px] h-[56px] flex items-center justify-between">
         {/* Left — logo */}

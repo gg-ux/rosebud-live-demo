@@ -11,7 +11,10 @@ const tabs = [
   )},
   { id: 'write', label: '', icon: () => (
     <div className="w-[40px] h-[40px] rounded-full bg-[#000000] flex items-center justify-center -mt-[8px]">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" className="w-[18px] h-[18px]"><path d="M12 5v14m-7-7h14" strokeLinecap="round"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-[18px] h-[18px]">
+        <path d="M12 20h9" />
+        <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
+      </svg>
     </div>
   )},
   { id: 'patterns', label: 'Patterns', icon: (c) => (

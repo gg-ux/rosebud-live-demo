@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, forwardRef, useImperativeHandle } from 'react';
 
 const STEPS = [
   {
@@ -11,14 +11,31 @@ const STEPS = [
   },
   {
     prompt: 'Got it. Now, what\'s on your mind today?',
-    placeholder: '',
+    placeholder: 'woke up feeling off today, maybe the rain...',
   },
 ];
 
-export function OnboardingV3Journal() {
+export const V3_STEP_COUNT = STEPS.length;
+
+export const OnboardingV3Journal = forwardRef(function OnboardingV3Journal(_props, ref) {
   const [step, setStep] = useState(0);
   const [inputs, setInputs] = useState(['', '', '']);
   const [committed, setCommitted] = useState([false, false, false]);
+
+  useImperativeHandle(ref, () => ({
+    reset: () => {
+      setStep(0);
+      setInputs(['', '', '']);
+      setCommitted([false, false, false]);
+    },
+    goToStep: (n) => setStep(n),
+    fillCurrentStepWithPlaceholder: (n) => {
+      const next = ['', '', ''];
+      next[n] = STEPS[n].placeholder || 'I want to understand my emotional patterns better.';
+      setInputs(next);
+    },
+    clearInputs: () => setInputs(['', '', '']),
+  }), []);
 
   const current = STEPS[step];
   const isLastStep = step === STEPS.length - 1;
@@ -117,28 +134,55 @@ export function OnboardingV3Journal() {
       {/* Bottom CTAs */}
       <div className="border-t border-[#F0F0F0]">
         <div className="flex items-center justify-between px-[18px] pt-[12px]">
-          <div className="flex items-center gap-[32px]">
-            <svg viewBox="0 0 24 24" fill="none" className="w-[24px] h-[24px]"><path d="M12 2a3 3 0 00-3 3v6a3 3 0 006 0V5a3 3 0 00-3-3z" stroke="#191C1A" strokeWidth="1.5"/><path d="M19 10v1a7 7 0 01-14 0v-1M12 18v4M8 22h8" stroke="#191C1A" strokeWidth="1.5" strokeLinecap="round"/></svg>
-            <svg viewBox="0 0 24 24" fill="none" className="w-[24px] h-[24px]"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z" stroke="#191C1A" strokeWidth="1.5"/></svg>
-            <svg viewBox="0 0 24 24" fill="none" className="w-[24px] h-[24px]"><rect x="3" y="3" width="18" height="18" rx="2" stroke="#191C1A" strokeWidth="1.5"/><circle cx="8.5" cy="8.5" r="1.5" fill="#191C1A"/><path d="M21 15l-5-5L5 21" stroke="#191C1A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          <div className="flex items-center gap-[24px]">
+            <svg viewBox="0 0 24 24" fill="none" className="w-[20px] h-[20px]"><path d="M12 2a3 3 0 00-3 3v6a3 3 0 006 0V5a3 3 0 00-3-3z" stroke="#191C1A" strokeWidth="1.5"/><path d="M19 10v1a7 7 0 01-14 0v-1M12 18v4M8 22h8" stroke="#191C1A" strokeWidth="1.5" strokeLinecap="round"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" className="w-[20px] h-[20px]"><rect x="3" y="3" width="18" height="18" rx="2" stroke="#191C1A" strokeWidth="1.5"/><circle cx="8.5" cy="8.5" r="1.5" fill="#191C1A"/><path d="M21 15l-5-5L5 21" stroke="#191C1A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </div>
-          <svg viewBox="0 0 24 24" fill="none" className="w-[24px] h-[24px]"><path d="M11 5L6 9H2v6h4l5 4V5zM19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07" stroke="#191C1A" strokeWidth="1.5" strokeLinecap="round"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" className="w-[20px] h-[20px]"><path d="M11 5L6 9H2v6h4l5 4V5zM19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07" stroke="#191C1A" strokeWidth="1.5" strokeLinecap="round"/></svg>
         </div>
         <div className="flex gap-[12px] px-[12px] py-[12px]">
-          <button className="flex-1 h-[44px] rounded-[12px] border border-[#C0C0BF] flex items-center justify-center gap-[8px]">
-            <svg viewBox="0 0 18 18" fill="#000000" className="w-[16px] h-[16px]"><path d="M9 1l1.3 3.2L13.5 5.5l-3.2 1.3L9 10 7.7 6.8 4.5 5.5l3.2-1.3L9 1zM4 10l.7 1.8L6.5 12.5l-1.8.7L4 15l-.7-1.8L1.5 12.5l1.8-.7L4 10z"/></svg>
-            <span className="text-[16px] leading-[22px] font-[500] text-[#191C1A]">Suggest</span>
-          </button>
-          <button
-            onClick={!isLastStep ? handleSubmit : undefined}
-            className="flex-1 h-[44px] rounded-[12px] border border-[#C0C0BF] flex items-center justify-center cursor-pointer"
-          >
-            <span className="text-[16px] leading-[22px] font-[500] text-[#191C1A]">
-              {isLastStep ? 'Finish entry' : 'Next'}
-            </span>
-          </button>
+          {inputs[step] ? (
+            <>
+              <button className="flex-1 h-[44px] rounded-[12px] border border-[#C0C0BF] flex items-center justify-center cursor-pointer">
+                <span className="text-[16px] leading-[22px] font-[500] text-[#191C1A]">Finish entry</span>
+              </button>
+              <button
+                onClick={!isLastStep ? handleSubmit : undefined}
+                className="flex-1 h-[44px] rounded-[12px] bg-[#191C1A] flex items-center justify-center gap-[6px] cursor-pointer"
+              >
+                <svg viewBox="0 0 18 18" fill="#FFFFFF" className="w-[14px] h-[14px]">
+                  <path d="M9 1l1.3 3.2L13.5 5.5l-3.2 1.3L9 10 7.7 6.8 4.5 5.5l3.2-1.3L9 1zM4 10l.7 1.8L6.5 12.5l-1.8.7L4 15l-.7-1.8L1.5 12.5l1.8-.7L4 10z" />
+                </svg>
+                <span className="text-[16px] leading-[22px] font-[500] text-[#FFFFFF]">Go deeper</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <button className="flex-1 h-[44px] rounded-[12px] border border-[#C0C0BF] flex items-center justify-center gap-[8px]">
+                <svg viewBox="0 0 18 18" fill="#000000" className="w-[16px] h-[16px]"><path d="M9 1l1.3 3.2L13.5 5.5l-3.2 1.3L9 10 7.7 6.8 4.5 5.5l3.2-1.3L9 1zM4 10l.7 1.8L6.5 12.5l-1.8.7L4 15l-.7-1.8L1.5 12.5l1.8-.7L4 10z"/></svg>
+                <span className="text-[16px] leading-[22px] font-[500] text-[#191C1A]">Suggest</span>
+              </button>
+              <button
+                onClick={!isLastStep ? handleSubmit : undefined}
+                className="flex-1 h-[44px] rounded-[12px] border border-[#C0C0BF] flex items-center justify-center gap-[8px] cursor-pointer"
+              >
+                {!isLastStep && (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#191C1A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-[16px] h-[16px]">
+                    <path d="M3 7V5a2 2 0 012-2h2" />
+                    <path d="M17 3h2a2 2 0 012 2v2" />
+                    <path d="M21 17v2a2 2 0 01-2 2h-2" />
+                    <path d="M7 21H5a2 2 0 01-2-2v-2" />
+                    <line x1="7" y1="12" x2="17" y2="12" />
+                  </svg>
+                )}
+                <span className="text-[16px] leading-[22px] font-[500] text-[#191C1A]">
+                  {isLastStep ? 'Finish entry' : 'Scan'}
+                </span>
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>
   );
-}
+});

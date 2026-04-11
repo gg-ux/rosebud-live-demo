@@ -5,7 +5,7 @@ const OPTIONS = [
     id: 'mention',
     icon: PenLine,
     title: 'Mention while writing',
-    desc: 'We\'ll detect patterns naturally from your journal entries — no extra steps needed.',
+    desc: 'We\'ll detect patterns naturally from your journal entries, no extra steps needed.',
   },
   {
     id: 'checkin',

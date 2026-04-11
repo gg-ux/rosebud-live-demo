@@ -9,7 +9,13 @@ export function PhoneFrame({
   children,
   showNavBar = true,
   showStatusBar = true,
+  activeTab = 'today',
   className = '',
+  // Optional callback ref. When supplied, fires with the inner rounded
+  // screen div element so callers can portal full-screen overlays
+  // (like a modal with a backdrop covering the status bar and home
+  // indicator areas) into the phone screen.
+  screenRef,
 }) {
   const wrapperRef = useRef(null);
   const [scale, setScale] = useState(1);
@@ -37,7 +43,11 @@ export function PhoneFrame({
   }, []);
 
   return (
-    <div ref={wrapperRef} className={`flex justify-center ${className}`}>
+    <div
+      ref={wrapperRef}
+      className={`flex justify-center ${className}`}
+      style={{ height: PHONE_H * scale }}
+    >
       <div
         style={{
           width: PHONE_W,
@@ -49,7 +59,7 @@ export function PhoneFrame({
         {/* Bezel */}
         <div className="relative w-full h-full rounded-[50px] bg-[#000000] p-[8px] shadow-[0_8px_40px_rgba(0,0,0,0.2)]">
           {/* Screen */}
-          <div className="relative w-full h-full rounded-[42px] bg-[#FFFFFF] overflow-hidden">
+          <div ref={screenRef} className="relative w-full h-full rounded-[42px] bg-[#FFFFFF] overflow-hidden">
             {/* Dynamic Island */}
             <div className="absolute top-[10px] left-1/2 -translate-x-1/2 w-[90px] h-[28px] rounded-full bg-[#000000] z-30" />
 
@@ -74,14 +84,12 @@ export function PhoneFrame({
             {/* Nav Bar — Figma SVG with floating island */}
             {showNavBar && (
               <div className="absolute bottom-0 left-0 right-0 z-20">
-                <MainNavBar />
+                <MainNavBar activeTab={activeTab} />
               </div>
             )}
           </div>
         </div>
       </div>
-      {/* Spacer to reserve correct height when scaled down */}
-      <div style={{ height: PHONE_H * scale, marginTop: -PHONE_H }} className="pointer-events-none" />
     </div>
   );
 }

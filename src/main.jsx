@@ -7,6 +7,7 @@ import App from './App.jsx'
 
 const DesignSystem = lazy(() => import('./pages/DesignSystem.jsx').then(m => ({ default: m.DesignSystem })))
 const Concepts = lazy(() => import('./pages/Concepts.jsx').then(m => ({ default: m.Concepts })))
+const Presentation = lazy(() => import('./pages/Presentation.jsx').then(m => ({ default: m.Presentation })))
 
 function Root() {
   const [loaded, setLoaded] = useState(false);
@@ -21,6 +22,7 @@ function Root() {
             <Route path="/" element={<App />} />
             <Route path="/design-system" element={<DesignSystem />} />
             <Route path="/concepts" element={<Concepts />} />
+            <Route path="/presentation" element={<Presentation />} />
           </Routes>
         </Suspense>
       </BrowserRouter>

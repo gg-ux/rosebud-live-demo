@@ -133,9 +133,18 @@ function TokenTable({ headers, rows }) {
 }
 
 function Swatch({ name, hex, className }) {
+  // Use inline style when a hex is provided. Dynamically-generated
+  // Tailwind class names (e.g. `bg-rose-pink-${n}`) don't get picked
+  // up by the JIT compiler because it scans source files for literal
+  // strings, not runtime-interpolated ones. Inline style sidesteps
+  // that entirely and guarantees the swatch renders. className still
+  // flows through for semantic-token swatches that use CSS variables.
   return (
     <div className="flex flex-col items-center gap-[6px]">
-      <div className={`w-[56px] h-[56px] rounded-[10px] border border-[var(--color-outline-light)] ${className}`} />
+      <div
+        className={`w-[56px] h-[56px] rounded-[10px] border border-[var(--color-outline-light)] ${className || ''}`}
+        style={hex ? { backgroundColor: hex } : undefined}
+      />
       <span className="text-[12px] leading-[17px] text-[var(--color-on-surface-variant)] text-center max-w-[70px]">{name}</span>
       {hex && <span className="text-[11px] leading-[14px] text-[var(--color-secondary-text)] font-mono">{hex}</span>}
     </div>
@@ -164,6 +173,7 @@ export function DesignSystem() {
   const [theme, setTheme] = useState('light');
   const [activeSection, setActiveSection] = useState('colors');
   const [collapsed, setCollapsed] = useState({});
+  const [sidebarSearch, setSidebarSearch] = useState('');
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -205,9 +215,23 @@ export function DesignSystem() {
       <div className="max-w-[1400px] mx-auto flex">
         {/* ── Sidebar ── */}
         <nav className="hidden lg:block w-[200px] shrink-0 sticky top-[64px] h-[calc(100vh-64px)] overflow-y-auto border-r border-[var(--color-outline-light)] py-[24px] px-[12px]">
+          <div className="mb-[12px]">
+            <input
+              type="text"
+              value={sidebarSearch}
+              onChange={(e) => setSidebarSearch(e.target.value)}
+              placeholder="Search..."
+              className="w-full px-[10px] py-[6px] rounded-[8px] bg-[var(--color-surface-variant)] border border-[var(--color-outline-light)] text-[13px] leading-[18px] font-[450] text-[var(--color-on-surface)] placeholder:text-[var(--color-secondary-text)] outline-none focus:border-[var(--color-primary)] transition-colors"
+            />
+          </div>
           {NAV.map((group) => {
-            const isOpen = !collapsed[group.group];
-            const hasActive = group.items.some(i => i.id === activeSection);
+            const q = sidebarSearch.toLowerCase();
+            const filteredItems = q
+              ? group.items.filter(i => i.label.toLowerCase().includes(q) || group.group.toLowerCase().includes(q))
+              : group.items;
+            if (filteredItems.length === 0) return null;
+            const isOpen = sidebarSearch || !collapsed[group.group];
+            const hasActive = filteredItems.some(i => i.id === activeSection);
             return (
               <div key={group.group} className="mb-[8px]">
                 <button
@@ -225,7 +249,7 @@ export function DesignSystem() {
                 </button>
                 {isOpen && (
                   <ul className="space-y-[2px] mt-[4px] ml-[6px]">
-                    {group.items.map((item) => (
+                    {filteredItems.map((item) => (
                       <li key={item.id}>
                         <a
                           href={`#${item.id}`}
