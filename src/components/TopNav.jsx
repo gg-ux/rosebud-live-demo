@@ -40,15 +40,19 @@ export function TopNav({ rightSlot, alwaysVisible = false, sticky = true, classN
     <header
       className={`${stickyClasses} ${className}`}
     >
-      <div className="max-w-[1400px] mx-auto px-[16px] md:px-[24px] h-[56px] flex items-center justify-between">
+      {/* 3-column grid keeps the middle nav perfectly centered in the
+          viewport regardless of how wide the left logo or right
+          rightSlot get. justify-between would let asymmetric content
+          on either side pull the middle off-center. */}
+      <div className="max-w-[1400px] mx-auto px-[16px] md:px-[24px] h-[56px] grid grid-cols-3 items-center">
         {/* Left — logo */}
-        <a href="/" className="flex items-center gap-[8px] hover:opacity-80 transition-opacity shrink-0">
+        <a href="/" className="flex items-center gap-[8px] hover:opacity-80 transition-opacity justify-self-start">
           <img src="/favicon-rosebud.svg" alt="Rosebud" className="w-[22px] h-[22px]" />
           <span className="hidden sm:inline text-[17px] leading-[24px] font-[700] text-[var(--color-on-background)]">rosebud</span>
         </a>
 
         {/* Center — nav items */}
-        <nav className="flex items-center gap-[4px]">
+        <nav className="flex items-center gap-[4px] justify-self-center">
           {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.path;
             return (
@@ -70,7 +74,7 @@ export function TopNav({ rightSlot, alwaysVisible = false, sticky = true, classN
         </nav>
 
         {/* Right — optional slot (theme toggle, etc.) */}
-        <div className="shrink-0">
+        <div className="justify-self-end">
           {rightSlot}
         </div>
       </div>
