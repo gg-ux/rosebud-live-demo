@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import { Loader } from './components/Loader.jsx'
-import { PasswordGate } from './components/PasswordGate.jsx'
 import App from './App.jsx'
 
 const DesignSystem = lazy(() => import('./pages/DesignSystem.jsx').then(m => ({ default: m.DesignSystem })))
@@ -15,7 +14,7 @@ function Root() {
   const handleComplete = useCallback(() => setLoaded(true), []);
 
   return (
-    <PasswordGate>
+    <>
       {!loaded && <Loader minDuration={1400} onComplete={handleComplete} />}
       <BrowserRouter>
         <Suspense fallback={null}>
@@ -33,7 +32,7 @@ function Root() {
           </Routes>
         </Suspense>
       </BrowserRouter>
-    </PasswordGate>
+    </>
   );
 }
 
