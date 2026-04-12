@@ -1,8 +1,8 @@
-import { StrictMode, useState, useCallback, lazy, Suspense } from 'react'
+import { StrictMode, lazy, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
-import { Loader } from './components/Loader.jsx'
+import { PasswordGate } from './components/PasswordGate.jsx'
 import App from './App.jsx'
 
 const DesignSystem = lazy(() => import('./pages/DesignSystem.jsx').then(m => ({ default: m.DesignSystem })))
@@ -10,12 +10,8 @@ const Concepts = lazy(() => import('./pages/Concepts.jsx').then(m => ({ default:
 const Presentation = lazy(() => import('./pages/Presentation.jsx').then(m => ({ default: m.Presentation })))
 
 function Root() {
-  const [loaded, setLoaded] = useState(false);
-  const handleComplete = useCallback(() => setLoaded(true), []);
-
   return (
-    <>
-      {!loaded && <Loader minDuration={1400} onComplete={handleComplete} />}
+    <PasswordGate>
       <BrowserRouter>
         <Suspense fallback={null}>
           <Routes>
@@ -32,7 +28,7 @@ function Root() {
           </Routes>
         </Suspense>
       </BrowserRouter>
-    </>
+    </PasswordGate>
   );
 }
 
