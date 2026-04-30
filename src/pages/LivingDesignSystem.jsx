@@ -1515,12 +1515,26 @@ export function LivingDesignSystem() {
             <Body>
               <Code>react-native-web</Code> is already a dependency in <Code>apps/native</Code>. Spin up a thin Storybook workspace that points at the existing component files, deploy it to a stable URL, and now design and engineering review the same artifact: live production components, on the web, every PR.
             </Body>
-            <div className="mt-[24px] flex flex-wrap gap-[12px]">
-              <StatCard value="69" label="Components in apps/native" color="charcoal" />
-              <StatCard value="~55" label="Renderable on web in v1" color="sage" />
-              <StatCard value="~1 wk" label="To stable, deployable URL" color="ivory" />
-              <StatCard value="0" label="Edits required to apps/native" color="rose" />
-            </div>
+            <dl className="mt-[28px] border-t border-[var(--color-outline-light)]">
+              {[
+                ['Components in apps/native', '69'],
+                ['Renderable on web in v1', '~55'],
+                ['To stable, deployable URL', '~1 week'],
+                ['Edits required to apps/native', '0'],
+              ].map(([label, value]) => (
+                <div
+                  key={label}
+                  className="grid grid-cols-[1fr_auto] gap-[16px] py-[14px] border-b border-[var(--color-outline-light)]"
+                >
+                  <dt className="text-[13px] leading-[20px] font-[450] text-[var(--color-secondary-text)]">
+                    {label}
+                  </dt>
+                  <dd className="text-[14px] leading-[20px] font-[600] text-[var(--color-on-background)] tabular-nums">
+                    {value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
           </Section>
 
           <Section id="storybook" sectionRef={setRef('storybook')}>

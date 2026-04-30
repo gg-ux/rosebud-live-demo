@@ -210,63 +210,93 @@ function ScenarioRow({ reverse, phone, copy }) {
   );
 }
 
-const SCENARIO_ONE_VERSIONS = [
+const OLDER_ITERATIONS = [
   {
     id: 'inline-summary',
     label: 'V1',
     name: 'Inline summary',
+    tagline: 'Live ticker collapses into a tappable summary',
+    description:
+      'Tool calls fade in one at a time, then collapse into a single inline accordion above the Write area. The user can tap to expand and see what the assistant did.',
     isLatest: false,
   },
   {
-    id: 'fade-swap',
-    label: 'V2',
-    name: 'Minimal In-Line',
-    isLatest: true,
-  },
-  {
     id: 'snackbar',
-    label: 'V3',
+    label: 'V2',
     name: 'Bottom snackbar',
+    tagline: 'All tool calls run through a floating bottom pill',
+    description:
+      'Both pre- and post-AI tool calls run through a single floating snackbar above the bottom action bar. Conversation thread stays clean; the snackbar carries all loading state and fades out when complete.',
     isLatest: false,
   },
 ];
 
-function ScenarioOnePhone() {
+function FinalProposalPhone() {
   const ref = useRef(null);
   return (
     <div>
       <PhoneFrame showNavBar={false}>
-        <ToolCallFlow ref={ref} scenario="creating-page" />
+        <ToolCallFlow ref={ref} scenario="creating-page" variant="fade-swap" />
       </PhoneFrame>
       <Replay onClick={() => ref.current?.reset()} />
     </div>
   );
 }
 
-function FinalProposalPhones() {
-  const refs = useRef({});
-  const versions = SCENARIO_ONE_VERSIONS.filter((v) => v.id !== 'inline-summary');
+function OlderIterationsSection() {
+  const phoneRef = useRef(null);
+  const [iterationId, setIterationId] = useState('inline-summary');
+
+  const choose = (next) => {
+    if (next === iterationId) return;
+    setIterationId(next);
+    phoneRef.current?.reset();
+  };
+
+  const active = OLDER_ITERATIONS.find((i) => i.id === iterationId);
 
   return (
-    <div className="max-w-[760px] mx-auto">
-      <div className="flex flex-col sm:flex-row justify-center items-start gap-[24px] sm:gap-[40px]">
-        {versions.map((v) => {
-          if (!refs.current[v.id]) refs.current[v.id] = { current: null };
-          const ref = refs.current[v.id];
-          return (
-            <div key={v.id} className="w-full max-w-[340px] flex flex-col">
-              <div className="flex items-center gap-[8px] mb-[12px]">
-                <VersionLabelChip isLatest={v.isLatest} label={v.label} />
-                <span className="text-[14px] leading-[20px] font-[600] text-[var(--color-on-background)]">{v.name}</span>
-              </div>
-              <PhoneFrame showNavBar={false}>
-                <ToolCallFlow ref={ref} scenario="creating-page" variant={v.id} />
-              </PhoneFrame>
-              <Replay onClick={() => ref.current?.reset()} />
+    <div>
+      <ScenarioRow
+        reverse={false}
+        phone={
+          <div>
+            <PhoneFrame showNavBar={false}>
+              <ToolCallFlow ref={phoneRef} scenario="creating-page" variant={iterationId} />
+            </PhoneFrame>
+            <Replay onClick={() => phoneRef.current?.reset()} />
+          </div>
+        }
+        copy={
+          <div>
+            <Tagline>Scenario 1 — Older Iterations</Tagline>
+            <Title>{active.name}</Title>
+            <NumberedInstructions
+              items={[
+                'Tap “Go deeper” to play through the flow.',
+                'Pick another iteration below to compare.',
+              ]}
+            />
+            <div className="flex flex-col gap-[10px] mt-[20px]">
+              {OLDER_ITERATIONS.map((it) => (
+                <IterationCard
+                  key={it.id}
+                  active={iterationId === it.id}
+                  label={it.label}
+                  name={it.name}
+                  tagline={it.tagline}
+                  isLatest={it.isLatest}
+                  onClick={() => choose(it.id)}
+                />
+              ))}
             </div>
-          );
-        })}
-      </div>
+            <p className="text-[13px] leading-[19px] font-[450] text-[var(--color-secondary-text)] mt-[12px] px-[4px]">
+              {active.description}
+            </p>
+          </div>
+        }
+      />
+      <SpecBlock behavior={SHARED_BEHAVIOR} sequence={S1_SEQUENCE} />
     </div>
   );
 }
@@ -562,13 +592,30 @@ export function ToolCalls() {
     <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-on-background)]">
       <section className="max-w-[1200px] mx-auto px-[20px] md:px-[24px] py-[40px] md:py-[60px]">
         <div className="max-w-[680px] mb-[32px] md:mb-[48px]">
+          <Tagline>Final Proposal</Tagline>
           <h1 className="text-[32px] md:text-[44px] leading-[38px] md:leading-[50px] font-[700] tracking-[-0.02em]">
-            Final Proposal
+            Tool Calls
           </h1>
         </div>
 
-        <div className="mb-[64px] md:mb-[96px]">
-          <FinalProposalPhones />
+        <div className="mb-[24px] md:mb-[40px]">
+          <ScenarioRow
+            reverse={false}
+            phone={<FinalProposalPhone />}
+            copy={
+              <div>
+                <Tagline>Scenario 1</Tagline>
+                <Title>Minimal In-Line</Title>
+                <NumberedInstructions
+                  items={[
+                    'Tap “Go deeper” to update Sage’s memory.',
+                    'Pre-tool ticker plays, AI replies, post-tool ticker runs below the reply, then per-message actions and Write settle in.',
+                  ]}
+                />
+              </div>
+            }
+          />
+          <SpecBlock behavior={SHARED_BEHAVIOR} sequence={S1_SEQUENCE} />
         </div>
 
         <div className="max-w-[680px] mb-[24px] md:mb-[32px]">
@@ -577,25 +624,7 @@ export function ToolCalls() {
           </h2>
         </div>
 
-        <div>
-          <ScenarioRow
-            reverse={false}
-            phone={<ScenarioOnePhone />}
-            copy={
-              <div>
-                <Tagline>Scenario 1 — V1</Tagline>
-                <Title>Inline summary</Title>
-                <NumberedInstructions
-                  items={[
-                    'Tap “Go deeper” to update Sage’s memory.',
-                    'Tap “Memory updated” to expand the tool call and see the steps that led to it.',
-                  ]}
-                />
-              </div>
-            }
-          />
-          <SpecBlock behavior={SHARED_BEHAVIOR} sequence={S1_SEQUENCE} />
-        </div>
+        <OlderIterationsSection />
 
         <ScenarioTwoSection />
 
