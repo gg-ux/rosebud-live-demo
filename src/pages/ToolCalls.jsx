@@ -492,7 +492,6 @@ function FinalProposalSection() {
         }
         copy={
           <div>
-            <Tagline>Scenario 1</Tagline>
             <Title>Minimal In-Line</Title>
             <NumberedInstructions
               items={[
