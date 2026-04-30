@@ -283,12 +283,17 @@ function useToolCallSequence(stagger = 1100) {
    ════════════════════════════════════════════════════════════════ */
 const S1_ENTRY = "Today's lunch with my brother was a highlight. We laughed and reminisced about our childhood.";
 const S1_AI = 'Your brother seems like an important person, let me update my memory.';
-// Pre-AI: assistant reads + grounds before replying (V2/V3 only).
+// Pre-AI: brief filler while the tool plan is being assembled, then the
+// actual reads/grounding before the assistant replies.
 const S1_PRE_TOOLS = [
+  { running: 'Reflecting...', done: 'Reflected', duration: 700 },
   { running: 'Searching memory...', done: 'Searched memory' },
   { running: 'Reading recent entries...', done: 'Read recent entries' },
 ];
+// Post-AI: same "Reflecting..." filler while the post-tool plan loads,
+// then the actual tool calls.
 const S1_TOOLS = [
+  { running: 'Reflecting...', done: 'Reflected', duration: 700 },
   { running: 'Consulting Page Creator...', done: 'Consulted Page Creator' },
   { running: 'Updating memory...', done: 'Memory updated' },
 ];

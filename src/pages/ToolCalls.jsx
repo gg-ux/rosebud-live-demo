@@ -166,10 +166,14 @@ const SHARED_BEHAVIOR = [
 ];
 
 const S1_SEQUENCE = [
-  { label: 'Consulting page creator', transient: true },
-  { label: 'Consulted page creator' },
+  { label: 'Reflecting', transient: true, note: 'pre-AI filler' },
+  { label: 'Searching memory', transient: true },
+  { label: 'Reading recent entries', transient: true },
+  { label: 'AI reply', note: 'persists' },
+  { label: 'Reflecting', transient: true, note: 'post-AI filler' },
+  { label: 'Consulting Page Creator', transient: true },
   { label: 'Updating memory', transient: true },
-  { label: 'Memory updated' },
+  { label: 'Action icons + Write', note: 'persist' },
 ];
 
 const S2_SEQUENCE = [
@@ -232,11 +236,11 @@ const OLDER_ITERATIONS = [
 ];
 
 const LOADER_STYLES = [
+  { id: 'squiggle', label: 'Squiggle' },
   { id: 'spinner', label: 'Spinner' },
   { id: 'dots', label: 'Dots' },
   { id: 'pulse', label: 'Pulse' },
   { id: 'bloom', label: 'Bloom' },
-  { id: 'squiggle', label: 'Squiggle' },
   { id: 'sparkle', label: 'Sparkle' },
   { id: 'none', label: 'Text only' },
 ];
@@ -467,7 +471,7 @@ function LoaderStyleChips({ value, onChange }) {
 
 function FinalProposalSection() {
   const ref = useRef(null);
-  const [loaderStyle, setLoaderStyle] = useState('spinner');
+  const [loaderStyle, setLoaderStyle] = useState('squiggle');
 
   return (
     <div>
@@ -492,8 +496,9 @@ function FinalProposalSection() {
             <Title>Minimal In-Line</Title>
             <NumberedInstructions
               items={[
-                'Tap “Go deeper” to update Sage’s memory.',
-                'Pre-tool ticker plays, AI replies, post-tool ticker runs below the reply, then per-message actions and Write settle in.',
+                'Tap “Go deeper” to play the flow.',
+                '“Reflecting…” auto-populates while the tool plan loads, then the pre-AI loaders run (searching memory, reading recent entries) and fade out as the AI reply lands.',
+                'After the reply, the post-AI loaders run below it (Reflecting → consulting Page Creator → updating memory), then fade out — replaced by the per-message actions and Write.',
               ]}
             />
             <LoaderStyleChips value={loaderStyle} onChange={setLoaderStyle} />
