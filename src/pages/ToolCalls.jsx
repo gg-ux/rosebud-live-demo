@@ -497,8 +497,8 @@ function FinalProposalSection() {
             <NumberedInstructions
               items={[
                 'Tap “Go deeper” to play the flow.',
-                '“Reflecting…” auto-populates while the tool plan loads, then the pre-AI loaders run (searching memory, reading recent entries) and fade out as the AI reply lands.',
-                'After the reply, the post-AI loaders run below it (Reflecting → consulting Page Creator → updating memory), then fade out — replaced by the per-message actions and Write.',
+                '“Reflecting…” auto-populates while the tool plan loads, then the pre-AI loaders run and fade out as the AI reply lands.',
+                'After the reply, the post-AI loaders run below it, then fade out — replaced by the per-message actions and Write.',
               ]}
             />
             <LoaderStyleChips value={loaderStyle} onChange={setLoaderStyle} />
