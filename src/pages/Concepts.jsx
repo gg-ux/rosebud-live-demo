@@ -1,8 +1,8 @@
 import { Fragment, useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { PhoneFrame } from '../components/PhoneFrame';
-import { TopNav } from '../components/TopNav';
 import { ExportModal } from '../components/ExportModal';
+import { usePageActions } from '../components/Layout';
 import joySvg from '../symbols/emotes/joy.svg';
 import moodUnimpressedSvg from '../symbols/emotes/mood-unimpressed.svg';
 import { useFlowStepper } from './concepts/useFlowStepper';
@@ -563,41 +563,39 @@ export function Concepts() {
     <OnboardingV5Confirmation key="v5confirm" step={v5Total - 1} total={v5Total} data={onboardingV5.data} onBack={onboardingV5.back} onReset={() => onboardingV5.goTo(0)} />,
   ];
 
+  usePageActions(
+    <div className="flex items-center gap-[8px]">
+      <Link
+        to="/presentation"
+        className="inline-flex items-center gap-[6px] px-[12px] py-[7px] rounded-full text-[13px] font-[500] bg-[var(--color-background)] border border-[var(--color-outline)] text-[var(--color-on-background)] hover:border-[var(--color-on-background)] transition-colors"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-[14px] h-[14px]">
+          <rect x="2" y="3" width="20" height="14" rx="2" />
+          <line x1="8" y1="21" x2="16" y2="21" />
+          <line x1="12" y1="17" x2="12" y2="21" />
+        </svg>
+        Present overview
+      </Link>
+      <button
+        onClick={() => setExportModalOpen(true)}
+        disabled={!!exportProgress}
+        className="inline-flex items-center gap-[6px] px-[12px] py-[7px] rounded-full text-[13px] font-[500] bg-[var(--color-on-background)] text-[var(--color-background)] hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-60 disabled:cursor-wait"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-[14px] h-[14px]">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+        {exportProgress
+          ? `${exportProgress.current}/${exportProgress.total}`
+          : 'Export screens'}
+      </button>
+    </div>,
+    [exportProgress]
+  );
+
   return (
     <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-on-background)]">
-      <TopNav
-        sticky={false}
-        className="bg-[var(--color-surface)]/95"
-        rightSlot={
-          <div className="flex items-center gap-[8px]">
-            <Link
-              to="/presentation"
-              className="inline-flex items-center gap-[6px] px-[12px] py-[7px] rounded-full text-[13px] font-[500] bg-[var(--color-background)] border border-[var(--color-outline)] text-[var(--color-on-background)] hover:border-[var(--color-on-background)] transition-colors"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-[14px] h-[14px]">
-                <rect x="2" y="3" width="20" height="14" rx="2" />
-                <line x1="8" y1="21" x2="16" y2="21" />
-                <line x1="12" y1="17" x2="12" y2="21" />
-              </svg>
-              Present overview
-            </Link>
-            <button
-              onClick={() => setExportModalOpen(true)}
-              disabled={!!exportProgress}
-              className="inline-flex items-center gap-[6px] px-[12px] py-[7px] rounded-full text-[13px] font-[500] bg-[var(--color-on-background)] text-[var(--color-background)] hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-60 disabled:cursor-wait"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-[14px] h-[14px]">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="7 10 12 15 17 10" />
-                <line x1="12" y1="15" x2="12" y2="3" />
-              </svg>
-              {exportProgress
-                ? `${exportProgress.current}/${exportProgress.total}`
-                : 'Export screens'}
-            </button>
-          </div>
-        }
-      />
       <ExportModal
         open={exportModalOpen}
         onClose={() => setExportModalOpen(false)}

@@ -37,6 +37,31 @@ body {
   animation: loader-pulse 1.8s ease-in-out infinite;
 }
 
+/* Tool-call shimmer — gray base with a brighter highlight that sweeps across.
+   Matches the in-progress text effect used in Claude Code. */
+@keyframes tool-shimmer {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+.tool-shimmer {
+  background: linear-gradient(
+    90deg,
+    #6D6C6A 0%,
+    #6D6C6A 35%,
+    #C0C0BF 48%,
+    #E5E5E5 50%,
+    #C0C0BF 52%,
+    #6D6C6A 65%,
+    #6D6C6A 100%
+  );
+  background-size: 250% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: tool-shimmer 2.4s linear infinite;
+}
+
 /* Hero illustration animations */
 @keyframes hero-float {
   0%, 100% { transform: translateY(0); }

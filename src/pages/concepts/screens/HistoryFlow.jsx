@@ -358,10 +358,9 @@ function ChatView({ bookmarks, onBookmark }) {
               {/* Action icon row — only on bookmarkable AI messages, mimics Rosebud's real hover state */}
               {msg.bookmarkable && (
                 <div className="flex items-center gap-[14px]">
-                  {/* Speaker */}
+                  {/* Play */}
                   <svg viewBox="0 0 24 24" fill="none" stroke="#2B6CB0" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-[15px] h-[15px]">
-                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                    <polygon points="6 4 20 12 6 20 6 4" />
                   </svg>
                   {/* Copy */}
                   <svg viewBox="0 0 24 24" fill="none" stroke="#2B6CB0" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-[15px] h-[15px]">

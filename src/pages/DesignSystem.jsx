@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Sun, Moon, ChevronRight } from 'lucide-react';
-import { TopNav } from '../components/TopNav';
+import { usePageActions } from '../components/Layout';
 import {
   Button, Input, Textarea, Searchbar, Switch, Checkbox, RadioButton,
   SegmentedControl, CheckboxCard, Pill, Avatar, Tag, Snackbar, Infobar, Card,
@@ -196,21 +196,19 @@ export function DesignSystem() {
     return () => observer.disconnect();
   }, []);
 
+  usePageActions(
+    <button
+      onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
+      className="p-[8px] rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-outline-light)] text-[var(--color-on-surface)] hover:opacity-80 transition-opacity cursor-pointer"
+      aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+    >
+      {theme === 'light' ? <Sun size={18} /> : <Moon size={18} />}
+    </button>,
+    [theme]
+  );
+
   return (
     <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-on-background)]">
-      <TopNav
-        alwaysVisible
-        className="bg-[var(--color-background)]/95"
-        rightSlot={
-          <button
-            onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
-            className="p-[8px] rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-outline-light)] text-[var(--color-on-surface)] hover:opacity-80 transition-opacity cursor-pointer"
-            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-          >
-            {theme === 'light' ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
-        }
-      />
 
       <div className="max-w-[1400px] mx-auto flex">
         {/* ── Sidebar ── */}

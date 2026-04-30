@@ -127,13 +127,13 @@ function TrackerBlock({ icon, label, status, children }) {
    Shared chrome — matches V3 Journal / Chat exactly
    ══════════════════════════════════════════════════════════ */
 
-function TopBar() {
+export function TopBar() {
   return (
-    <div className="flex items-center justify-between px-[8px] h-[48px] shrink-0">
-      <div className="flex items-center gap-[12px] pl-[6px] pr-[12px] py-[6px] rounded-[10px] border border-[#C0C0BF]">
-        <div className="w-[24px] h-[24px] rounded-full bg-[#7CC4AF]" />
-        <span className="text-[15px] leading-[20px] font-[450] text-[#191C1A]">Sage</span>
-        <svg viewBox="0 0 12 12" fill="none" className="w-[12px] h-[12px]">
+    <div className="flex items-center justify-between px-[8px] h-[44px] shrink-0">
+      <div className="flex items-center gap-[8px] pl-[4px] pr-[10px] py-[4px] rounded-[8px] border border-[#C0C0BF]">
+        <div className="w-[20px] h-[20px] rounded-full bg-[#7CC4AF]" />
+        <span className="text-[13px] leading-[18px] font-[500] text-[#191C1A]">Sage</span>
+        <svg viewBox="0 0 12 12" fill="none" className="w-[10px] h-[10px]">
           <path
             d="M2.5 4.5L6 8L9.5 4.5"
             stroke="#000000"
@@ -144,9 +144,9 @@ function TopBar() {
         </svg>
       </div>
       <div className="flex items-center gap-[8px]">
-        <span className="text-[16px] leading-[22px] font-[500] text-[#000000]">Drafts</span>
-        <button className="w-[36px] h-[36px] rounded-full flex items-center justify-center">
-          <svg viewBox="0 0 18 18" fill="none" className="w-[18px] h-[18px]">
+        <span className="text-[14px] leading-[20px] font-[500] text-[#000000]">Drafts</span>
+        <button className="w-[32px] h-[32px] rounded-full flex items-center justify-center">
+          <svg viewBox="0 0 18 18" fill="none" className="w-[16px] h-[16px]">
             <path
               d="M4.5 4.5L13.5 13.5M13.5 4.5L4.5 13.5"
               stroke="#000000"
@@ -165,7 +165,7 @@ function TopBar() {
 // inserts the V2 tag-icon-with-badge into the left icon row. `onGoDeeper`
 // wires up the right-side button (V3 uses it to trigger the conversational
 // Rosebud suggestion flow; V1 and V2 leave it unhandled).
-function BottomCTAs({ onFinishEntry, onGoDeeper, extraTop = null, trackerAffordance = null }) {
+export function BottomCTAs({ onFinishEntry, onGoDeeper, extraTop = null, trackerAffordance = null, hasContent = true }) {
   return (
     <div className="border-t border-[#F0F0F0]">
       {extraTop}
@@ -248,21 +248,21 @@ function BottomCTAs({ onFinishEntry, onGoDeeper, extraTop = null, trackerAfforda
           />
         </svg>
       </div>
-      <div className="flex gap-[12px] px-[12px] py-[12px]">
+      <div className="flex gap-[10px] px-[12px] py-[10px]">
         <button
           onClick={onFinishEntry}
-          className="flex-1 h-[44px] rounded-[12px] border border-[#C0C0BF] flex items-center justify-center cursor-pointer"
+          className="flex-1 h-[36px] rounded-[8px] border border-[#C0C0BF] flex items-center justify-center cursor-pointer"
         >
-          <span className="text-[16px] leading-[22px] font-[500] text-[#191C1A]">Finish entry</span>
+          <span className="text-[14px] leading-[18px] font-[500] text-[#191C1A]">Finish entry</span>
         </button>
         <button
           onClick={onGoDeeper}
-          className="flex-1 h-[44px] rounded-[12px] bg-[#191C1A] flex items-center justify-center gap-[6px] cursor-pointer"
+          className="flex-1 h-[36px] rounded-[8px] bg-[#191C1A] flex items-center justify-center gap-[6px] cursor-pointer"
         >
-          <svg viewBox="0 0 18 18" fill="#FFFFFF" className="w-[14px] h-[14px]">
+          <svg viewBox="0 0 18 18" fill="#FFFFFF" className="w-[12px] h-[12px]">
             <path d="M9 1l1.3 3.2L13.5 5.5l-3.2 1.3L9 10 7.7 6.8 4.5 5.5l3.2-1.3L9 1zM4 10l.7 1.8L6.5 12.5l-1.8.7L4 15l-.7-1.8L1.5 12.5l1.8-.7L4 10z" />
           </svg>
-          <span className="text-[16px] leading-[22px] font-[500] text-[#FFFFFF]">Go deeper</span>
+          <span className="text-[14px] leading-[18px] font-[500] text-[#FFFFFF]">{hasContent ? 'Go deeper' : 'Suggest'}</span>
         </button>
       </div>
     </div>
@@ -272,7 +272,7 @@ function BottomCTAs({ onFinishEntry, onGoDeeper, extraTop = null, trackerAfforda
 // Thread body — shared by all three versions. Renders the blue prompt +
 // Ellie's entry in the Rosebud journal style. Children render AI responses
 // below (used by V3 for the inference banner).
-function ThreadBody({ children }) {
+export function ThreadBody({ children }) {
   return (
     <div className="flex-1 overflow-y-auto px-[15px] pt-[12px] pb-[8px]">
       <div className="mb-[24px]">
