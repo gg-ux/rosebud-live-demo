@@ -62,6 +62,25 @@ body {
   animation: tool-shimmer 2.4s linear infinite;
 }
 
+/* Inverse shimmer — for white text on dark surfaces (e.g. snackbar pills).
+   Same sweep timing as .tool-shimmer; brighter highlight on a soft-white base. */
+.snackbar-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.7) 0%,
+    rgba(255, 255, 255, 0.7) 35%,
+    rgba(255, 255, 255, 1) 48%,
+    rgba(255, 255, 255, 1) 52%,
+    rgba(255, 255, 255, 0.7) 65%,
+    rgba(255, 255, 255, 0.7) 100%
+  );
+  background-size: 250% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: tool-shimmer 2.4s linear infinite;
+}
+
 /* Hero illustration animations */
 @keyframes hero-float {
   0%, 100% { transform: translateY(0); }

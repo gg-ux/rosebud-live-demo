@@ -210,6 +210,27 @@ function ScenarioRow({ reverse, phone, copy }) {
   );
 }
 
+const SCENARIO_ONE_VERSIONS = [
+  {
+    id: 'inline-summary',
+    label: 'V1',
+    name: 'Inline summary',
+    isLatest: false,
+  },
+  {
+    id: 'fade-swap',
+    label: 'V2',
+    name: 'Minimal In-Line',
+    isLatest: true,
+  },
+  {
+    id: 'snackbar',
+    label: 'V3',
+    name: 'Bottom snackbar',
+    isLatest: false,
+  },
+];
+
 function ScenarioOnePhone() {
   const ref = useRef(null);
   return (
@@ -218,6 +239,34 @@ function ScenarioOnePhone() {
         <ToolCallFlow ref={ref} scenario="creating-page" />
       </PhoneFrame>
       <Replay onClick={() => ref.current?.reset()} />
+    </div>
+  );
+}
+
+function FinalProposalPhones() {
+  const refs = useRef({});
+  const versions = SCENARIO_ONE_VERSIONS.filter((v) => v.id !== 'inline-summary');
+
+  return (
+    <div className="max-w-[760px] mx-auto">
+      <div className="flex flex-col sm:flex-row justify-center items-start gap-[24px] sm:gap-[40px]">
+        {versions.map((v) => {
+          if (!refs.current[v.id]) refs.current[v.id] = { current: null };
+          const ref = refs.current[v.id];
+          return (
+            <div key={v.id} className="w-full max-w-[340px] flex flex-col">
+              <div className="flex items-center gap-[8px] mb-[12px]">
+                <VersionLabelChip isLatest={v.isLatest} label={v.label} />
+                <span className="text-[14px] leading-[20px] font-[600] text-[var(--color-on-background)]">{v.name}</span>
+              </div>
+              <PhoneFrame showNavBar={false}>
+                <ToolCallFlow ref={ref} scenario="creating-page" variant={v.id} />
+              </PhoneFrame>
+              <Replay onClick={() => ref.current?.reset()} />
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -512,16 +561,20 @@ export function ToolCalls() {
   return (
     <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-on-background)]">
       <section className="max-w-[1200px] mx-auto px-[20px] md:px-[24px] py-[40px] md:py-[60px]">
-        <div className="max-w-[680px] mb-[20px] md:mb-[40px]">
-          <span className="inline-block px-[12px] py-[4px] rounded-full bg-[var(--color-surface-variant)] text-[12px] font-[600] tracking-[0.05em] uppercase text-[var(--color-secondary-text)] mb-[16px]">
-            Tool Calls
-          </span>
-          <h1 className="text-[32px] md:text-[44px] leading-[38px] md:leading-[50px] font-[700] tracking-[-0.02em] mb-[16px]">
-            Transparency, without the noise
+        <div className="max-w-[680px] mb-[32px] md:mb-[48px]">
+          <h1 className="text-[32px] md:text-[44px] leading-[38px] md:leading-[50px] font-[700] tracking-[-0.02em]">
+            Final Proposal
           </h1>
-          <p className="text-[15px] md:text-[17px] leading-[22px] md:leading-[26px] font-[450] text-[var(--color-secondary-text)]">
-            Tool calls fade in one at a time, then collapse into a single inline accordion. The user can tap to expand and see what the assistant did.
-          </p>
+        </div>
+
+        <div className="mb-[64px] md:mb-[96px]">
+          <FinalProposalPhones />
+        </div>
+
+        <div className="max-w-[680px] mb-[24px] md:mb-[32px]">
+          <h2 className="text-[24px] md:text-[32px] leading-[30px] md:leading-[40px] font-[700] tracking-[-0.02em]">
+            Older Iterations
+          </h2>
         </div>
 
         <div>
@@ -530,8 +583,8 @@ export function ToolCalls() {
             phone={<ScenarioOnePhone />}
             copy={
               <div>
-                <Tagline>Scenario 1</Tagline>
-                <Title>Creating a new page</Title>
+                <Tagline>Scenario 1 — V1</Tagline>
+                <Title>Inline summary</Title>
                 <NumberedInstructions
                   items={[
                     'Tap “Go deeper” to update Sage’s memory.',

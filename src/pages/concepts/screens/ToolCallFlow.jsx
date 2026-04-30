@@ -40,7 +40,7 @@ function ToolCallRow({ call, completed }) {
   );
 }
 
-// Action row matching the History & Bookmarks treatment: 15px icons, 14px gap,
+// Action row matching the History & Bookmarks treatment: 15px icons, 12px gap,
 // 1.6 stroke, color inherited from the parent text bubble.
 function ActionIcons({ color = '#6D6C6A' }) {
   const svgProps = {
@@ -53,7 +53,7 @@ function ActionIcons({ color = '#6D6C6A' }) {
     className: 'w-[15px] h-[15px]',
   };
   return (
-    <div className="flex items-center gap-[14px] mt-[6px]">
+    <div className="flex items-center gap-[12px] mt-[6px]">
       {/* Play */}
       <button aria-label="Play"><svg {...svgProps}><polygon points="6 4 20 12 6 20 6 4" /></svg></button>
       {/* Copy */}
@@ -62,14 +62,30 @@ function ActionIcons({ color = '#6D6C6A' }) {
       <button aria-label="Helpful"><svg {...svgProps}><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" /></svg></button>
       {/* Thumbs down */}
       <button aria-label="Not helpful"><svg {...svgProps}><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17" /></svg></button>
+      {/* Share */}
+      <button aria-label="Share"><svg {...svgProps}><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7" /><polyline points="16 6 12 2 8 6" /><line x1="12" y1="2" x2="12" y2="15" /></svg></button>
+      {/* Info */}
+      <button aria-label="Info"><svg {...svgProps}><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg></button>
     </div>
   );
 }
 
 // Clickable text bubble — toggles a row of action icons when tapped.
 // Coordinates with parent so only one bubble shows actions at a time.
-function ClickableText({ id, children, colorClass, iconColor = '#6D6C6A', activeId, setActiveId, mb = '16px' }) {
+// `forceShowActions` makes the action row visible without a tap; used for
+// the most-recent AI reply once any tool calls following it have resolved.
+function ClickableText({
+  id,
+  children,
+  colorClass,
+  iconColor = '#6D6C6A',
+  activeId,
+  setActiveId,
+  mb = '16px',
+  forceShowActions = false,
+}) {
   const isActive = activeId === id;
+  const showActions = isActive || forceShowActions;
   return (
     <div style={{ marginBottom: mb }}>
       <button
@@ -78,7 +94,19 @@ function ClickableText({ id, children, colorClass, iconColor = '#6D6C6A', active
       >
         <p className={`text-[14px] leading-[20px] font-[450] ${colorClass}`}>{children}</p>
       </button>
-      {isActive && <ActionIcons color={iconColor} />}
+      <AnimatePresence initial={false}>
+        {showActions && (
+          <motion.div
+            key="actions"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+          >
+            <ActionIcons color={iconColor} />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -194,33 +222,192 @@ function useToolCallSequence(stagger = 1100) {
    ════════════════════════════════════════════════════════════════ */
 const S1_ENTRY = "Today's lunch with my brother was a highlight. We laughed and reminisced about our childhood.";
 const S1_AI = 'Your brother seems like an important person, let me update my memory.';
+// Pre-AI: assistant reads + grounds before replying (V2/V3 only).
+const S1_PRE_TOOLS = [
+  { running: 'Searching memory...', done: 'Searched memory' },
+  { running: 'Reading recent entries...', done: 'Read recent entries' },
+];
 const S1_TOOLS = [
   { running: 'Consulting Page Creator...', done: 'Consulted Page Creator' },
   { running: 'Updating memory...', done: 'Memory updated' },
 ];
 
-function CreatingPageScenario({ flowRef }) {
-  // 'idle' → 'ai-then-tools' (AI message visible, tools running) → 'done'
+// Bottom snackbar pill — floats absolutely above BottomCTAs so the sheet's
+// height stays identical across variants. The pill stays mounted as long as
+// `message` is non-null; only the text inside crossfades when the label
+// changes, and the pill width animates to the new text via framer-motion's
+// layout prop. While a tool call is in progress, the label shimmers.
+function BottomSnackbar({ message, shimmer = false }) {
+  const [displayed, setDisplayed] = useState(message);
+  const [textOpacity, setTextOpacity] = useState(message ? 1 : 0);
+  const previousRef = useRef(message);
+
+  useEffect(() => {
+    const previous = previousRef.current;
+    previousRef.current = message;
+
+    if (message == null) {
+      // Pill exits via AnimatePresence; leave `displayed` so the last text
+      // stays readable through the exit fade.
+      return;
+    }
+    if (previous == null) {
+      // First mount: snap displayed text into place; pill itself fades in.
+      setDisplayed(message);
+      setTextOpacity(1);
+      return;
+    }
+    if (message === previous) return;
+
+    // Mid-flight label swap: fade text → swap → fade text back in.
+    // Pill remains mounted; width animates via the parent's `layout` prop.
+    setTextOpacity(0);
+    const t = setTimeout(() => {
+      setDisplayed(message);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setTextOpacity(1));
+      });
+    }, 160);
+    return () => clearTimeout(t);
+  }, [message]);
+
+  return (
+    <div className="pointer-events-none absolute inset-x-0 bottom-[101px] flex justify-center z-10">
+      <AnimatePresence>
+        {message != null && (
+          <motion.div
+            key="pill"
+            layout
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{
+              opacity: { duration: 0.24, ease: [0.32, 0.72, 0, 1] },
+              layout: { duration: 0.32, ease: [0.32, 0.72, 0, 1] },
+            }}
+            className="px-[14px] py-[6px] rounded-full bg-[#191C1A] text-[12px] leading-[16px] font-[500] shadow-[0_4px_16px_rgba(0,0,0,0.18)] whitespace-nowrap"
+          >
+            <span
+              style={{
+                opacity: textOpacity,
+                transition: 'opacity 160ms cubic-bezier(0.32, 0.72, 0, 1)',
+              }}
+              className={shimmer ? 'snackbar-shimmer' : 'text-white'}
+            >
+              {displayed}
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function CreatingPageScenario({ flowRef, variant = 'inline-summary' }) {
+  // V1 (inline-summary): idle → ai-then-tools (AI + inline ticker concurrent) → done
+  // V2 (fade-swap, strictly sequential): idle → pre-tools → ai-shown → post-tools → done
+  // V3 (snackbar): idle → pre-tools (in snackbar) → ai-then-tools (AI + snackbar) → done
   const [phase, setPhase] = useState('idle');
   const seq = useToolCallSequence();
+  const preSeq = useToolCallSequence();
   const [expanded, setExpanded] = useState(false);
   const [activeId, setActiveId] = useState(null);
   const [draft, setDraft] = useState('');
+  const [snackMessage, setSnackMessage] = useState(null);
   const draftRef = useRef(null);
+  const aiHoldTimerRef = useRef(null);
+  const AI_READ_HOLD_MS = 1800;
 
   const reset = () => {
     seq.reset();
+    preSeq.reset();
     setPhase('idle');
     setExpanded(false);
     setActiveId(null);
     setDraft('');
+    setSnackMessage(null);
+    if (aiHoldTimerRef.current) {
+      clearTimeout(aiHoldTimerRef.current);
+      aiHoldTimerRef.current = null;
+    }
   };
   useImperativeHandle(flowRef, () => ({ reset }), []);
 
   const trigger = () => {
     if (phase !== 'idle') return;
+    if (variant === 'fade-swap') {
+      // V2: pre-ticker → AI reply (persists, briefly alone) → post-tool
+      // ticker appears below AI reply → ticker fades, action icons replace
+      // it → WriteArea drops in below.
+      setPhase('pre-tools');
+      preSeq.start(S1_PRE_TOOLS, () => {
+        setPhase('ai-then-tools');
+        // Hold so the AI reply is fully visible alone before the second
+        // tool call begins.
+        aiHoldTimerRef.current = setTimeout(() => {
+          aiHoldTimerRef.current = null;
+          seq.start(S1_TOOLS, () => {
+            // After post-tools complete, hold long enough for the
+            // ticker→actions swap to finish before WriteArea mounts.
+            aiHoldTimerRef.current = setTimeout(() => {
+              aiHoldTimerRef.current = null;
+              setPhase('done');
+            }, 320);
+          });
+        }, 1200);
+      });
+      return;
+    }
+    if (variant === 'snackbar') {
+      setPhase('pre-tools');
+      preSeq.start(S1_PRE_TOOLS, () => {
+        setPhase('ai-then-tools');
+        seq.start(S1_TOOLS, () => {
+          // Hold the phase transition until the snackbar has had time to
+          // fully fade out. Otherwise Write would mount while the pill is
+          // still mid-exit — i.e. the tool-call indicator still visible.
+          aiHoldTimerRef.current = setTimeout(() => {
+            aiHoldTimerRef.current = null;
+            setPhase('done');
+          }, 280);
+        });
+      });
+      return;
+    }
+    // V1
     setPhase('ai-then-tools');
     seq.start(S1_TOOLS, () => setPhase('done'));
+  };
+
+  // Snackbar variant: drive the bottom pill text from BOTH sequences. Pre-AI
+  // tool calls flow into the same pill before the AI reply appears, then the
+  // post-AI sequence takes over. preSeq has priority while it's running so
+  // the transition into seq is a smooth label swap (no null gap → no blink).
+  // Once the post-AI sequence completes, the pill fades out — no final
+  // "done" label hold.
+  useEffect(() => {
+    if (variant !== 'snackbar') return;
+    if (preSeq.phase === 'running') {
+      setSnackMessage(preSeq.currentRunning);
+    } else if (seq.phase === 'running') {
+      setSnackMessage(seq.currentRunning);
+    } else {
+      setSnackMessage(null);
+    }
+  }, [
+    variant,
+    preSeq.phase,
+    preSeq.currentRunning,
+    seq.phase,
+    seq.currentRunning,
+  ]);
+
+  // V2 sequential transition props — shared opacity-only fade for each slot.
+  const v2Fade = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    exit: { opacity: 0 },
+    transition: { duration: 0.28, ease: [0.32, 0.72, 0, 1] },
   };
 
   return (
@@ -239,31 +426,137 @@ function CreatingPageScenario({ flowRef }) {
           {S1_ENTRY}
         </ClickableText>
 
-        {phase !== 'idle' && (
-          <ClickableText
-            id="ai-reply"
-            colorClass="text-[#2B6CB0]"
-            iconColor="#2B6CB0"
-            activeId={activeId}
-            setActiveId={setActiveId}
-            mb="16px"
-          >
-            {S1_AI}
-          </ClickableText>
+        {/* V1 — inline summary: AI reply + concurrent inline ticker, then summary + Write */}
+        {variant === 'inline-summary' && (
+          <>
+            {phase !== 'idle' && (
+              <ClickableText
+                id="ai-reply"
+                colorClass="text-[#2B6CB0]"
+                iconColor="#2B6CB0"
+                activeId={activeId}
+                setActiveId={setActiveId}
+                mb="16px"
+                forceShowActions={phase === 'done'}
+              >
+                {S1_AI}
+              </ClickableText>
+            )}
+            {seq.phase === 'running' && <ToolCallTicker call={seq.currentRunning} />}
+            {phase === 'done' && (
+              <>
+                <ToolCallSummary
+                  calls={seq.doneLabels}
+                  expanded={expanded}
+                  onToggle={() => setExpanded((e) => !e)}
+                />
+                <WriteArea value={draft} onChange={setDraft} areaRef={draftRef} />
+              </>
+            )}
+          </>
         )}
 
-        {seq.phase === 'running' && <ToolCallTicker call={seq.currentRunning} />}
-        {phase === 'done' && (
+        {/* V2 — top slot: pre-ticker → AI reply (persistent). Below AI reply,
+            an action-row slot shows the post-tool ticker while running, then
+            fades to reveal per-message action icons. WriteArea drops in
+            below action icons once everything settles. */}
+        {variant === 'fade-swap' && (
           <>
-            <ToolCallSummary
-              calls={seq.doneLabels}
-              expanded={expanded}
-              onToggle={() => setExpanded((e) => !e)}
-            />
-            <WriteArea value={draft} onChange={setDraft} areaRef={draftRef} />
+            <AnimatePresence mode="wait">
+              {phase === 'pre-tools' && (
+                <motion.div key="pre-ticker" {...v2Fade} className="mb-[16px]">
+                  <ToolCallRow call={preSeq.currentRunning} completed={false} />
+                </motion.div>
+              )}
+              {(phase === 'ai-then-tools' || phase === 'done') && (
+                <motion.div key="ai-reply" {...v2Fade}>
+                  <p className="text-[14px] leading-[20px] font-[450] text-[#2B6CB0] mb-[6px]">
+                    {S1_AI}
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Action / post-tool ticker slot — only mounts once the second
+                tool call begins (so the AI reply is alone above for a beat).
+                Ticker shows during running, fades to reveal action icons. */}
+            {(seq.phase === 'running' || seq.phase === 'done') && (
+              <div className="mb-[16px]">
+                <AnimatePresence mode="wait">
+                  {seq.phase === 'running' && (
+                    <motion.div
+                      key="post-ticker"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+                    >
+                      <ToolCallRow call={seq.currentRunning} completed={false} />
+                    </motion.div>
+                  )}
+                  {seq.phase === 'done' && (
+                    <motion.div
+                      key="actions"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+                    >
+                      <ActionIcons color="#2B6CB0" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
+
+            {phase === 'done' && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+              >
+                <WriteArea value={draft} onChange={setDraft} areaRef={draftRef} />
+              </motion.div>
+            )}
+          </>
+        )}
+
+        {/* V3 — snackbar: AI reply persists, all tool-call labels run via bottom pill */}
+        {variant === 'snackbar' && (
+          <>
+            <AnimatePresence>
+              {(phase === 'ai-then-tools' || phase === 'done') && (
+                <motion.div
+                  key="ai-reply"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+                >
+                  <ClickableText
+                    id="ai-reply"
+                    colorClass="text-[#2B6CB0]"
+                    iconColor="#2B6CB0"
+                    activeId={activeId}
+                    setActiveId={setActiveId}
+                    mb="16px"
+                    forceShowActions
+                  >
+                    {S1_AI}
+                  </ClickableText>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            {phase === 'done' && (
+              <WriteArea value={draft} onChange={setDraft} areaRef={draftRef} />
+            )}
           </>
         )}
       </div>
+      {variant === 'snackbar' && (
+        <BottomSnackbar
+          message={snackMessage}
+          shimmer={preSeq.phase === 'running' || seq.phase === 'running'}
+        />
+      )}
       <BottomCTAs
         onFinishEntry={() => {}}
         onGoDeeper={trigger}
@@ -757,7 +1050,7 @@ function AfterTextScenario({ flowRef }) {
    Public wrapper
    ════════════════════════════════════════════════════════════════ */
 export const ToolCallFlow = forwardRef(function ToolCallFlow(
-  { scenario = 'creating-page', mode = 'single', placement = 'top' } = {},
+  { scenario = 'creating-page', mode = 'single', placement = 'top', variant = 'inline-summary' } = {},
   ref,
 ) {
   if (scenario === 'starting-entry') {
@@ -772,5 +1065,5 @@ export const ToolCallFlow = forwardRef(function ToolCallFlow(
   if (scenario === 'after-text') {
     return <AfterTextScenario flowRef={ref} />;
   }
-  return <CreatingPageScenario flowRef={ref} />;
+  return <CreatingPageScenario flowRef={ref} variant={variant} />;
 });

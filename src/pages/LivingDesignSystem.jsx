@@ -56,7 +56,7 @@ function Eyebrow({ children, color = 'secondary' }) {
 
 function H1({ children }) {
   return (
-    <h1 className="text-[32px] md:text-[44px] leading-[38px] md:leading-[50px] font-[700] tracking-[-0.025em] text-[var(--color-on-background)] mb-[16px]">
+    <h1 className="text-[34px] md:text-[52px] leading-[40px] md:leading-[58px] font-[700] tracking-[-0.03em] text-[var(--color-on-background)] mb-[20px]">
       {children}
     </h1>
   );
@@ -64,7 +64,7 @@ function H1({ children }) {
 
 function H2({ children }) {
   return (
-    <h2 className="text-[22px] md:text-[28px] leading-[28px] md:leading-[36px] font-[700] tracking-[-0.02em] text-[var(--color-on-background)] mb-[12px]">
+    <h2 className="text-[24px] md:text-[32px] leading-[30px] md:leading-[40px] font-[700] tracking-[-0.025em] text-[var(--color-on-background)] mb-[16px]">
       {children}
     </h2>
   );
@@ -120,7 +120,7 @@ function PageSidebar({ active, onJump }) {
           </button>
         ))}
       </nav>
-      <div className="mt-[20px] mx-[10px] pt-[16px] border-t border-[var(--color-outline-light)]">
+      <div className="mt-[20px] mx-[10px] pt-[16px] border-t border-[var(--color-outline-light)]/60">
         <a
           href={REPO_URL}
           target="_blank"
@@ -158,8 +158,8 @@ function StatCard({ value, label, color = 'sage' }) {
     ivory: 'text-[var(--color-soft-ivory-700)]',
   };
   return (
-    <div className="flex-1 min-w-[140px] p-[20px] rounded-[12px] bg-[var(--color-surface)] border border-[var(--color-outline-light)]">
-      <div className={`text-[36px] leading-[42px] font-[700] tracking-[-0.02em] mb-[6px] ${colorMap[color]}`}>
+    <div className="flex-1 min-w-[140px] p-[24px] rounded-[20px] bg-[var(--color-surface)] shadow-[0_1px_2px_rgba(25,28,26,0.03),0_2px_8px_-4px_rgba(25,28,26,0.04)]">
+      <div className={`text-[40px] leading-[44px] font-[700] tracking-[-0.025em] mb-[8px] ${colorMap[color]}`}>
         {value}
       </div>
       <div className="text-[12px] leading-[16px] font-[500] text-[var(--color-secondary-text)]">
@@ -188,12 +188,12 @@ function Pill({ children, tone = 'neutral' }) {
 function FlowDiagram() {
   const Box = ({ title, sub, tone = 'neutral' }) => {
     const toneMap = {
-      neutral: 'bg-[var(--color-surface)] border-[var(--color-outline-light)]',
-      sage: 'bg-[var(--color-sage-green-50)] border-[var(--color-sage-green-200)]',
-      ivory: 'bg-[var(--color-soft-ivory-50)] border-[var(--color-soft-ivory-200)]',
+      neutral: 'bg-[var(--color-surface)]',
+      sage: 'bg-[var(--color-sage-green-50)]/70',
+      ivory: 'bg-[var(--color-soft-ivory-50)]/70',
     };
     return (
-      <div className={`flex-1 min-w-[140px] p-[14px] rounded-[10px] border ${toneMap[tone]}`}>
+      <div className={`flex-1 min-w-[140px] p-[16px] rounded-[14px] ${toneMap[tone]}`}>
         <div className="text-[13px] leading-[18px] font-[700] text-[var(--color-on-background)] mb-[2px]">{title}</div>
         <div className="text-[11px] leading-[15px] font-[450] text-[var(--color-secondary-text)]">{sub}</div>
       </div>
@@ -210,7 +210,7 @@ function FlowDiagram() {
   );
 
   return (
-    <div className="my-[20px] p-[20px] rounded-[14px] bg-[var(--color-background)] border border-[var(--color-outline-light)]">
+    <div className="my-[20px] p-[20px] rounded-[18px] bg-[var(--color-background)] ring-1 ring-inset ring-[var(--color-outline-light)]/50">
       <div className="flex flex-col md:flex-row items-stretch md:items-center gap-[10px]">
         <Box
           title="apps/native/src/components/"
@@ -287,13 +287,13 @@ function ComponentTriage() {
   const bucket = COMPONENT_BUCKETS[tab];
 
   return (
-    <div className="mt-[20px] rounded-[14px] bg-[var(--color-surface)] border border-[var(--color-outline-light)] overflow-hidden">
-      <div className="flex border-b border-[var(--color-outline-light)]">
+    <div className="mt-[20px] rounded-[20px] bg-[var(--color-surface)] overflow-hidden">
+      <div className="flex border-b border-[var(--color-outline-light)]/60">
         {Object.entries(COMPONENT_BUCKETS).map(([key, b]) => (
           <button
             key={key}
             onClick={() => setTab(key)}
-            className={`flex-1 px-[16px] py-[14px] text-left transition-colors cursor-pointer border-r border-[var(--color-outline-light)] last:border-r-0 ${
+            className={`flex-1 px-[18px] py-[16px] text-left transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] cursor-pointer border-r border-[var(--color-outline-light)]/60 last:border-r-0 ${
               tab === key
                 ? 'bg-[var(--color-background)]'
                 : 'hover:bg-[var(--color-surface-variant)]'
@@ -308,24 +308,24 @@ function ComponentTriage() {
           </button>
         ))}
       </div>
-      <div className="p-[20px]">
+      <div className="p-[24px]">
         <Body>{bucket.description}</Body>
-        <div className="mt-[16px]">
-          <div className="text-[11px] font-[700] tracking-[0.08em] uppercase text-[var(--color-secondary-text)] mb-[8px]">
+        <div className="mt-[18px]">
+          <div className="text-[11px] font-[700] tracking-[0.08em] uppercase text-[var(--color-secondary-text)] mb-[10px]">
             Examples from your repo
           </div>
           <div className="flex flex-wrap gap-[6px]">
             {bucket.examples.map((ex) => (
               <span
                 key={ex}
-                className="px-[8px] py-[3px] rounded-[6px] bg-[var(--color-surface-variant)] border border-[var(--color-outline-light)] text-[12px] leading-[16px] font-[500] text-[var(--color-on-background)]"
+                className="px-[10px] py-[4px] rounded-full bg-[var(--color-surface-variant)] ring-1 ring-inset ring-[var(--color-outline-light)]/70 text-[12px] leading-[16px] font-[500] text-[var(--color-on-background)]"
               >
                 {ex}
               </span>
             ))}
           </div>
         </div>
-        <div className="mt-[16px] p-[12px] rounded-[8px] bg-[var(--color-background)] border border-[var(--color-outline-light)]">
+        <div className="mt-[18px] p-[14px] rounded-[12px] bg-[var(--color-background)]">
           <div className="text-[11px] font-[700] tracking-[0.08em] uppercase text-[var(--color-secondary-text)] mb-[4px]">
             What we do
           </div>
@@ -342,7 +342,7 @@ function ComponentTriage() {
 
 function ChangeMatrix() {
   const Row = ({ what, doesnt = false }) => (
-    <div className="flex items-start gap-[10px] py-[10px] border-b border-[var(--color-outline-light)] last:border-b-0">
+    <div className="flex items-start gap-[10px] py-[10px] border-b border-[var(--color-outline-light)]/60 last:border-b-0">
       <div className={`mt-[2px] shrink-0 w-[16px] h-[16px] rounded-full flex items-center justify-center ${
         doesnt
           ? 'bg-[var(--color-sage-green-100)] text-[var(--color-sage-green-700)]'
@@ -365,7 +365,7 @@ function ChangeMatrix() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px] mt-[20px]">
-      <div className="p-[20px] rounded-[14px] bg-[var(--color-surface)] border border-[var(--color-outline-light)]">
+      <div className="p-[20px] rounded-[18px] bg-[var(--color-surface)]">
         <div className="flex items-center gap-[8px] mb-[8px]">
           <Pill tone="ivory">New</Pill>
           <span className="text-[13px] font-[700] text-[var(--color-on-background)]">What changes</span>
@@ -377,7 +377,7 @@ function ChangeMatrix() {
           <Row what="Stories file added when you ship a new component" />
         </div>
       </div>
-      <div className="p-[20px] rounded-[14px] bg-[var(--color-surface)] border border-[var(--color-outline-light)]">
+      <div className="p-[20px] rounded-[18px] bg-[var(--color-surface)]">
         <div className="flex items-center gap-[8px] mb-[8px]">
           <Pill tone="sage">Same</Pill>
           <span className="text-[13px] font-[700] text-[var(--color-on-background)]">What doesn't change</span>
@@ -408,12 +408,12 @@ function Rollout() {
 
   return (
     <div className="mt-[20px]">
-      <div className="rounded-[14px] bg-[var(--color-surface)] border border-[var(--color-outline-light)] overflow-hidden">
+      <div className="rounded-[18px] bg-[var(--color-surface)] overflow-hidden">
         {phases.map((p, i) => (
           <div
             key={p.num}
             className={`flex items-start gap-[16px] p-[16px] ${
-              i < phases.length - 1 ? 'border-b border-[var(--color-outline-light)]' : ''
+              i < phases.length - 1 ? 'border-b border-[var(--color-outline-light)]/60' : ''
             }`}
           >
             <div className="shrink-0 w-[28px] h-[28px] rounded-full bg-[var(--color-sage-green-100)] text-[var(--color-sage-green-800)] flex items-center justify-center text-[13px] font-[700]">
@@ -476,16 +476,16 @@ const FAQ_ITEMS = [
 function FaqItem({ item }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border-b border-[var(--color-outline-light)] last:border-b-0">
+    <div className="border-b border-[var(--color-outline-light)]/60 last:border-b-0">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-start gap-[10px] py-[14px] text-left cursor-pointer group"
+        className="w-full flex items-start gap-[10px] py-[16px] text-left cursor-pointer group"
       >
         <ChevronRight
           size={14}
-          className={`mt-[3px] shrink-0 text-[var(--color-secondary-text)] transition-transform duration-200 ${open ? 'rotate-90' : ''}`}
+          className={`mt-[3px] shrink-0 text-[var(--color-secondary-text)] transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${open ? 'rotate-90' : ''}`}
         />
-        <span className="flex-1 text-[14px] leading-[22px] font-[600] text-[var(--color-on-background)] group-hover:text-[var(--color-sage-green-700)] transition-colors">
+        <span className="flex-1 text-[14px] leading-[22px] font-[600] text-[var(--color-on-background)] group-hover:text-[var(--color-sage-green-700)] transition-colors duration-300">
           {item.q}
         </span>
       </button>
@@ -495,7 +495,7 @@ function FaqItem({ item }) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+            transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
             className="overflow-hidden"
           >
             <div className="pb-[14px] pl-[24px] pr-[8px]">
@@ -543,15 +543,14 @@ const STORYBOOK_EXAMPLES = [
 
 function StorybookExamples() {
   return (
-    <div className="mt-[20px] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[12px]">
+    <div className="mt-[20px] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[14px]">
       {STORYBOOK_EXAMPLES.map((ex) => (
         <a
           key={ex.org}
           href={ex.url}
           target="_blank"
           rel="noreferrer"
-          className="group block p-[20px] rounded-[14px] bg-[var(--color-surface)] border border-[var(--color-outline-light)] hover:border-[var(--color-on-background)] transition-colors relative overflow-hidden"
-          style={{ borderTopColor: ex.accent, borderTopWidth: 3 }}
+          className="group block p-[22px] rounded-[18px] bg-[var(--color-surface)] ring-1 ring-inset ring-[var(--color-outline-light)]/60 shadow-[0_1px_2px_rgba(25,28,26,0.03)] hover:shadow-[0_2px_4px_rgba(25,28,26,0.04),0_12px_28px_-12px_rgba(25,28,26,0.10)] hover:-translate-y-[2px] transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
         >
           <div
             className="text-[10px] font-[700] tracking-[0.1em] uppercase mb-[6px]"
@@ -579,7 +578,7 @@ function StorybookExamples() {
 
 function NativeCallout() {
   return (
-    <div className="mt-[28px] p-[20px] rounded-[14px] bg-[var(--color-sage-green-50)]/40 border border-[var(--color-sage-green-200)]">
+    <div className="mt-[32px]">
       <div className="flex items-center gap-[8px] mb-[10px]">
         <Pill tone="sage">For native specifically</Pill>
       </div>
@@ -591,11 +590,10 @@ function NativeCallout() {
         href="https://gluestack.io/ui/docs/components/button"
         target="_blank"
         rel="noreferrer"
-        className="group mt-[16px] block p-[16px] rounded-[12px] bg-[var(--color-surface)] border border-[var(--color-outline-light)] hover:border-[var(--color-on-background)] transition-colors"
-        style={{ borderLeftColor: '#18181B', borderLeftWidth: 3 }}
+        className="group mt-[18px] block p-[20px] rounded-[18px] bg-[var(--color-surface)] ring-1 ring-inset ring-[var(--color-outline-light)]/60 shadow-[0_1px_2px_rgba(25,28,26,0.03)] hover:shadow-[0_2px_4px_rgba(25,28,26,0.04),0_12px_28px_-12px_rgba(25,28,26,0.10)] hover:-translate-y-[2px] transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
       >
-        <div className="flex items-center gap-[8px] mb-[6px] flex-wrap">
-          <span className="text-[10px] font-[700] tracking-[0.1em] uppercase" style={{ color: '#18181B' }}>
+        <div className="flex items-center gap-[8px] mb-[8px] flex-wrap">
+          <span className="text-[10px] font-[700] tracking-[0.1em] uppercase text-[var(--color-on-background)]">
             Gluestack UI
           </span>
           <Pill tone="sage">Same react-native-web pattern</Pill>
@@ -626,7 +624,7 @@ function RNToWebTranslator() {
     { rn: '<ScrollView>', web: '<div> (scrollable)', what: 'Scroll area' },
   ];
   return (
-    <div className="mt-[28px] p-[20px] rounded-[14px] bg-[var(--color-surface)] border border-[var(--color-outline-light)]">
+    <div className="mt-[28px] p-[20px] rounded-[18px] bg-[var(--color-surface)]">
       <div className="flex items-center gap-[8px] mb-[10px]">
         <Pill tone="neutral">Plain-English explainer</Pill>
       </div>
@@ -635,18 +633,18 @@ function RNToWebTranslator() {
         A library called <Code>react-native-web</Code> acts as a translator. React Native's building blocks get auto-converted to their web equivalents — no rewrites required. About 80% of your components use only these primitives, so they work as-is.
       </Body>
       <div className="mt-[16px] rounded-[10px] bg-[var(--color-background)] border border-[var(--color-outline-light)] overflow-hidden">
-        <div className="grid grid-cols-[1fr_24px_1fr_1fr] text-[10px] font-[700] tracking-[0.08em] uppercase text-[var(--color-secondary-text)] border-b border-[var(--color-outline-light)]">
+        <div className="grid grid-cols-[1fr_24px_1fr_1fr] text-[10px] font-[700] tracking-[0.08em] uppercase text-[var(--color-secondary-text)] border-b border-[var(--color-outline-light)]/60">
           <div className="px-[14px] py-[8px]">React Native</div>
           <div className="px-[8px] py-[8px]"></div>
-          <div className="px-[14px] py-[8px] border-l border-[var(--color-outline-light)]">Web</div>
-          <div className="px-[14px] py-[8px] border-l border-[var(--color-outline-light)]">What it is</div>
+          <div className="px-[14px] py-[8px] border-l border-[var(--color-outline-light)]/60">Web</div>
+          <div className="px-[14px] py-[8px] border-l border-[var(--color-outline-light)]/60">What it is</div>
         </div>
         {mappings.map((m, i) => (
-          <div key={m.rn} className={`grid grid-cols-[1fr_24px_1fr_1fr] text-[12px] leading-[18px] ${i < mappings.length - 1 ? 'border-b border-[var(--color-outline-light)]' : ''}`}>
+          <div key={m.rn} className={`grid grid-cols-[1fr_24px_1fr_1fr] text-[12px] leading-[18px] ${i < mappings.length - 1 ? 'border-b border-[var(--color-outline-light)]/60' : ''}`}>
             <div className="px-[14px] py-[10px] font-mono font-[500] text-[var(--color-on-background)]">{m.rn}</div>
             <div className="px-[4px] py-[10px] flex items-center justify-center text-[var(--color-secondary-text)]">→</div>
-            <div className="px-[14px] py-[10px] font-mono font-[500] text-[var(--color-sage-green-700)] border-l border-[var(--color-outline-light)]">{m.web}</div>
-            <div className="px-[14px] py-[10px] font-[450] text-[var(--color-secondary-text)] border-l border-[var(--color-outline-light)]">{m.what}</div>
+            <div className="px-[14px] py-[10px] font-mono font-[500] text-[var(--color-sage-green-700)] border-l border-[var(--color-outline-light)]/60">{m.web}</div>
+            <div className="px-[14px] py-[10px] font-[450] text-[var(--color-secondary-text)] border-l border-[var(--color-outline-light)]/60">{m.what}</div>
           </div>
         ))}
       </div>
@@ -678,7 +676,7 @@ function WorkflowComparison() {
   ];
 
   const Step = ({ num, text, tone }) => (
-    <li className="flex gap-[10px] py-[8px] border-b border-[var(--color-outline-light)] last:border-b-0">
+    <li className="flex gap-[10px] py-[8px] border-b border-[var(--color-outline-light)]/60 last:border-b-0">
       <div className={`shrink-0 w-[20px] h-[20px] rounded-full flex items-center justify-center text-[11px] font-[700] ${
         tone === 'today'
           ? 'bg-[var(--color-soft-ivory-100)] text-[var(--color-soft-ivory-800)]'
@@ -692,7 +690,7 @@ function WorkflowComparison() {
 
   return (
     <div className="mt-[20px] grid grid-cols-1 md:grid-cols-2 gap-[16px]">
-      <div className="p-[20px] rounded-[14px] bg-[var(--color-surface)] border border-[var(--color-outline-light)]">
+      <div className="p-[20px] rounded-[18px] bg-[var(--color-surface)] ring-1 ring-inset ring-[var(--color-outline-light)]/60">
         <div className="flex items-center gap-[8px] mb-[12px]">
           <Pill tone="ivory">Today</Pill>
           <span className="text-[13px] font-[700] text-[var(--color-on-background)]">The handoff loop now</span>
@@ -701,7 +699,7 @@ function WorkflowComparison() {
           {today.map((t, i) => <Step key={i} num={i + 1} text={t} tone="today" />)}
         </ol>
       </div>
-      <div className="p-[20px] rounded-[14px] bg-[var(--color-sage-green-50)]/40 border border-[var(--color-sage-green-200)]">
+      <div className="p-[20px] rounded-[18px] bg-[var(--color-sage-green-50)]/60">
         <div className="flex items-center gap-[8px] mb-[12px]">
           <Pill tone="sage">With Living Design System</Pill>
           <span className="text-[13px] font-[700] text-[var(--color-on-background)]">The handoff becomes</span>
@@ -738,22 +736,22 @@ function HandoffCallout() {
     },
   ];
   return (
-    <div className="mt-[20px] rounded-[14px] bg-[var(--color-surface)] border border-[var(--color-outline-light)] overflow-hidden">
-      <div className="grid grid-cols-[1fr_1fr_1fr] text-[11px] font-[700] tracking-[0.08em] uppercase text-[var(--color-secondary-text)] border-b border-[var(--color-outline-light)]">
+    <div className="mt-[20px] rounded-[18px] bg-[var(--color-surface)] overflow-hidden">
+      <div className="grid grid-cols-[1fr_1fr_1fr] text-[11px] font-[700] tracking-[0.08em] uppercase text-[var(--color-secondary-text)] border-b border-[var(--color-outline-light)]/60">
         <div className="px-[16px] py-[10px]">Friction point</div>
-        <div className="px-[16px] py-[10px] border-l border-[var(--color-outline-light)]">Today</div>
-        <div className="px-[16px] py-[10px] border-l border-[var(--color-outline-light)] bg-[var(--color-sage-green-50)]/30">After</div>
+        <div className="px-[16px] py-[10px] border-l border-[var(--color-outline-light)]/60">Today</div>
+        <div className="px-[16px] py-[10px] border-l border-[var(--color-outline-light)]/60 bg-[var(--color-sage-green-50)]/30">After</div>
       </div>
       {items.map((it, i) => (
         <div
           key={it.label}
           className={`grid grid-cols-[1fr_1fr_1fr] text-[13px] leading-[19px] ${
-            i < items.length - 1 ? 'border-b border-[var(--color-outline-light)]' : ''
+            i < items.length - 1 ? 'border-b border-[var(--color-outline-light)]/60' : ''
           }`}
         >
           <div className="px-[16px] py-[12px] font-[600] text-[var(--color-on-background)]">{it.label}</div>
-          <div className="px-[16px] py-[12px] font-[450] text-[var(--color-secondary-text)] border-l border-[var(--color-outline-light)]">{it.today}</div>
-          <div className="px-[16px] py-[12px] font-[500] text-[var(--color-on-background)] border-l border-[var(--color-outline-light)] bg-[var(--color-sage-green-50)]/30">{it.after}</div>
+          <div className="px-[16px] py-[12px] font-[450] text-[var(--color-secondary-text)] border-l border-[var(--color-outline-light)]/60">{it.today}</div>
+          <div className="px-[16px] py-[12px] font-[500] text-[var(--color-on-background)] border-l border-[var(--color-outline-light)]/60 bg-[var(--color-sage-green-50)]/30">{it.after}</div>
         </div>
       ))}
     </div>
@@ -789,7 +787,7 @@ function PrototypeEnvironments() {
       {envs.map((e) => (
         <div
           key={e.name}
-          className="p-[20px] rounded-[14px] bg-[var(--color-surface)] border border-[var(--color-outline-light)] flex flex-col"
+          className="p-[20px] rounded-[18px] bg-[var(--color-surface)] flex flex-col"
         >
           <div className="flex items-center justify-between gap-[8px] mb-[10px]">
             <Code>{e.name}</Code>
@@ -816,7 +814,7 @@ function PrototypeEnvironments() {
               ))}
             </ul>
           </div>
-          <div className="mt-[12px] pt-[12px] border-t border-[var(--color-outline-light)]">
+          <div className="mt-[12px] pt-[12px] border-t border-[var(--color-outline-light)]/60">
             <div className="text-[10px] font-[700] tracking-[0.08em] uppercase text-[var(--color-secondary-text)] mb-[4px]">
               Tradeoff
             </div>
@@ -849,8 +847,8 @@ function ClaudeWorkflow() {
   ];
 
   return (
-    <div className="mt-[20px] rounded-[14px] bg-[var(--color-background)] border border-[var(--color-outline-light)] overflow-hidden">
-      <div className="px-[20px] py-[14px] border-b border-[var(--color-outline-light)] bg-[var(--color-surface)]">
+    <div className="mt-[20px] rounded-[18px] bg-[var(--color-background)] ring-1 ring-inset ring-[var(--color-outline-light)]/50 overflow-hidden">
+      <div className="px-[20px] py-[14px] border-b border-[var(--color-outline-light)]/60 bg-[var(--color-surface)]">
         <div className="text-[11px] font-[700] tracking-[0.08em] uppercase text-[var(--color-secondary-text)] mb-[2px]">
           The Claude Code loop
         </div>
@@ -922,7 +920,7 @@ function ComponentLifecycle() {
   ];
 
   const Step = ({ num, cmd, what }) => (
-    <li className="flex items-start gap-[12px] py-[10px] border-b border-[var(--color-outline-light)] last:border-b-0">
+    <li className="flex items-start gap-[12px] py-[10px] border-b border-[var(--color-outline-light)]/60 last:border-b-0">
       <div className="shrink-0 w-[20px] h-[20px] rounded-full bg-[var(--color-sage-green-100)] text-[var(--color-sage-green-800)] flex items-center justify-center text-[11px] font-[700] mt-[1px]">
         {num}
       </div>
@@ -937,7 +935,7 @@ function ComponentLifecycle() {
 
   return (
     <div className="mt-[20px] grid grid-cols-1 md:grid-cols-2 gap-[16px]">
-      <div className="p-[20px] rounded-[14px] bg-[var(--color-surface)] border border-[var(--color-outline-light)]">
+      <div className="p-[20px] rounded-[18px] bg-[var(--color-surface)]">
         <div className="flex items-center gap-[8px] mb-[12px]">
           <Pill tone="neutral">Most common</Pill>
           <span className="text-[13px] font-[700] text-[var(--color-on-background)]">Modifying an existing component</span>
@@ -946,7 +944,7 @@ function ComponentLifecycle() {
           {modifying.map((s, i) => <Step key={i} num={i + 1} {...s} />)}
         </ol>
       </div>
-      <div className="p-[20px] rounded-[14px] bg-[var(--color-sage-green-50)]/40 border border-[var(--color-sage-green-200)]">
+      <div className="p-[20px] rounded-[18px] bg-[var(--color-sage-green-50)]/60">
         <div className="flex items-center gap-[8px] mb-[12px]">
           <Pill tone="sage">Less often</Pill>
           <span className="text-[13px] font-[700] text-[var(--color-on-background)]">Adding a new component</span>
@@ -968,7 +966,7 @@ function PRChecklist() {
     'Component name + props documented in the story description',
   ];
   return (
-    <div className="mt-[20px] p-[20px] rounded-[14px] bg-[var(--color-soft-ivory-50)] border border-[var(--color-soft-ivory-200)]">
+    <div className="mt-[20px] p-[20px] rounded-[18px] bg-[var(--color-soft-ivory-50)]/70">
       <div className="flex items-center gap-[8px] mb-[12px]">
         <Pill tone="ivory">PR checklist</Pill>
         <span className="text-[13px] font-[700] text-[var(--color-on-background)]">For any PR touching apps/native/src/components/</span>
@@ -998,7 +996,7 @@ function AIAssistedDocs() {
   ];
 
   return (
-    <div className="mt-[20px] p-[20px] rounded-[14px] bg-[var(--color-sage-green-50)]/40 border border-[var(--color-sage-green-200)]">
+    <div className="mt-[20px] p-[20px] rounded-[18px] bg-[var(--color-sage-green-50)]/60">
       <div className="flex items-center gap-[8px] mb-[10px]">
         <Pill tone="sage">Maintenance unlock</Pill>
       </div>
@@ -1025,7 +1023,7 @@ function AIAssistedDocs() {
 
 function PromotionRule() {
   return (
-    <div className="mt-[20px] p-[20px] rounded-[14px] bg-[var(--color-surface)] border border-[var(--color-outline-light)]">
+    <div className="mt-[20px] p-[20px] rounded-[18px] bg-[var(--color-surface)]">
       <H3>When does a pattern become a shared component?</H3>
       <Body>
         Default rule: <strong className="text-[var(--color-on-background)] font-[600]">used in 2+ screens with the same intent → promote to a shared component.</strong> Anything used once stays screen-local until it earns reuse. Avoids the "we built a kit nobody uses" trap.
@@ -1069,8 +1067,7 @@ function TrifectaPieces() {
       {pieces.map((p, i) => (
         <div
           key={p.name}
-          className="p-[18px] rounded-[14px] bg-[var(--color-surface)] border border-[var(--color-outline-light)] flex flex-col"
-          style={{ borderTopColor: p.accent, borderTopWidth: 3 }}
+          className="p-[22px] rounded-[18px] bg-[var(--color-surface)] ring-1 ring-inset ring-[var(--color-outline-light)]/60 flex flex-col"
         >
           <div className="flex items-center gap-[8px] mb-[6px]">
             <span className="text-[14px] leading-[20px] font-[700] text-[var(--color-secondary-text)]">
@@ -1086,7 +1083,7 @@ function TrifectaPieces() {
           <p className="text-[12px] leading-[18px] font-[450] text-[var(--color-secondary-text)] flex-1">
             {p.what}
           </p>
-          <div className="mt-[12px] pt-[10px] border-t border-[var(--color-outline-light)] text-[10px] font-[700] tracking-[0.08em] uppercase text-[var(--color-secondary-text)]">
+          <div className="mt-[12px] pt-[10px] border-t border-[var(--color-outline-light)]/60 text-[10px] font-[700] tracking-[0.08em] uppercase text-[var(--color-secondary-text)]">
             {p.tag}
           </div>
         </div>
@@ -1126,8 +1123,8 @@ function WalkthroughExample() {
   ];
 
   return (
-    <div className="mt-[24px] rounded-[14px] bg-[var(--color-surface)] border border-[var(--color-outline-light)] overflow-hidden">
-      <div className="px-[20px] py-[14px] border-b border-[var(--color-outline-light)] bg-[var(--color-background)]">
+    <div className="mt-[24px] rounded-[18px] bg-[var(--color-surface)] overflow-hidden">
+      <div className="px-[20px] py-[14px] border-b border-[var(--color-outline-light)]/60 bg-[var(--color-background)]">
         <div className="text-[11px] font-[700] tracking-[0.08em] uppercase text-[var(--color-secondary-text)] mb-[2px]">
           A day in this workflow
         </div>
@@ -1171,7 +1168,7 @@ function WalkthroughExample() {
           </div>
         ))}
       </div>
-      <div className="px-[20px] py-[14px] border-t border-[var(--color-outline-light)] bg-[var(--color-sage-green-50)]/30">
+      <div className="px-[20px] py-[14px] border-t border-[var(--color-outline-light)]/60 bg-[var(--color-sage-green-50)]/30">
         <p className="text-[12px] leading-[18px] font-[500] text-[var(--color-on-background)]">
           You wrote no code. You shipped a real component fix to production. Engineering was in the loop the whole time.
         </p>
@@ -1190,20 +1187,20 @@ function ClaudeCapabilities() {
   ];
 
   return (
-    <div className="mt-[24px] rounded-[14px] bg-[var(--color-surface)] border border-[var(--color-outline-light)] overflow-hidden">
-      <div className="grid grid-cols-[1fr_2fr] text-[10px] font-[700] tracking-[0.08em] uppercase text-[var(--color-secondary-text)] border-b border-[var(--color-outline-light)]">
+    <div className="mt-[24px] rounded-[18px] bg-[var(--color-surface)] overflow-hidden">
+      <div className="grid grid-cols-[1fr_2fr] text-[10px] font-[700] tracking-[0.08em] uppercase text-[var(--color-secondary-text)] border-b border-[var(--color-outline-light)]/60">
         <div className="px-[16px] py-[10px]">Task</div>
-        <div className="px-[16px] py-[10px] border-l border-[var(--color-outline-light)]">Workflow</div>
+        <div className="px-[16px] py-[10px] border-l border-[var(--color-outline-light)]/60">Workflow</div>
       </div>
       {rows.map((r, i) => (
         <div
           key={r.task}
           className={`grid grid-cols-[1fr_2fr] text-[13px] leading-[19px] ${
-            i < rows.length - 1 ? 'border-b border-[var(--color-outline-light)]' : ''
+            i < rows.length - 1 ? 'border-b border-[var(--color-outline-light)]/60' : ''
           }`}
         >
           <div className="px-[16px] py-[12px] font-[600] text-[var(--color-on-background)]">{r.task}</div>
-          <div className="px-[16px] py-[12px] font-[450] text-[var(--color-secondary-text)] border-l border-[var(--color-outline-light)]">{r.flow}</div>
+          <div className="px-[16px] py-[12px] font-[450] text-[var(--color-secondary-text)] border-l border-[var(--color-outline-light)]/60">{r.flow}</div>
         </div>
       ))}
     </div>
@@ -1227,13 +1224,19 @@ function HonestyCallout() {
   ];
 
   return (
-    <div className="mt-[24px] p-[20px] rounded-[14px] bg-[var(--color-soft-ivory-50)]/50 border border-[var(--color-soft-ivory-200)]">
-      <div className="flex items-center gap-[8px] mb-[12px]">
+    <div className="mt-[24px] p-[24px] rounded-[18px] bg-[var(--color-soft-ivory-50)]/60 ring-1 ring-inset ring-[var(--color-soft-ivory-200)]/50">
+      <div className="flex items-center gap-[8px] mb-[18px]">
         <Pill tone="ivory">Honest about what you're not getting</Pill>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-[16px]">
-        {items.map((item) => (
-          <div key={item.h}>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-y-[20px] md:gap-x-[24px]">
+        {items.map((item, i) => (
+          <div
+            key={item.h}
+            className={i > 0 ? 'md:pl-[24px] md:border-l md:border-[var(--color-soft-ivory-200)]/60' : ''}
+          >
+            <div className="text-[10px] font-[700] tracking-[0.1em] uppercase text-[var(--color-soft-ivory-800)] mb-[8px]">
+              Not this · {String(i + 1).padStart(2, '0')}
+            </div>
             <H3>{item.h}</H3>
             <Body>{item.b}</Body>
           </div>
@@ -1289,7 +1292,7 @@ function BusinessImpact() {
       {items.map((it) => (
         <div
           key={it.lead}
-          className="p-[20px] rounded-[14px] bg-[var(--color-surface)] border border-[var(--color-outline-light)] flex flex-col"
+          className="p-[20px] rounded-[18px] bg-[var(--color-surface)] flex flex-col"
         >
           <div className="flex items-baseline gap-[10px] mb-[8px]">
             <span className="text-[24px] leading-[28px] font-[700] tracking-[-0.02em] text-[var(--color-sage-green-700)] shrink-0">
@@ -1338,7 +1341,7 @@ function CompoundVelocity() {
   return (
     <div className="mt-[20px] grid grid-cols-1 md:grid-cols-2 gap-[16px]">
       {/* Bar chart */}
-      <div className="p-[24px] rounded-[14px] bg-[var(--color-surface)] border border-[var(--color-outline-light)]">
+      <div className="p-[24px] rounded-[18px] bg-[var(--color-surface)]">
         <div className="text-[11px] font-[700] tracking-[0.08em] uppercase text-[var(--color-secondary-text)] mb-[20px]">
           Time to build a single form
         </div>
@@ -1366,13 +1369,13 @@ function CompoundVelocity() {
             <div key={b.name} className="flex-1 text-center text-[12px] font-[500] text-[var(--color-on-background)]">{b.name}</div>
           ))}
         </div>
-        <div className="pt-[12px] border-t border-[var(--color-outline-light)] text-[10px] leading-[14px] font-[500] italic text-[var(--color-secondary-text)]">
+        <div className="pt-[12px] border-t border-[var(--color-outline-light)]/60 text-[10px] leading-[14px] font-[500] italic text-[var(--color-secondary-text)]">
           Sparkbox / IBM Carbon controlled study, 2021
         </div>
       </div>
 
       {/* Line chart */}
-      <div className="p-[24px] rounded-[14px] bg-[var(--color-surface)] border border-[var(--color-outline-light)]">
+      <div className="p-[24px] rounded-[18px] bg-[var(--color-surface)]">
         <div className="text-[11px] font-[700] tracking-[0.08em] uppercase text-[var(--color-secondary-text)] mb-[16px]">
           Cumulative engineering hours saved (illustrative model)
         </div>
@@ -1406,7 +1409,7 @@ function CompoundVelocity() {
             </g>
           ))}
         </svg>
-        <div className="mt-[6px] pt-[12px] border-t border-[var(--color-outline-light)] text-[10px] leading-[14px] font-[500] italic text-[var(--color-secondary-text)]">
+        <div className="mt-[6px] pt-[12px] border-t border-[var(--color-outline-light)]/60 text-[10px] leading-[14px] font-[500] italic text-[var(--color-secondary-text)]">
           Modeled at conservative 30% per-component savings × ~10 features/quarter, derived from Sparkbox 47% baseline.
         </div>
       </div>
@@ -1418,9 +1421,17 @@ function CompoundVelocity() {
 
 function Section({ id, sectionRef, children }) {
   return (
-    <section ref={sectionRef} id={id} className="scroll-mt-[80px] mb-[56px]">
+    <motion.section
+      ref={sectionRef}
+      id={id}
+      initial={{ opacity: 0, y: 24, filter: 'blur(6px)' }}
+      whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+      viewport={{ once: true, margin: '-80px 0px -120px 0px' }}
+      transition={{ duration: 0.8, ease: [0.32, 0.72, 0, 1] }}
+      className="scroll-mt-[80px] mb-[80px] md:mb-[112px]"
+    >
       {children}
-    </section>
+    </motion.section>
   );
 }
 
@@ -1474,20 +1485,25 @@ export function LivingDesignSystem() {
   };
 
   return (
-    <div className="w-full max-w-[1280px] mx-auto px-[20px] md:px-[32px] py-[40px] md:py-[60px]">
+    <div className="w-full max-w-[1280px] mx-auto px-[20px] md:px-[32px] py-[56px] md:py-[88px]">
       {/* ── Page header ── */}
-      <div className="mb-[40px] md:mb-[56px] max-w-[760px]">
+      <motion.div
+        initial={{ opacity: 0, y: 16, filter: 'blur(6px)' }}
+        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+        transition={{ duration: 0.9, ease: [0.32, 0.72, 0, 1] }}
+        className="mb-[56px] md:mb-[96px] max-w-[760px]"
+      >
         <Eyebrow color="sage">Planning · Proposal for the rosebud-react team</Eyebrow>
         <H1>Living Design System</H1>
         <Body size="lg">
           The end of the design-to-code translation gap. Designers prototype with real Rosebud components, propose updates as pull requests, and engineering reviews instead of rebuilding. One URL, one truth, always current with what ships.
         </Body>
-        <div className="mt-[20px] flex flex-wrap gap-[8px]">
+        <div className="mt-[28px] flex flex-wrap gap-[8px]">
           <Pill tone="sage">Storybook + react-native-web</Pill>
           <Pill tone="neutral">~1 week to v1</Pill>
           <Pill tone="neutral">Zero edits to apps/native</Pill>
         </div>
-      </div>
+      </motion.div>
 
       {/* ── Two-column layout ── */}
       <div className="flex flex-col lg:flex-row gap-[32px] lg:gap-[48px]">
@@ -1537,7 +1553,7 @@ export function LivingDesignSystem() {
                 { h: 'For engineers', b: 'Per-PR preview URL. Reviewers see the change without pulling the branch or running a simulator.' },
                 { h: 'For the codebase', b: 'No parallel system to keep in sync. Storybook is downstream of your real components.' },
               ].map((c) => (
-                <div key={c.h} className="p-[16px] rounded-[12px] bg-[var(--color-surface)] border border-[var(--color-outline-light)]">
+                <div key={c.h} className="p-[20px] rounded-[16px] bg-[var(--color-surface)]">
                   <H3>{c.h}</H3>
                   <Body>{c.b}</Body>
                 </div>
@@ -1612,11 +1628,11 @@ export function LivingDesignSystem() {
               This isn't a tooling project. It's a productivity multiplier — every feature on the roadmap ships faster, with less rework, after this lands.
             </Body>
             <BusinessImpact />
-            <div className="mt-[20px] p-[16px] rounded-[12px] bg-[var(--color-soft-ivory-50)] border border-[var(--color-soft-ivory-200)]">
-              <div className="text-[11px] font-[700] tracking-[0.08em] uppercase text-[var(--color-soft-ivory-900)] mb-[6px]">
+            <div className="mt-[24px] p-[24px] rounded-[18px] bg-[var(--color-soft-ivory-50)]/70">
+              <div className="text-[11px] font-[700] tracking-[0.08em] uppercase text-[var(--color-soft-ivory-900)] mb-[8px]">
                 One-line for leadership
               </div>
-              <p className="text-[14px] leading-[22px] font-[500] text-[var(--color-on-background)]">
+              <p className="text-[15px] leading-[24px] font-[500] text-[var(--color-on-background)]">
                 "We are spending one engineer-week to build a permanent web preview of our React Native app, so design, eng, marketing, sales, and new hires all stop paying the simulator tax."
               </p>
             </div>
@@ -1684,19 +1700,25 @@ export function LivingDesignSystem() {
           <Section id="faq" sectionRef={setRef('faq')}>
             <H2>FAQ</H2>
             <Body>The questions I'd ask if I were on the eng team.</Body>
-            <div className="mt-[16px] rounded-[14px] bg-[var(--color-surface)] border border-[var(--color-outline-light)] px-[20px]">
+            <div className="mt-[16px] rounded-[18px] bg-[var(--color-surface)] px-[20px]">
               {FAQ_ITEMS.map((item) => (
                 <FaqItem key={item.q} item={item} />
               ))}
             </div>
           </Section>
 
-          <div className="mt-[24px] p-[24px] rounded-[16px] bg-[var(--color-sage-green-50)] border border-[var(--color-sage-green-200)]">
+          <motion.div
+            initial={{ opacity: 0, y: 24, filter: 'blur(6px)' }}
+            whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            viewport={{ once: true, margin: '-80px 0px -120px 0px' }}
+            transition={{ duration: 0.8, ease: [0.32, 0.72, 0, 1] }}
+            className="mt-[40px] p-[32px] rounded-[24px] bg-[var(--color-sage-green-50)]/70 shadow-[0_1px_2px_rgba(86,140,118,0.04),0_12px_32px_-16px_rgba(86,140,118,0.14)]"
+          >
             <H3>Want to see it before you commit?</H3>
             <Body>
               The next step is a 1-day spike on a branch: scaffold <Code>apps/storybook</Code>, get a single component (Button) rendering on web, deploy the static build to a Vercel preview. Total time including review: half a day. If it doesn't feel right, we delete the branch.
             </Body>
-          </div>
+          </motion.div>
         </article>
       </div>
     </div>
