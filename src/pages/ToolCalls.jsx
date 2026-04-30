@@ -246,19 +246,51 @@ const LOADER_STYLES = [
   { id: 'none', label: 'Text only' },
 ];
 
-// JSX + CSS snippets for each loader. Designer-readable, engineer-copyable.
-// Markup uses Tailwind arbitrary-values to match the project; CSS keyframes
-// live in src/index.css.
+// Snippets per loader, with both Web (React + Tailwind/CSS) and React Native
+// (Reanimated v3 + react-native-svg) variants. Designer-readable, copyable.
 const LOADER_SNIPPETS = {
-  spinner: `// JSX (Tailwind animate-spin built-in)
+  spinner: {
+    web: `// JSX (Tailwind animate-spin built-in)
 <svg viewBox="0 0 24 24" className="w-[12px] h-[12px] animate-spin">
   <circle cx="12" cy="12" r="9" stroke="#C0C0BF"
           strokeWidth="3" fill="none" />
   <path d="M12 3a9 9 0 0 1 9 9" stroke="currentColor"
         strokeWidth="3" strokeLinecap="round" fill="none" />
 </svg>`,
+    rn: `// React Native (Reanimated v3 + react-native-svg)
+import Animated, {
+  useSharedValue, useAnimatedStyle,
+  withRepeat, withTiming, Easing,
+} from 'react-native-reanimated';
+import Svg, { Circle, Path } from 'react-native-svg';
+import { useEffect } from 'react';
 
-  dots: `// JSX
+export function Spinner({ color = '#191C1A' }) {
+  const r = useSharedValue(0);
+  useEffect(() => {
+    r.value = withRepeat(
+      withTiming(360, { duration: 1100, easing: Easing.linear }),
+      -1
+    );
+  }, []);
+  const style = useAnimatedStyle(() => ({
+    transform: [{ rotate: \`\${r.value}deg\` }],
+  }));
+  return (
+    <Animated.View style={style}>
+      <Svg width={12} height={12} viewBox="0 0 24 24">
+        <Circle cx="12" cy="12" r="9" stroke={color}
+                strokeOpacity={0.25} strokeWidth={3} fill="none" />
+        <Path d="M12 3a9 9 0 0 1 9 9" stroke={color}
+              strokeWidth={3} strokeLinecap="round" fill="none" />
+      </Svg>
+    </Animated.View>
+  );
+}`,
+  },
+
+  dots: {
+    web: `// JSX
 <div className="flex items-center gap-[2px]">
   <span className="w-[3px] h-[3px] rounded-full
                    bg-current animate-loader-dot-1" />
@@ -279,8 +311,47 @@ const LOADER_SNIPPETS = {
   ease-in-out infinite both; animation-delay: 0.16s; }
 .animate-loader-dot-3 { animation: loader-dot-bounce 1.2s
   ease-in-out infinite both; animation-delay: 0.32s; }`,
+    rn: `// React Native (Reanimated v3)
+import Animated, {
+  useSharedValue, useAnimatedStyle,
+  withRepeat, withDelay, withTiming, Easing, interpolate,
+} from 'react-native-reanimated';
+import { View } from 'react-native';
+import { useEffect } from 'react';
 
-  pulse: `// JSX
+function Dot({ delay = 0, color = '#191C1A' }) {
+  const v = useSharedValue(0);
+  useEffect(() => {
+    v.value = withDelay(delay, withRepeat(
+      withTiming(1, { duration: 1200, easing: Easing.inOut(Easing.ease) }),
+      -1, true
+    ));
+  }, []);
+  const style = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(v.value, [0, 0.5, 1], [0.5, 1, 0.5]) }],
+    opacity: interpolate(v.value, [0, 0.5, 1], [0.4, 1, 0.4]),
+  }));
+  return (
+    <Animated.View style={[
+      { width: 3, height: 3, borderRadius: 1.5, backgroundColor: color },
+      style,
+    ]} />
+  );
+}
+
+export function Dots() {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+      <Dot />
+      <Dot delay={160} />
+      <Dot delay={320} />
+    </View>
+  );
+}`,
+  },
+
+  pulse: {
+    web: `// JSX
 <span className="w-[8px] h-[8px] rounded-full
                  bg-current animate-loader-pulse-dot" />
 
@@ -292,8 +363,36 @@ const LOADER_SNIPPETS = {
 .animate-loader-pulse-dot {
   animation: loader-pulse-dot 1.4s ease-in-out infinite;
 }`,
+    rn: `// React Native (Reanimated v3)
+import Animated, {
+  useSharedValue, useAnimatedStyle,
+  withRepeat, withTiming, Easing, interpolate,
+} from 'react-native-reanimated';
+import { useEffect } from 'react';
 
-  bloom: `// JSX — 4 petals on a cross
+export function Pulse({ color = '#191C1A' }) {
+  const v = useSharedValue(0);
+  useEffect(() => {
+    v.value = withRepeat(
+      withTiming(1, { duration: 1400, easing: Easing.inOut(Easing.ease) }),
+      -1, true
+    );
+  }, []);
+  const style = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(v.value, [0, 1], [0.55, 1]) }],
+    opacity: interpolate(v.value, [0, 1], [0.4, 1]),
+  }));
+  return (
+    <Animated.View style={[
+      { width: 8, height: 8, borderRadius: 4, backgroundColor: color },
+      style,
+    ]} />
+  );
+}`,
+  },
+
+  bloom: {
+    web: `// JSX — 4 petals on a cross
 <svg viewBox="0 0 14 14" className="w-[14px] h-[14px]">
   <circle cx="7"    cy="2.5"  r="1.4" fill="currentColor"
           className="animate-loader-bloom animate-loader-bloom-1" />
@@ -318,8 +417,52 @@ const LOADER_SNIPPETS = {
 .animate-loader-bloom-2 { animation-delay: 0.2s; }
 .animate-loader-bloom-3 { animation-delay: 0.4s; }
 .animate-loader-bloom-4 { animation-delay: 0.6s; }`,
+    rn: `// React Native (Reanimated v3) — 4 absolutely-positioned petal Views
+import Animated, {
+  useSharedValue, useAnimatedStyle,
+  withRepeat, withDelay, withTiming, Easing, interpolate,
+} from 'react-native-reanimated';
+import { View } from 'react-native';
+import { useEffect } from 'react';
 
-  squiggle: `// JSX — single sine-wave path, drawn snake-style
+function Petal({ delay = 0, top, left, color = '#191C1A' }) {
+  const v = useSharedValue(0);
+  useEffect(() => {
+    v.value = withDelay(delay, withRepeat(
+      withTiming(1, { duration: 1600, easing: Easing.inOut(Easing.ease) }),
+      -1, true
+    ));
+  }, []);
+  const style = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(v.value, [0, 0.5, 1], [0.35, 1, 0.35]) }],
+    opacity: interpolate(v.value, [0, 0.5, 1], [0.3, 1, 0.3]),
+  }));
+  return (
+    <Animated.View style={[
+      {
+        position: 'absolute', top: top - 1.4, left: left - 1.4,
+        width: 2.8, height: 2.8, borderRadius: 1.4,
+        backgroundColor: color,
+      },
+      style,
+    ]} />
+  );
+}
+
+export function Bloom() {
+  return (
+    <View style={{ width: 14, height: 14 }}>
+      <Petal delay={0}   top={2.5}  left={7}    />
+      <Petal delay={200} top={7}    left={11.5} />
+      <Petal delay={400} top={11.5} left={7}    />
+      <Petal delay={600} top={7}    left={2.5}  />
+    </View>
+  );
+}`,
+  },
+
+  squiggle: {
+    web: `// JSX — single sine-wave path, drawn snake-style
 <svg viewBox="0 0 14 14" className="w-[14px] h-[14px]">
   <path d="M 1 7 Q 3.5 3, 7 7 T 13 7"
         fill="none" stroke="currentColor"
@@ -337,8 +480,42 @@ const LOADER_SNIPPETS = {
   stroke-dasharray: 18; stroke-dashoffset: 18;
   animation: loader-squiggle-draw 1.6s ease-in-out infinite;
 }`,
+    rn: `// React Native (Reanimated v3 + animated SVG path)
+import Animated, {
+  useSharedValue, useAnimatedProps,
+  withRepeat, withTiming, Easing,
+} from 'react-native-reanimated';
+import Svg, { Path } from 'react-native-svg';
+import { useEffect } from 'react';
 
-  'ring-pulse': `// JSX — two concentric rings rippling outward
+const APath = Animated.createAnimatedComponent(Path);
+
+export function Squiggle({ color = '#191C1A' }) {
+  const v = useSharedValue(18);
+  useEffect(() => {
+    v.value = withRepeat(
+      withTiming(-18, { duration: 1600, easing: Easing.inOut(Easing.ease) }),
+      -1, false
+    );
+  }, []);
+  const animatedProps = useAnimatedProps(() => ({
+    strokeDashoffset: v.value,
+  }));
+  return (
+    <Svg width={14} height={14} viewBox="0 0 14 14">
+      <APath
+        d="M 1 7 Q 3.5 3, 7 7 T 13 7"
+        fill="none" stroke={color} strokeWidth={1.5}
+        strokeLinecap="round" strokeDasharray="18"
+        animatedProps={animatedProps}
+      />
+    </Svg>
+  );
+}`,
+  },
+
+  'ring-pulse': {
+    web: `// JSX — two concentric rings rippling outward
 <svg viewBox="0 0 14 14" className="w-[14px] h-[14px]">
   <circle cx="7" cy="7" r="6" fill="none"
           stroke="currentColor" strokeWidth="1.2"
@@ -360,8 +537,46 @@ const LOADER_SNIPPETS = {
 }
 .animate-loader-ring-pulse-1 { animation-delay: 0s;   }
 .animate-loader-ring-pulse-2 { animation-delay: 0.9s; }`,
+    rn: `// React Native (Reanimated v3) — animates Circle r via animatedProps
+import Animated, {
+  useSharedValue, useAnimatedProps,
+  withRepeat, withDelay, withTiming, Easing, interpolate,
+} from 'react-native-reanimated';
+import Svg, { Circle } from 'react-native-svg';
+import { useEffect } from 'react';
 
-  sparkle: `// JSX — 4-point concave star, scales + rotates 45°
+const ACircle = Animated.createAnimatedComponent(Circle);
+
+function Ring({ delay = 0, color = '#191C1A' }) {
+  const v = useSharedValue(0);
+  useEffect(() => {
+    v.value = withDelay(delay, withRepeat(
+      withTiming(1, { duration: 1800, easing: Easing.out(Easing.ease) }),
+      -1, false
+    ));
+  }, []);
+  const animatedProps = useAnimatedProps(() => ({
+    r: interpolate(v.value, [0, 1], [1, 6]),
+    opacity: interpolate(v.value, [0, 1], [0.9, 0]),
+  }));
+  return (
+    <ACircle cx={7} cy={7} fill="none" stroke={color}
+             strokeWidth={1.2} animatedProps={animatedProps} />
+  );
+}
+
+export function RingPulse() {
+  return (
+    <Svg width={14} height={14} viewBox="0 0 14 14">
+      <Ring delay={0} />
+      <Ring delay={900} />
+    </Svg>
+  );
+}`,
+  },
+
+  sparkle: {
+    web: `// JSX — 4-point concave star, scales + rotates 45°
 <svg viewBox="0 0 14 14" className="w-[14px] h-[14px]">
   <path d="M 7 1.5 Q 7.5 6.5, 12.5 7 Q 7.5 7.5, 7 12.5
            Q 6.5 7.5, 1.5 7 Q 6.5 6.5, 7 1.5 Z"
@@ -378,6 +593,41 @@ const LOADER_SNIPPETS = {
   transform-box: fill-box; transform-origin: center;
   animation: loader-sparkle 1.4s ease-in-out infinite;
 }`,
+    rn: `// React Native (Reanimated v3) — Animated.View transform on the Svg
+import Animated, {
+  useSharedValue, useAnimatedStyle,
+  withRepeat, withTiming, Easing, interpolate,
+} from 'react-native-reanimated';
+import Svg, { Path } from 'react-native-svg';
+import { useEffect } from 'react';
+
+export function Sparkle({ color = '#191C1A' }) {
+  const v = useSharedValue(0);
+  useEffect(() => {
+    v.value = withRepeat(
+      withTiming(1, { duration: 1400, easing: Easing.inOut(Easing.ease) }),
+      -1, true
+    );
+  }, []);
+  const style = useAnimatedStyle(() => ({
+    transform: [
+      { rotate: \`\${interpolate(v.value, [0, 1], [0, 45])}deg\` },
+      { scale: interpolate(v.value, [0, 1], [0.5, 1]) },
+    ],
+    opacity: interpolate(v.value, [0, 1], [0.45, 1]),
+  }));
+  return (
+    <Animated.View style={style}>
+      <Svg width={14} height={14} viewBox="0 0 14 14">
+        <Path
+          d="M 7 1.5 Q 7.5 6.5, 12.5 7 Q 7.5 7.5, 7 12.5 Q 6.5 7.5, 1.5 7 Q 6.5 6.5, 7 1.5 Z"
+          fill={color}
+        />
+      </Svg>
+    </Animated.View>
+  );
+}`,
+  },
 };
 
 function CopyButton({ text }) {
@@ -416,8 +666,34 @@ function LoaderDemoCard({ id, label, code }) {
   );
 }
 
+const PLATFORMS = [
+  { id: 'web', label: 'Web (React + Tailwind)' },
+  { id: 'rn', label: 'React Native (Reanimated v3)' },
+];
+
+function PlatformToggle({ value, onChange }) {
+  return (
+    <div className="inline-flex items-center gap-[2px] p-[2px] rounded-full bg-[var(--color-surface-variant)] border border-[var(--color-outline-light)]">
+      {PLATFORMS.map((p) => (
+        <button
+          key={p.id}
+          onClick={() => onChange(p.id)}
+          className={`shrink-0 px-[12px] h-[28px] rounded-full text-[12px] font-[500] transition-colors cursor-pointer ${
+            value === p.id
+              ? 'bg-[var(--color-on-background)] text-white'
+              : 'text-[var(--color-secondary-text)] hover:text-[var(--color-on-background)]'
+          }`}
+        >
+          {p.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function LoaderGallery() {
   const [expanded, setExpanded] = useState(false);
+  const [platform, setPlatform] = useState('web');
   const items = LOADER_STYLES.filter((s) => s.id !== 'none');
   return (
     <div className="mt-[16px] pb-[32px] border-b border-[var(--color-outline-light)]">
@@ -442,16 +718,19 @@ function LoaderGallery() {
             className="overflow-hidden"
           >
             <div className="pt-[20px]">
-              <p className="max-w-[680px] mb-[20px] text-[13px] leading-[20px] font-[450] text-[var(--color-secondary-text)]">
-                React + Tailwind. Animations use <code className="font-mono">currentColor</code> so you can tint via the parent's text color. Keyframes live in <code className="font-mono">src/index.css</code>.
+              <p className="max-w-[680px] mb-[16px] text-[13px] leading-[20px] font-[450] text-[var(--color-secondary-text)]">
+                Animations use <code className="font-mono">currentColor</code> so you can tint via the parent's text color. Web keyframes live in <code className="font-mono">src/index.css</code>; React Native uses <code className="font-mono">react-native-reanimated</code> + <code className="font-mono">react-native-svg</code>.
               </p>
+              <div className="mb-[20px]">
+                <PlatformToggle value={platform} onChange={setPlatform} />
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[16px]">
                 {items.map((s) => (
                   <LoaderDemoCard
                     key={s.id}
                     id={s.id}
                     label={s.label}
-                    code={LOADER_SNIPPETS[s.id]}
+                    code={LOADER_SNIPPETS[s.id][platform]}
                   />
                 ))}
               </div>
