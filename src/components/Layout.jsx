@@ -24,7 +24,7 @@ export function useHeaderCenter(node, deps = []) {
 }
 
 export function Layout({ children }) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [actions, setActions] = useState(null);
   const [center, setCenter] = useState(null);
 
