@@ -86,7 +86,7 @@ function ToolCallRow({ call, completed, loaderStyle = 'spinner' }) {
   return (
     <div className="flex items-center gap-[8px] py-[2px]">
       {!completed && loaderStyle !== 'none' && (
-        <div className="w-[14px] h-[14px] flex items-center justify-center shrink-0">
+        <div className="w-[14px] h-[14px] flex items-center justify-center shrink-0 text-[#6D6C6A]">
           <LoaderIcon style={loaderStyle} />
         </div>
       )}
