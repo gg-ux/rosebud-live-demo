@@ -165,6 +165,30 @@ const SHARED_BEHAVIOR = [
   { title: 'Chevron Behavior', body: 'Down chevron rotates 180° when expanded. Shows previous completed tool calls inline.' },
 ];
 
+// Final Proposal (V2 Minimal In-Line) — no accordion / no chevron;
+// every loader is transient.
+const FINAL_BEHAVIOR = [
+  {
+    title: 'Single Line Animation',
+    body: 'Pre-tool, AI reply, and post-tool each occupy the same vertical slot one at a time.',
+  },
+  {
+    title: 'States',
+    body: [
+      'In-progress: Loader + shimmering text',
+      'Complete: Fades out (transient — nothing pins to the conversation)',
+    ],
+  },
+  {
+    title: 'Loader Style',
+    body: 'Configurable per call. Defaults to Squiggle. See Loader Gallery for options + code.',
+  },
+  {
+    title: 'Persistent surfaces',
+    body: 'Only the AI reply, per-message actions, and Write area persist after the flow completes.',
+  },
+];
+
 const S1_SEQUENCE = [
   { label: 'Reflecting', transient: true, note: 'pre-AI filler' },
   { label: 'Searching memory', transient: true },
@@ -807,7 +831,7 @@ function FinalProposalSection() {
           </div>
         }
       />
-      <SpecBlock behavior={SHARED_BEHAVIOR} sequence={S1_SEQUENCE} noBorder />
+      <SpecBlock behavior={FINAL_BEHAVIOR} sequence={S1_SEQUENCE} noBorder />
       <LoaderGallery />
     </div>
   );
