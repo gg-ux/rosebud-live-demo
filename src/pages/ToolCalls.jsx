@@ -261,6 +261,7 @@ const OLDER_ITERATIONS = [
 
 const LOADER_STYLES = [
   { id: 'squiggle', label: 'Squiggle' },
+  { id: 'squiggle-2', label: 'Squiggle 2' },
   { id: 'spinner', label: 'Spinner' },
   { id: 'dots', label: 'Dots' },
   { id: 'pulse', label: 'Pulse' },
@@ -533,6 +534,62 @@ export function Squiggle({ color = '#191C1A' }) {
         strokeLinecap="round" strokeDasharray="18"
         animatedProps={animatedProps}
       />
+    </Svg>
+  );
+}`,
+  },
+
+  'squiggle-2': {
+    web: `// JSX — wide repeating sine path, translates one period per cycle
+<svg viewBox="0 0 14 14" className="w-[14px] h-[14px] overflow-hidden">
+  <g className="animate-loader-squiggle-2">
+    <path
+      d="M -6 7 Q -3 3, 0 7 T 6 7 T 12 7 T 18 7 T 24 7 T 30 7"
+      fill="none" stroke="currentColor"
+      strokeWidth="1.5" strokeLinecap="round"
+    />
+  </g>
+</svg>
+
+/* CSS — translates the group by one wavelength (12 viewBox units)
+   linearly so the wave rolls continuously without re-drawing. */
+@keyframes loader-squiggle-2-flow {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-12px); }
+}
+.animate-loader-squiggle-2 {
+  animation: loader-squiggle-2-flow 1.6s linear infinite;
+}`,
+    rn: `// React Native (Reanimated v3) — animated <G> transform
+import Animated, {
+  useSharedValue, useAnimatedProps,
+  withRepeat, withTiming, Easing,
+} from 'react-native-reanimated';
+import Svg, { G, Path } from 'react-native-svg';
+import { useEffect } from 'react';
+
+const AG = Animated.createAnimatedComponent(G);
+
+export function Squiggle2({ color = '#191C1A' }) {
+  const v = useSharedValue(0);
+  useEffect(() => {
+    v.value = withRepeat(
+      withTiming(-12, { duration: 1600, easing: Easing.linear }),
+      -1, false
+    );
+  }, []);
+  const animatedProps = useAnimatedProps(() => ({
+    transform: \`translate(\${v.value} 0)\`,
+  }));
+  return (
+    <Svg width={14} height={14} viewBox="0 0 14 14">
+      <AG animatedProps={animatedProps}>
+        <Path
+          d="M -6 7 Q -3 3, 0 7 T 6 7 T 12 7 T 18 7 T 24 7 T 30 7"
+          fill="none" stroke={color} strokeWidth={1.5}
+          strokeLinecap="round"
+        />
+      </AG>
     </Svg>
   );
 }`,

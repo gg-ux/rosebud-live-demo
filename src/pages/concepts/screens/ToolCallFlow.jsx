@@ -67,6 +67,23 @@ export function LoaderIcon({ style = 'spinner' }) {
       </svg>
     );
   }
+  if (style === 'squiggle-2') {
+    // Path is 3 full periods wide (-6..30). The <g> translates -12 (one
+    // period) per cycle so the wave rolls continuously without re-drawing.
+    return (
+      <svg viewBox="0 0 14 14" className="w-[14px] h-[14px] overflow-hidden">
+        <g className="animate-loader-squiggle-2">
+          <path
+            d="M -6 7 Q -3 3, 0 7 T 6 7 T 12 7 T 18 7 T 24 7 T 30 7"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          />
+        </g>
+      </svg>
+    );
+  }
   if (style === 'ring-pulse') {
     return (
       <svg viewBox="0 0 14 14" className="w-[14px] h-[14px]">
