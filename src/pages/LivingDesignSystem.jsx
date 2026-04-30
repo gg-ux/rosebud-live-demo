@@ -1347,14 +1347,14 @@ function CompoundVelocity() {
             const heightPct = (b.value / maxBar) * 100;
             return (
               <div key={b.name} className="flex-1 flex flex-col items-center justify-end h-full">
-                <div className="text-[18px] font-[700] mb-[6px]" style={{ color: b.highlight ? ROSE : 'var(--color-secondary-text)' }}>
+                <div className="text-[18px] font-[700] mb-[6px]" style={{ color: b.highlight ? ROSE : 'var(--color-on-background)' }}>
                   {b.value} {b.unit}
                 </div>
                 <div
                   className="w-full rounded-t-[6px]"
                   style={{
                     height: `${heightPct}%`,
-                    backgroundColor: b.highlight ? ROSE : 'var(--color-surface-variant)',
+                    backgroundColor: b.highlight ? ROSE : '#7D7B79',
                   }}
                 />
               </div>
