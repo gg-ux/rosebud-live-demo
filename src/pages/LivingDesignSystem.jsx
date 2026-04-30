@@ -33,6 +33,7 @@ const SECTIONS = [
   { id: 'lifecycle', label: 'Adding & modifying' },
   { id: 'claude-workflow', label: 'Designer + Claude Code' },
   { id: 'business', label: 'Business impact' },
+  { id: 'math', label: 'The compounding math' },
   { id: 'why', label: 'Why this fits us' },
   { id: 'components', label: 'Component triage' },
   { id: 'changes', label: 'What changes' },
@@ -1306,6 +1307,113 @@ function BusinessImpact() {
   );
 }
 
+/* ── Compound velocity charts (light theme, mirrors deck slide 18) ── */
+
+const ROSE = '#E31665';
+
+function CompoundVelocity() {
+  const bars = [
+    { name: 'From scratch', value: 4.2, unit: 'hrs', highlight: false },
+    { name: 'With a design system', value: 2.0, unit: 'hrs', highlight: true },
+  ];
+  const maxBar = Math.max(...bars.map((b) => b.value));
+
+  const points = [
+    { x: 'Q1', y: 0 },
+    { x: 'Q2', y: 60 },
+    { x: 'Q3', y: 145 },
+    { x: 'Q4', y: 250 },
+  ];
+  const lineW = 600;
+  const lineH = 200;
+  const padX = 36;
+  const padY = 22;
+  const maxY = Math.max(...points.map((p) => p.y));
+  const stepX = (lineW - padX * 2) / (points.length - 1);
+  const yScale = (v) => padY + (1 - v / maxY) * (lineH - padY * 2);
+  const lineCoords = points.map((p, i) => [padX + i * stepX, yScale(p.y)]);
+  const linePath = lineCoords.map(([x, y], i) => (i === 0 ? `M ${x} ${y}` : `L ${x} ${y}`)).join(' ');
+  const areaPath = `${linePath} L ${lineCoords[lineCoords.length - 1][0]} ${lineH - padY} L ${padX} ${lineH - padY} Z`;
+
+  return (
+    <div className="mt-[20px] grid grid-cols-1 md:grid-cols-2 gap-[16px]">
+      {/* Bar chart */}
+      <div className="p-[24px] rounded-[14px] bg-[var(--color-surface)] border border-[var(--color-outline-light)]">
+        <div className="text-[11px] font-[700] tracking-[0.08em] uppercase text-[var(--color-secondary-text)] mb-[20px]">
+          Time to build a single form
+        </div>
+        <div className="flex items-end gap-[20px] h-[160px] mb-[14px]">
+          {bars.map((b) => {
+            const heightPct = (b.value / maxBar) * 100;
+            return (
+              <div key={b.name} className="flex-1 flex flex-col items-center justify-end h-full">
+                <div className="text-[18px] font-[700] mb-[6px]" style={{ color: b.highlight ? ROSE : 'var(--color-secondary-text)' }}>
+                  {b.value} {b.unit}
+                </div>
+                <div
+                  className="w-full rounded-t-[6px]"
+                  style={{
+                    height: `${heightPct}%`,
+                    backgroundColor: b.highlight ? ROSE : 'var(--color-surface-variant)',
+                  }}
+                />
+              </div>
+            );
+          })}
+        </div>
+        <div className="flex items-end gap-[20px] mb-[12px]">
+          {bars.map((b) => (
+            <div key={b.name} className="flex-1 text-center text-[12px] font-[500] text-[var(--color-on-background)]">{b.name}</div>
+          ))}
+        </div>
+        <div className="pt-[12px] border-t border-[var(--color-outline-light)] text-[10px] leading-[14px] font-[500] italic text-[var(--color-secondary-text)]">
+          Sparkbox / IBM Carbon controlled study, 2021
+        </div>
+      </div>
+
+      {/* Line chart */}
+      <div className="p-[24px] rounded-[14px] bg-[var(--color-surface)] border border-[var(--color-outline-light)]">
+        <div className="text-[11px] font-[700] tracking-[0.08em] uppercase text-[var(--color-secondary-text)] mb-[16px]">
+          Cumulative engineering hours saved (illustrative model)
+        </div>
+        <svg viewBox={`0 0 ${lineW} ${lineH + 26}`} className="w-full h-auto">
+          {/* Gridlines */}
+          {[0, 0.25, 0.5, 0.75, 1].map((t, i) => {
+            const y = padY + t * (lineH - padY * 2);
+            return <line key={i} x1={padX} y1={y} x2={lineW - padX} y2={y} stroke="var(--color-outline-light)" strokeWidth="1" />;
+          })}
+          {/* Area fill under line */}
+          <path d={areaPath} fill={ROSE} fillOpacity="0.10" />
+          {/* Line */}
+          <path
+            d={linePath}
+            fill="none"
+            stroke={ROSE}
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          {/* Points + labels */}
+          {lineCoords.map(([x, y], i) => (
+            <g key={i}>
+              <circle cx={x} cy={y} r="4" fill={ROSE} />
+              <text x={x} y={y - 12} textAnchor="middle" fill="var(--color-on-background)" fontSize="11" fontWeight="700">
+                {points[i].y}
+              </text>
+              <text x={x} y={lineH + 16} textAnchor="middle" fill="var(--color-secondary-text)" fontSize="11" fontWeight="600">
+                {points[i].x}
+              </text>
+            </g>
+          ))}
+        </svg>
+        <div className="mt-[6px] pt-[12px] border-t border-[var(--color-outline-light)] text-[10px] leading-[14px] font-[500] italic text-[var(--color-secondary-text)]">
+          Modeled at conservative 30% per-component savings × ~10 features/quarter, derived from Sparkbox 47% baseline.
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Section wrapper ── */
 
 function Section({ id, sectionRef, children }) {
@@ -1512,6 +1620,17 @@ export function LivingDesignSystem() {
                 "We are spending one engineer-week to build a permanent web preview of our React Native app, so design, eng, marketing, sales, and new hires all stop paying the simulator tax."
               </p>
             </div>
+          </Section>
+
+          <Section id="math" sectionRef={setRef('math')}>
+            <H2>The compounding math</H2>
+            <Body>
+              A design system isn't linear ROI. The first feature recoups the build; every feature after that pays back compounding interest. The numbers are conservative — derived from a controlled study at IBM and modeled down for our context.
+            </Body>
+            <CompoundVelocity />
+            <p className="mt-[16px] text-[13px] leading-[20px] font-[450] italic text-[var(--color-secondary-text)]">
+              The Q1-Q4 line is an illustrative model, not a measured outcome — flagged transparently so it survives a skeptical engineer's read. The 4.2 → 2.0 hr bar is from a published controlled study (Sparkbox, n=8 developers, IBM Carbon).
+            </p>
           </Section>
 
           <Section id="why" sectionRef={setRef('why')}>
