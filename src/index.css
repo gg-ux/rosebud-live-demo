@@ -89,6 +89,22 @@ body {
   animation: loader-squiggle-draw 1.6s ease-in-out infinite;
 }
 
+/* Ring Pulse loader — two concentric circles ripple outward from center.
+   `r` is animated directly (CSS-supported on SVG circles in modern
+   browsers); fill-mode backwards keeps the staggered second ring hidden
+   during its delay. */
+@keyframes loader-ring-pulse {
+  0%   { r: 1; opacity: 0.9; }
+  100% { r: 6; opacity: 0;   }
+}
+
+.animate-loader-ring-pulse {
+  animation: loader-ring-pulse 1.8s ease-out infinite backwards;
+}
+
+.animate-loader-ring-pulse-1 { animation-delay: 0s;   }
+.animate-loader-ring-pulse-2 { animation-delay: 0.9s; }
+
 /* Sparkle loader — 4-point concave star pulses + rotates 45°.
    AI-thinking twinkle, Claude-style. */
 @keyframes loader-sparkle {

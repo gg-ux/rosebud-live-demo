@@ -67,6 +67,20 @@ export function LoaderIcon({ style = 'spinner' }) {
       </svg>
     );
   }
+  if (style === 'ring-pulse') {
+    return (
+      <svg viewBox="0 0 14 14" className="w-[14px] h-[14px]">
+        <circle
+          cx="7" cy="7" r="6" fill="none" stroke="currentColor" strokeWidth="1.2"
+          className="animate-loader-ring-pulse animate-loader-ring-pulse-1"
+        />
+        <circle
+          cx="7" cy="7" r="6" fill="none" stroke="currentColor" strokeWidth="1.2"
+          className="animate-loader-ring-pulse animate-loader-ring-pulse-2"
+        />
+      </svg>
+    );
+  }
   if (style === 'sparkle') {
     return (
       <svg viewBox="0 0 14 14" className="w-[14px] h-[14px]">

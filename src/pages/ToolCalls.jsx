@@ -240,6 +240,7 @@ const LOADER_STYLES = [
   { id: 'spinner', label: 'Spinner' },
   { id: 'dots', label: 'Dots' },
   { id: 'pulse', label: 'Pulse' },
+  { id: 'ring-pulse', label: 'Ring pulse' },
   { id: 'bloom', label: 'Bloom' },
   { id: 'sparkle', label: 'Sparkle' },
   { id: 'none', label: 'Text only' },
@@ -336,6 +337,29 @@ const LOADER_SNIPPETS = {
   stroke-dasharray: 18; stroke-dashoffset: 18;
   animation: loader-squiggle-draw 1.6s ease-in-out infinite;
 }`,
+
+  'ring-pulse': `// JSX — two concentric rings rippling outward
+<svg viewBox="0 0 14 14" className="w-[14px] h-[14px]">
+  <circle cx="7" cy="7" r="6" fill="none"
+          stroke="currentColor" strokeWidth="1.2"
+          className="animate-loader-ring-pulse
+                     animate-loader-ring-pulse-1" />
+  <circle cx="7" cy="7" r="6" fill="none"
+          stroke="currentColor" strokeWidth="1.2"
+          className="animate-loader-ring-pulse
+                     animate-loader-ring-pulse-2" />
+</svg>
+
+/* CSS — animates SVG circle's r attribute directly */
+@keyframes loader-ring-pulse {
+  0%   { r: 1; opacity: 0.9; }
+  100% { r: 6; opacity: 0;   }
+}
+.animate-loader-ring-pulse {
+  animation: loader-ring-pulse 1.8s ease-out infinite backwards;
+}
+.animate-loader-ring-pulse-1 { animation-delay: 0s;   }
+.animate-loader-ring-pulse-2 { animation-delay: 0.9s; }`,
 
   sparkle: `// JSX — 4-point concave star, scales + rotates 45°
 <svg viewBox="0 0 14 14" className="w-[14px] h-[14px]">
