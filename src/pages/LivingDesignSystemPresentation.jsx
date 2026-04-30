@@ -129,8 +129,8 @@ const slides = [
     eyebrow: 'What companies you respect already did',
     title: "This isn't speculative. The companies you'd benchmark against built theirs years ago.",
     headlineStat: {
-      value: '+32 pp',
-      desc: 'higher revenue growth at top-quartile design-mature companies vs. industry peers, over a 5-year tracking period.',
+      value: '~2×',
+      desc: 'Companies with mature design practices grew revenue at nearly twice the rate of industry peers over a 5-year tracking period (+32 percentage points higher growth).',
       source: 'McKinsey & Co., The Business Value of Design, 2018 (n=300 publicly traded companies)',
     },
     companies: [
