@@ -37,6 +37,71 @@ body {
   animation: loader-pulse 1.8s ease-in-out infinite;
 }
 
+/* Dots loader — three dots bouncing in sequence (typing-style). */
+@keyframes loader-dot-bounce {
+  0%, 80%, 100% { transform: scale(0.5); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+.animate-loader-dot-1 { animation: loader-dot-bounce 1.2s ease-in-out infinite both; }
+.animate-loader-dot-2 { animation: loader-dot-bounce 1.2s ease-in-out infinite both; animation-delay: 0.16s; }
+.animate-loader-dot-3 { animation: loader-dot-bounce 1.2s ease-in-out infinite both; animation-delay: 0.32s; }
+
+/* Pulse-dot loader — single dot scaling + fading. */
+@keyframes loader-pulse-dot {
+  0%, 100% { transform: scale(0.55); opacity: 0.4; }
+  50% { transform: scale(1); opacity: 1; }
+}
+
+.animate-loader-pulse-dot {
+  animation: loader-pulse-dot 1.4s ease-in-out infinite;
+}
+
+/* Bloom loader — 4 petals in a radial cross, pulsing clockwise.
+   Evokes a rosebud opening; ties to the brand mark. */
+@keyframes loader-bloom-petal {
+  0%, 70%, 100% { transform: scale(0.35); opacity: 0.3; }
+  35% { transform: scale(1); opacity: 1; }
+}
+
+.animate-loader-bloom {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: loader-bloom-petal 1.6s ease-in-out infinite;
+}
+
+.animate-loader-bloom-1 { animation-delay: 0s; }
+.animate-loader-bloom-2 { animation-delay: 0.2s; }
+.animate-loader-bloom-3 { animation-delay: 0.4s; }
+.animate-loader-bloom-4 { animation-delay: 0.6s; }
+
+/* Squiggle loader — sine-wave path that draws across, then erases tail-first.
+   Creates a "snake" / Notion-style brush effect along a small wave. */
+@keyframes loader-squiggle-draw {
+  0%   { stroke-dashoffset: 18; }
+  50%  { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -18; }
+}
+
+.animate-loader-squiggle {
+  stroke-dasharray: 18;
+  stroke-dashoffset: 18;
+  animation: loader-squiggle-draw 1.6s ease-in-out infinite;
+}
+
+/* Sparkle loader — 4-point concave star pulses + rotates 45°.
+   AI-thinking twinkle, Claude-style. */
+@keyframes loader-sparkle {
+  0%, 100% { transform: rotate(0deg) scale(0.5); opacity: 0.45; }
+  50%      { transform: rotate(45deg) scale(1); opacity: 1; }
+}
+
+.animate-loader-sparkle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: loader-sparkle 1.4s ease-in-out infinite;
+}
+
 /* Tool-call shimmer — gray base with a brighter highlight that sweeps across.
    Matches the in-progress text effect used in Claude Code. */
 @keyframes tool-shimmer {

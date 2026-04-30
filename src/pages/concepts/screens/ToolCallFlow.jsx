@@ -17,16 +17,77 @@ import { TopBar, BottomCTAs } from './TrackingFlow';
 
 const PROMPT = "What's on your mind?";
 
-// One animated tool-call row. Running shows a spinner + shimmer; completed is text-only.
-function ToolCallRow({ call, completed }) {
+// Reusable loader icon — renders the leading visual based on style.
+// Uses `currentColor` so callers can tint via the parent's text color.
+// Spinner's track is currentColor at 25% opacity so it stays readable on
+// any backdrop.
+export function LoaderIcon({ style = 'spinner' }) {
+  if (style === 'none') return null;
+  if (style === 'spinner') {
+    return (
+      <svg viewBox="0 0 24 24" className="w-[12px] h-[12px] animate-spin">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeOpacity="0.25" strokeWidth="3" fill="none" />
+        <path d="M12 3a9 9 0 0 1 9 9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" fill="none" />
+      </svg>
+    );
+  }
+  if (style === 'dots') {
+    return (
+      <div className="flex items-center gap-[2px]">
+        <span className="w-[3px] h-[3px] rounded-full bg-current animate-loader-dot-1" />
+        <span className="w-[3px] h-[3px] rounded-full bg-current animate-loader-dot-2" />
+        <span className="w-[3px] h-[3px] rounded-full bg-current animate-loader-dot-3" />
+      </div>
+    );
+  }
+  if (style === 'pulse') {
+    return <span className="w-[8px] h-[8px] rounded-full bg-current animate-loader-pulse-dot" />;
+  }
+  if (style === 'bloom') {
+    return (
+      <svg viewBox="0 0 14 14" className="w-[14px] h-[14px]">
+        <circle cx="7" cy="2.5" r="1.4" fill="currentColor" className="animate-loader-bloom animate-loader-bloom-1" />
+        <circle cx="11.5" cy="7" r="1.4" fill="currentColor" className="animate-loader-bloom animate-loader-bloom-2" />
+        <circle cx="7" cy="11.5" r="1.4" fill="currentColor" className="animate-loader-bloom animate-loader-bloom-3" />
+        <circle cx="2.5" cy="7" r="1.4" fill="currentColor" className="animate-loader-bloom animate-loader-bloom-4" />
+      </svg>
+    );
+  }
+  if (style === 'squiggle') {
+    return (
+      <svg viewBox="0 0 14 14" className="w-[14px] h-[14px]">
+        <path
+          d="M 1 7 Q 3.5 3, 7 7 T 13 7"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          className="animate-loader-squiggle"
+        />
+      </svg>
+    );
+  }
+  if (style === 'sparkle') {
+    return (
+      <svg viewBox="0 0 14 14" className="w-[14px] h-[14px]">
+        <path
+          d="M 7 1.5 Q 7.5 6.5, 12.5 7 Q 7.5 7.5, 7 12.5 Q 6.5 7.5, 1.5 7 Q 6.5 6.5, 7 1.5 Z"
+          fill="currentColor"
+          className="animate-loader-sparkle"
+        />
+      </svg>
+    );
+  }
+  return null;
+}
+
+// One animated tool-call row. Running shows a loader + shimmer; completed is text-only.
+function ToolCallRow({ call, completed, loaderStyle = 'spinner' }) {
   return (
     <div className="flex items-center gap-[8px] py-[2px]">
-      {!completed && (
+      {!completed && loaderStyle !== 'none' && (
         <div className="w-[14px] h-[14px] flex items-center justify-center shrink-0">
-          <svg viewBox="0 0 24 24" className="w-[12px] h-[12px] animate-spin">
-            <circle cx="12" cy="12" r="9" stroke="#C0C0BF" strokeWidth="3" fill="none" />
-            <path d="M12 3a9 9 0 0 1 9 9" stroke="#191C1A" strokeWidth="3" strokeLinecap="round" fill="none" />
-          </svg>
+          <LoaderIcon style={loaderStyle} />
         </div>
       )}
       <span
@@ -303,7 +364,7 @@ function BottomSnackbar({ message, shimmer = false }) {
   );
 }
 
-function CreatingPageScenario({ flowRef, variant = 'inline-summary' }) {
+function CreatingPageScenario({ flowRef, variant = 'inline-summary', loaderStyle = 'spinner' }) {
   // V1 (inline-summary): idle → ai-then-tools (AI + inline ticker concurrent) → done
   // V2 (fade-swap, strictly sequential): idle → pre-tools → ai-shown → post-tools → done
   // V3 (snackbar): idle → pre-tools (in snackbar) → ai-then-tools (AI + snackbar) → done
@@ -465,7 +526,7 @@ function CreatingPageScenario({ flowRef, variant = 'inline-summary' }) {
             <AnimatePresence mode="wait">
               {phase === 'pre-tools' && (
                 <motion.div key="pre-ticker" {...v2Fade} className="mb-[16px]">
-                  <ToolCallRow call={preSeq.currentRunning} completed={false} />
+                  <ToolCallRow call={preSeq.currentRunning} completed={false} loaderStyle={loaderStyle} />
                 </motion.div>
               )}
               {(phase === 'ai-then-tools' || phase === 'done') && (
@@ -491,7 +552,7 @@ function CreatingPageScenario({ flowRef, variant = 'inline-summary' }) {
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
                     >
-                      <ToolCallRow call={seq.currentRunning} completed={false} />
+                      <ToolCallRow call={seq.currentRunning} completed={false} loaderStyle={loaderStyle} />
                     </motion.div>
                   )}
                   {seq.phase === 'done' && (
@@ -1050,7 +1111,13 @@ function AfterTextScenario({ flowRef }) {
    Public wrapper
    ════════════════════════════════════════════════════════════════ */
 export const ToolCallFlow = forwardRef(function ToolCallFlow(
-  { scenario = 'creating-page', mode = 'single', placement = 'top', variant = 'inline-summary' } = {},
+  {
+    scenario = 'creating-page',
+    mode = 'single',
+    placement = 'top',
+    variant = 'inline-summary',
+    loaderStyle = 'spinner',
+  } = {},
   ref,
 ) {
   if (scenario === 'starting-entry') {
@@ -1065,5 +1132,5 @@ export const ToolCallFlow = forwardRef(function ToolCallFlow(
   if (scenario === 'after-text') {
     return <AfterTextScenario flowRef={ref} />;
   }
-  return <CreatingPageScenario flowRef={ref} variant={variant} />;
+  return <CreatingPageScenario flowRef={ref} variant={variant} loaderStyle={loaderStyle} />;
 });

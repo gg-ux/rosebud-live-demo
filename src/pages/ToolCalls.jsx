@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
 import { PhoneFrame } from '../components/PhoneFrame';
 import { SegmentedControl } from '../components';
-import { ToolCallFlow } from './concepts/screens/ToolCallFlow';
+import { ToolCallFlow, LoaderIcon } from './concepts/screens/ToolCallFlow';
 import { usePageActions } from '../components/Layout';
 
 const NOTION_URL =
@@ -75,10 +75,10 @@ function SectionLabel({ children }) {
   );
 }
 
-function SpecBlock({ behavior, sequence }) {
+function SpecBlock({ behavior, sequence, noBorder = false }) {
   const [expanded, setExpanded] = useState(false);
   return (
-    <div className="mt-[16px] pb-[32px] border-b border-[var(--color-outline-light)]">
+    <div className={`mt-[16px] ${noBorder ? 'pb-[12px]' : 'pb-[32px] border-b border-[var(--color-outline-light)]'}`}>
       <button
         onClick={() => setExpanded((e) => !e)}
         className="flex items-center gap-[8px] text-[11px] font-[700] tracking-[0.08em] uppercase text-[var(--color-secondary-text)] hover:text-[var(--color-on-background)] transition-colors cursor-pointer"
@@ -231,14 +231,277 @@ const OLDER_ITERATIONS = [
   },
 ];
 
-function FinalProposalPhone() {
+const LOADER_STYLES = [
+  { id: 'spinner', label: 'Spinner' },
+  { id: 'dots', label: 'Dots' },
+  { id: 'pulse', label: 'Pulse' },
+  { id: 'bloom', label: 'Bloom' },
+  { id: 'squiggle', label: 'Squiggle' },
+  { id: 'sparkle', label: 'Sparkle' },
+  { id: 'none', label: 'Text only' },
+];
+
+// JSX + CSS snippets for each loader. Designer-readable, engineer-copyable.
+// Markup uses Tailwind arbitrary-values to match the project; CSS keyframes
+// live in src/index.css.
+const LOADER_SNIPPETS = {
+  spinner: `// JSX (Tailwind animate-spin built-in)
+<svg viewBox="0 0 24 24" className="w-[12px] h-[12px] animate-spin">
+  <circle cx="12" cy="12" r="9" stroke="#C0C0BF"
+          strokeWidth="3" fill="none" />
+  <path d="M12 3a9 9 0 0 1 9 9" stroke="currentColor"
+        strokeWidth="3" strokeLinecap="round" fill="none" />
+</svg>`,
+
+  dots: `// JSX
+<div className="flex items-center gap-[2px]">
+  <span className="w-[3px] h-[3px] rounded-full
+                   bg-current animate-loader-dot-1" />
+  <span className="w-[3px] h-[3px] rounded-full
+                   bg-current animate-loader-dot-2" />
+  <span className="w-[3px] h-[3px] rounded-full
+                   bg-current animate-loader-dot-3" />
+</div>
+
+/* CSS */
+@keyframes loader-dot-bounce {
+  0%, 80%, 100% { transform: scale(0.5); opacity: 0.4; }
+  40%           { transform: scale(1);   opacity: 1; }
+}
+.animate-loader-dot-1 { animation: loader-dot-bounce 1.2s
+  ease-in-out infinite both; }
+.animate-loader-dot-2 { animation: loader-dot-bounce 1.2s
+  ease-in-out infinite both; animation-delay: 0.16s; }
+.animate-loader-dot-3 { animation: loader-dot-bounce 1.2s
+  ease-in-out infinite both; animation-delay: 0.32s; }`,
+
+  pulse: `// JSX
+<span className="w-[8px] h-[8px] rounded-full
+                 bg-current animate-loader-pulse-dot" />
+
+/* CSS */
+@keyframes loader-pulse-dot {
+  0%, 100% { transform: scale(0.55); opacity: 0.4; }
+  50%      { transform: scale(1);    opacity: 1; }
+}
+.animate-loader-pulse-dot {
+  animation: loader-pulse-dot 1.4s ease-in-out infinite;
+}`,
+
+  bloom: `// JSX — 4 petals on a cross
+<svg viewBox="0 0 14 14" className="w-[14px] h-[14px]">
+  <circle cx="7"    cy="2.5"  r="1.4" fill="currentColor"
+          className="animate-loader-bloom animate-loader-bloom-1" />
+  <circle cx="11.5" cy="7"    r="1.4" fill="currentColor"
+          className="animate-loader-bloom animate-loader-bloom-2" />
+  <circle cx="7"    cy="11.5" r="1.4" fill="currentColor"
+          className="animate-loader-bloom animate-loader-bloom-3" />
+  <circle cx="2.5"  cy="7"    r="1.4" fill="currentColor"
+          className="animate-loader-bloom animate-loader-bloom-4" />
+</svg>
+
+/* CSS */
+@keyframes loader-bloom-petal {
+  0%, 70%, 100% { transform: scale(0.35); opacity: 0.3; }
+  35%           { transform: scale(1);    opacity: 1; }
+}
+.animate-loader-bloom {
+  transform-box: fill-box; transform-origin: center;
+  animation: loader-bloom-petal 1.6s ease-in-out infinite;
+}
+.animate-loader-bloom-1 { animation-delay: 0s; }
+.animate-loader-bloom-2 { animation-delay: 0.2s; }
+.animate-loader-bloom-3 { animation-delay: 0.4s; }
+.animate-loader-bloom-4 { animation-delay: 0.6s; }`,
+
+  squiggle: `// JSX — single sine-wave path, drawn snake-style
+<svg viewBox="0 0 14 14" className="w-[14px] h-[14px]">
+  <path d="M 1 7 Q 3.5 3, 7 7 T 13 7"
+        fill="none" stroke="currentColor"
+        strokeWidth="1.5" strokeLinecap="round"
+        className="animate-loader-squiggle" />
+</svg>
+
+/* CSS */
+@keyframes loader-squiggle-draw {
+  0%   { stroke-dashoffset:  18; }
+  50%  { stroke-dashoffset:   0; }
+  100% { stroke-dashoffset: -18; }
+}
+.animate-loader-squiggle {
+  stroke-dasharray: 18; stroke-dashoffset: 18;
+  animation: loader-squiggle-draw 1.6s ease-in-out infinite;
+}`,
+
+  sparkle: `// JSX — 4-point concave star, scales + rotates 45°
+<svg viewBox="0 0 14 14" className="w-[14px] h-[14px]">
+  <path d="M 7 1.5 Q 7.5 6.5, 12.5 7 Q 7.5 7.5, 7 12.5
+           Q 6.5 7.5, 1.5 7 Q 6.5 6.5, 7 1.5 Z"
+        fill="currentColor"
+        className="animate-loader-sparkle" />
+</svg>
+
+/* CSS */
+@keyframes loader-sparkle {
+  0%, 100% { transform: rotate(0deg)  scale(0.5); opacity: 0.45; }
+  50%      { transform: rotate(45deg) scale(1);   opacity: 1; }
+}
+.animate-loader-sparkle {
+  transform-box: fill-box; transform-origin: center;
+  animation: loader-sparkle 1.4s ease-in-out infinite;
+}`,
+};
+
+function CopyButton({ text }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      onClick={() => {
+        navigator.clipboard.writeText(text).then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1500);
+        });
+      }}
+      className="text-[11px] font-[500] text-[var(--color-secondary-text)] hover:text-[var(--color-on-background)] transition-colors cursor-pointer"
+    >
+      {copied ? 'Copied' : 'Copy'}
+    </button>
+  );
+}
+
+function LoaderDemoCard({ id, label, code }) {
+  return (
+    <div className="rounded-[12px] bg-[var(--color-surface)] border border-[var(--color-outline-light)] overflow-hidden">
+      <div className="flex items-center justify-between gap-[10px] px-[14px] py-[12px] border-b border-[var(--color-outline-light)]">
+        <div className="flex items-center gap-[10px]">
+          <div className="w-[18px] h-[18px] flex items-center justify-center text-[#191C1A]">
+            <LoaderIcon style={id} />
+          </div>
+          <span className="text-[13px] font-[600] text-[var(--color-on-background)]">{label}</span>
+        </div>
+        <CopyButton text={code} />
+      </div>
+      <pre className="text-[10px] leading-[15px] font-mono text-[var(--color-on-background)] bg-[var(--color-background)] p-[12px] m-0 max-h-[180px] overflow-auto whitespace-pre">
+        {code}
+      </pre>
+    </div>
+  );
+}
+
+function LoaderGallery() {
+  const [expanded, setExpanded] = useState(false);
+  const items = LOADER_STYLES.filter((s) => s.id !== 'none');
+  return (
+    <div className="mt-[16px] pb-[32px] border-b border-[var(--color-outline-light)]">
+      <button
+        onClick={() => setExpanded((e) => !e)}
+        className="flex items-center gap-[8px] text-[11px] font-[700] tracking-[0.08em] uppercase text-[var(--color-secondary-text)] hover:text-[var(--color-on-background)] transition-colors cursor-pointer"
+      >
+        <ChevronRight
+          size={12}
+          className={`shrink-0 transition-transform duration-200 ${expanded ? 'rotate-90' : ''}`}
+        />
+        <span>Loader Gallery</span>
+      </button>
+      <AnimatePresence initial={false}>
+        {expanded && (
+          <motion.div
+            key="content"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="pt-[20px]">
+              <p className="max-w-[680px] mb-[20px] text-[13px] leading-[20px] font-[450] text-[var(--color-secondary-text)]">
+                React + Tailwind. Animations use <code className="font-mono">currentColor</code> so you can tint via the parent's text color. Keyframes live in <code className="font-mono">src/index.css</code>.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[16px]">
+                {items.map((s) => (
+                  <LoaderDemoCard
+                    key={s.id}
+                    id={s.id}
+                    label={s.label}
+                    code={LOADER_SNIPPETS[s.id]}
+                  />
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function LoaderStyleChips({ value, onChange }) {
+  return (
+    <div className="mt-[24px]">
+      <span className="block text-[11px] font-[700] tracking-[0.08em] uppercase text-[var(--color-secondary-text)] mb-[10px]">
+        Loader Style
+      </span>
+      <div className="flex flex-wrap gap-[6px]">
+        {LOADER_STYLES.map((s) => (
+          <button
+            key={s.id}
+            onClick={() => onChange(s.id)}
+            className={`shrink-0 inline-flex items-center gap-[8px] pl-[10px] pr-[14px] h-[30px] rounded-full text-[12px] font-[500] transition-colors cursor-pointer ${
+              value === s.id
+                ? 'bg-[var(--color-on-background)] text-white'
+                : 'bg-[var(--color-surface-variant)] text-[var(--color-secondary-text)] hover:text-[var(--color-on-background)]'
+            }`}
+          >
+            {s.id !== 'none' && (
+              <span className="w-[14px] h-[14px] flex items-center justify-center shrink-0">
+                <LoaderIcon style={s.id} />
+              </span>
+            )}
+            <span>{s.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function FinalProposalSection() {
   const ref = useRef(null);
+  const [loaderStyle, setLoaderStyle] = useState('spinner');
+
   return (
     <div>
-      <PhoneFrame showNavBar={false}>
-        <ToolCallFlow ref={ref} scenario="creating-page" variant="fade-swap" />
-      </PhoneFrame>
-      <Replay onClick={() => ref.current?.reset()} />
+      <ScenarioRow
+        reverse={false}
+        phone={
+          <div>
+            <PhoneFrame showNavBar={false}>
+              <ToolCallFlow
+                ref={ref}
+                scenario="creating-page"
+                variant="fade-swap"
+                loaderStyle={loaderStyle}
+              />
+            </PhoneFrame>
+            <Replay onClick={() => ref.current?.reset()} />
+          </div>
+        }
+        copy={
+          <div>
+            <Tagline>Scenario 1</Tagline>
+            <Title>Minimal In-Line</Title>
+            <NumberedInstructions
+              items={[
+                'Tap “Go deeper” to update Sage’s memory.',
+                'Pre-tool ticker plays, AI replies, post-tool ticker runs below the reply, then per-message actions and Write settle in.',
+              ]}
+            />
+            <LoaderStyleChips value={loaderStyle} onChange={setLoaderStyle} />
+          </div>
+        }
+      />
+      <SpecBlock behavior={SHARED_BEHAVIOR} sequence={S1_SEQUENCE} noBorder />
+      <LoaderGallery />
     </div>
   );
 }
@@ -599,23 +862,7 @@ export function ToolCalls() {
         </div>
 
         <div className="mb-[24px] md:mb-[40px]">
-          <ScenarioRow
-            reverse={false}
-            phone={<FinalProposalPhone />}
-            copy={
-              <div>
-                <Tagline>Scenario 1</Tagline>
-                <Title>Minimal In-Line</Title>
-                <NumberedInstructions
-                  items={[
-                    'Tap “Go deeper” to update Sage’s memory.',
-                    'Pre-tool ticker plays, AI replies, post-tool ticker runs below the reply, then per-message actions and Write settle in.',
-                  ]}
-                />
-              </div>
-            }
-          />
-          <SpecBlock behavior={SHARED_BEHAVIOR} sequence={S1_SEQUENCE} />
+          <FinalProposalSection />
         </div>
 
         <div className="max-w-[680px] mb-[24px] md:mb-[32px]">
