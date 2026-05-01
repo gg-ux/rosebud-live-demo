@@ -123,40 +123,6 @@ const slides = [
     closing: 'Every Rosebud feature ships through this tax. Every new hire pays it again.',
   },
 
-  // 6. Industry benchmark — what comparable companies did
-  {
-    type: 'industry-benchmark',
-    eyebrow: 'What companies you respect already did',
-    title: "This isn't speculative. The companies you'd benchmark against built theirs years ago.",
-    headlineStat: {
-      value: '~2×',
-      desc: 'Companies with mature design practices grew revenue at nearly twice the rate of industry peers over a 5-year tracking period (+32 percentage points higher growth).',
-      source: 'McKinsey & Co., The Business Value of Design, 2018 (n=300 publicly traded companies)',
-    },
-    companies: [
-      {
-        name: 'Shopify',
-        system: 'Polaris',
-        proof: '86% of admin UI auto-updated when Polaris shipped one style change.',
-      },
-      {
-        name: 'Airbnb',
-        system: 'DLS',
-        proof: 'First cross-platform RN design system. Built by Karri Saarinen (now Linear CEO).',
-      },
-      {
-        name: 'Atlassian',
-        system: 'Design System',
-        proof: 'Dedicated 18-person team supporting ~100 product engineers. Treated as core infrastructure.',
-      },
-      {
-        name: 'IBM',
-        system: 'Carbon',
-        proof: '47% faster build times in controlled study. 3 of 8 developers improved accessibility using it.',
-      },
-    ],
-  },
-
   // SECTION 02 — The Proposal
   { type: 'section', number: '02', title: 'The Proposal' },
 
