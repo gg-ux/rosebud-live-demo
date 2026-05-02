@@ -127,12 +127,12 @@ function TrackerBlock({ icon, label, status, children }) {
    Shared chrome — matches V3 Journal / Chat exactly
    ══════════════════════════════════════════════════════════ */
 
-export function TopBar() {
+export function TopBar({ label = 'Sage', avatar = null }) {
   return (
     <div className="flex items-center justify-between px-[8px] h-[44px] shrink-0">
       <div className="flex items-center gap-[8px] pl-[4px] pr-[10px] py-[4px] rounded-[8px] border border-[#C0C0BF]">
-        <div className="w-[20px] h-[20px] rounded-full bg-[#7CC4AF]" />
-        <span className="text-[13px] leading-[18px] font-[500] text-[#191C1A]">Sage</span>
+        {avatar ?? <div className="w-[20px] h-[20px] rounded-full bg-[#7CC4AF]" />}
+        <span className="text-[13px] leading-[18px] font-[500] text-[#191C1A]">{label}</span>
         <svg viewBox="0 0 12 12" fill="none" className="w-[10px] h-[10px]">
           <path
             d="M2.5 4.5L6 8L9.5 4.5"

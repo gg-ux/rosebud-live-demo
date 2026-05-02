@@ -75,8 +75,8 @@ body {
 .animate-loader-bloom-3 { animation-delay: 0.4s; }
 .animate-loader-bloom-4 { animation-delay: 0.6s; }
 
-/* Squiggle loader — sine-wave path that draws across, then erases tail-first.
-   Creates a "snake" / Notion-style brush effect along a small wave. */
+/* Squiggle — sine-wave path that draws across, then erases tail-first.
+   Notion-style snake brush effect on top of a faint placeholder. */
 @keyframes loader-squiggle-draw {
   0%   { stroke-dashoffset: 18; }
   50%  { stroke-dashoffset: 0; }
@@ -87,18 +87,6 @@ body {
   stroke-dasharray: 18;
   stroke-dashoffset: 18;
   animation: loader-squiggle-draw 1.6s ease-in-out infinite;
-}
-
-/* Squiggle 2 — continuous flowing wave. Path is 3 periods wide; the
-   group translates left by one period (12 viewBox units) per cycle.
-   Linear timing so the wave appears to roll seamlessly. */
-@keyframes loader-squiggle-2-flow {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-12px); }
-}
-
-.animate-loader-squiggle-2 {
-  animation: loader-squiggle-2-flow 1.6s linear infinite;
 }
 
 /* Ring Pulse loader — two concentric circles ripple outward from center.

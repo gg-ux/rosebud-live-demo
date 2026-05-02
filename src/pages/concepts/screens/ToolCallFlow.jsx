@@ -54,8 +54,17 @@ export function LoaderIcon({ style = 'spinner' }) {
     );
   }
   if (style === 'squiggle') {
+    // Snake-draw on top of a faint base so there's a placeholder path
+    // visible at all times (same pattern as Spinner's track + arc).
     return (
       <svg viewBox="0 0 14 14" className="w-[14px] h-[14px]">
+        <path
+          d="M 1 7 Q 3.5 3, 7 7 T 13 7"
+          fill="none"
+          stroke="currentColor" strokeOpacity="0.25"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
         <path
           d="M 1 7 Q 3.5 3, 7 7 T 13 7"
           fill="none"
@@ -64,23 +73,6 @@ export function LoaderIcon({ style = 'spinner' }) {
           strokeLinecap="round"
           className="animate-loader-squiggle"
         />
-      </svg>
-    );
-  }
-  if (style === 'squiggle-2') {
-    // Path is 3 full periods wide (-6..30). The <g> translates -12 (one
-    // period) per cycle so the wave rolls continuously without re-drawing.
-    return (
-      <svg viewBox="0 0 14 14" className="w-[14px] h-[14px] overflow-hidden">
-        <g className="animate-loader-squiggle-2">
-          <path
-            d="M -6 7 Q -3 3, 0 7 T 6 7 T 12 7 T 18 7 T 24 7 T 30 7"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          />
-        </g>
       </svg>
     );
   }
@@ -428,7 +420,6 @@ function CreatingPageScenario({ flowRef, variant = 'inline-summary', loaderStyle
       aiHoldTimerRef.current = null;
     }
   };
-  useImperativeHandle(flowRef, () => ({ reset }), []);
 
   const trigger = () => {
     if (phase !== 'idle') return;
@@ -476,6 +467,10 @@ function CreatingPageScenario({ flowRef, variant = 'inline-summary', loaderStyle
     seq.start(S1_TOOLS, () => setPhase('done'));
   };
 
+  // Expose reset + trigger so parents can drive the flow externally
+  // (e.g. the loader-comparison Replay-both button).
+  useImperativeHandle(flowRef, () => ({ reset, trigger }), [phase, variant]);
+
   // Snackbar variant: drive the bottom pill text from BOTH sequences. Pre-AI
   // tool calls flow into the same pill before the AI reply appears, then the
   // post-AI sequence takes over. preSeq has priority while it's running so
@@ -509,7 +504,10 @@ function CreatingPageScenario({ flowRef, variant = 'inline-summary', loaderStyle
 
   return (
     <div className="relative flex flex-col h-full bg-white">
-      <TopBar />
+      <TopBar
+        label="Rosebud"
+        avatar={<img src="/favicon-rosebud.svg" alt="" className="w-[20px] h-[20px]" />}
+      />
       <div className="flex-1 overflow-y-auto px-[15px] pt-[12px] pb-[8px]">
         <p className="text-[14px] leading-[20px] font-[450] text-[#2B6CB0] mb-[6px]">{PROMPT}</p>
         <ClickableText
@@ -852,7 +850,10 @@ function StartingEntryScenario({ flowRef, mode = 'single', placement = 'top' }) 
 
   return (
     <div className="relative flex flex-col h-full bg-white">
-      <TopBar />
+      <TopBar
+        label="Rosebud"
+        avatar={<img src="/favicon-rosebud.svg" alt="" className="w-[20px] h-[20px]" />}
+      />
       <div className="flex-1 overflow-y-auto px-[15px] pt-[12px] pb-[8px]">
         <p className="text-[14px] leading-[20px] font-[450] text-[#2B6CB0] mb-[6px]">{PROMPT}</p>
 
@@ -991,7 +992,10 @@ function MentionsDateScenario({ flowRef }) {
 
   return (
     <div className="relative flex flex-col h-full bg-white">
-      <TopBar />
+      <TopBar
+        label="Rosebud"
+        avatar={<img src="/favicon-rosebud.svg" alt="" className="w-[20px] h-[20px]" />}
+      />
       <div className="flex-1 overflow-y-auto px-[15px] pt-[12px] pb-[8px]">
         <p className="text-[14px] leading-[20px] font-[450] text-[#2B6CB0] mb-[8px]">{PROMPT}</p>
         <p className="text-[14px] leading-[20px] font-[450] text-[#191C1A] mb-[8px]">{S3_USER}</p>
@@ -1051,7 +1055,10 @@ function ThinkingScenario({ flowRef }) {
 
   return (
     <div className="relative flex flex-col h-full bg-white">
-      <TopBar />
+      <TopBar
+        label="Rosebud"
+        avatar={<img src="/favicon-rosebud.svg" alt="" className="w-[20px] h-[20px]" />}
+      />
       <div className="flex-1 overflow-y-auto px-[15px] pt-[12px] pb-[8px]">
         <p className="text-[14px] leading-[20px] font-[450] text-[#2B6CB0] mb-[8px]">{PROMPT}</p>
         <p className="text-[14px] leading-[20px] font-[450] text-[#191C1A] mb-[8px]">{S4_USER}</p>
@@ -1118,7 +1125,10 @@ function AfterTextScenario({ flowRef }) {
 
   return (
     <div className="relative flex flex-col h-full bg-white">
-      <TopBar />
+      <TopBar
+        label="Rosebud"
+        avatar={<img src="/favicon-rosebud.svg" alt="" className="w-[20px] h-[20px]" />}
+      />
       <div className="flex-1 overflow-y-auto px-[15px] pt-[12px] pb-[8px]">
         <p className="text-[14px] leading-[20px] font-[450] text-[#2B6CB0] mb-[8px]">{PROMPT}</p>
         <p className="text-[14px] leading-[20px] font-[450] text-[#191C1A] mb-[8px]">{S5_USER}</p>

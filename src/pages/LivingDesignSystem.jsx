@@ -516,6 +516,7 @@ const STORYBOOK_EXAMPLES = [
     system: 'Primer',
     description: 'The design system powering all of github.com — used by 100M+ developers.',
     url: 'https://primer.style/components/button',
+    image: '/storybook-examples/gh-primer.png',
     accent: '#1F2328',
   },
   {
@@ -523,6 +524,7 @@ const STORYBOOK_EXAMPLES = [
     system: 'Atlassian Design System',
     description: 'The system behind Jira, Confluence, and Trello.',
     url: 'https://atlassian.design/components/button/examples',
+    image: '/storybook-examples/atlassian.png',
     accent: '#0052CC',
   },
   {
@@ -530,6 +532,7 @@ const STORYBOOK_EXAMPLES = [
     system: 'Carbon',
     description: "IBM's open-source design system used across their product portfolio.",
     url: 'https://carbondesignsystem.com/components/button/usage',
+    image: '/storybook-examples/carbon.png',
     accent: '#0F62FE',
   },
   {
@@ -537,48 +540,70 @@ const STORYBOOK_EXAMPLES = [
     system: 'Spectrum',
     description: 'The design system behind Photoshop, Lightroom, Illustrator, and Creative Cloud.',
     url: 'https://spectrum.adobe.com/page/button/',
+    image: '/storybook-examples/spectrum.png',
     accent: '#FA0F00',
   },
 ];
 
 function StorybookExamples() {
   return (
-    <div className="mt-[20px] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[14px]">
-      {STORYBOOK_EXAMPLES.map((ex) => (
-        <a
-          key={ex.org}
-          href={ex.url}
-          target="_blank"
-          rel="noreferrer"
-          className="group block p-[22px] rounded-[18px] bg-[var(--color-surface)] ring-1 ring-inset ring-[var(--color-outline-light)]/60 shadow-[0_1px_2px_rgba(25,28,26,0.03)] hover:shadow-[0_2px_4px_rgba(25,28,26,0.04),0_12px_28px_-12px_rgba(25,28,26,0.10)] hover:-translate-y-[2px] transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
-        >
-          <div
-            className="text-[10px] font-[700] tracking-[0.1em] uppercase mb-[6px]"
-            style={{ color: ex.accent }}
+    <figure className="mt-[20px]">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-[14px]">
+        {STORYBOOK_EXAMPLES.map((ex) => (
+          <a
+            key={ex.org}
+            href={ex.url}
+            target="_blank"
+            rel="noreferrer"
+            className="group block"
           >
-            {ex.org}
-          </div>
-          <div className="flex items-start justify-between gap-[8px] mb-[6px]">
-            <span className="text-[15px] leading-[20px] font-[700] text-[var(--color-on-background)]">
-              {ex.system}
-            </span>
-            <ExternalLink size={12} className="shrink-0 mt-[4px] text-[var(--color-secondary-text)] group-hover:text-[var(--color-on-background)] transition-colors" />
-          </div>
-          <p className="text-[12px] leading-[17px] font-[450] text-[var(--color-secondary-text)]">
-            {ex.description}
-          </p>
-          <div className="mt-[10px] text-[10px] leading-[14px] font-[500] text-[var(--color-secondary-text)] group-hover:text-[var(--color-on-background)] transition-colors truncate">
-            {ex.url.replace(/^https?:\/\//, '')}
-          </div>
-        </a>
-      ))}
-    </div>
+            <div className="aspect-[16/10] rounded-[8px] overflow-hidden bg-[var(--color-surface)] ring-1 ring-inset ring-[var(--color-outline-light)] transition-shadow duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:ring-[var(--color-on-background)]/20">
+              <img
+                src={ex.image}
+                alt={`${ex.org} ${ex.system} design system`}
+                loading="lazy"
+                className="w-full h-full object-cover object-top transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-[1.02]"
+              />
+            </div>
+            <figcaption className="mt-[10px]">
+              <div className="text-[10px] font-[600] tracking-[0.08em] uppercase text-[var(--color-secondary-text)]">
+                {ex.org}
+              </div>
+              <div className="text-[13px] leading-[18px] font-[600] text-[var(--color-on-background)] mt-[1px]">
+                {ex.system}
+              </div>
+            </figcaption>
+          </a>
+        ))}
+      </div>
+    </figure>
   );
 }
 
 function NativeCallout() {
+  const frameHeight = 480;
+  const imageWidth = 1400;
+  const imageHeight = 4500;
+  const aspectRatio = imageHeight / imageWidth;
+
+  const viewportRef = useRef(null);
+  const [scrollAmount, setScrollAmount] = useState(0);
+
+  useEffect(() => {
+    const update = () => {
+      if (viewportRef.current) {
+        const w = viewportRef.current.offsetWidth;
+        const displayedImageHeight = w * aspectRatio;
+        setScrollAmount(Math.max(0, displayedImageHeight - frameHeight));
+      }
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, [aspectRatio]);
+
   return (
-    <div className="mt-[32px]">
+    <div className="mt-[36px]">
       <div className="flex items-center gap-[8px] mb-[10px]">
         <Pill tone="sage">For native specifically</Pill>
       </div>
@@ -586,31 +611,51 @@ function NativeCallout() {
       <Body>
         Yes — with one honest caveat. Public Storybooks for shipped native apps are rare because most iOS and Android apps are closed-source (you can't browse Uber's iOS Storybook because Uber's iOS app isn't open source). What <em>is</em> public are <em>component libraries</em> built for React Native that publish their own browseable catalogs. The cleanest live example uses the exact same technical pattern this proposal does.
       </Body>
-      <a
-        href="https://gluestack.io/ui/docs/components/button"
-        target="_blank"
-        rel="noreferrer"
-        className="group mt-[18px] block p-[20px] rounded-[18px] bg-[var(--color-surface)] ring-1 ring-inset ring-[var(--color-outline-light)]/60 shadow-[0_1px_2px_rgba(25,28,26,0.03)] hover:shadow-[0_2px_4px_rgba(25,28,26,0.04),0_12px_28px_-12px_rgba(25,28,26,0.10)] hover:-translate-y-[2px] transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
-      >
-        <div className="flex items-center gap-[8px] mb-[8px] flex-wrap">
-          <span className="text-[10px] font-[700] tracking-[0.1em] uppercase text-[var(--color-on-background)]">
-            Gluestack UI
+      <figure className="mt-[24px]">
+        <div className="rounded-[12px] overflow-hidden bg-[#0F0E0E] ring-1 ring-inset ring-black/10 shadow-[0_12px_40px_-16px_rgba(25,28,26,0.22)]">
+          <div className="px-[12px] py-[8px] flex items-center gap-[6px] bg-white/[0.05] border-b border-white/[0.06]">
+            <span className="w-[10px] h-[10px] rounded-full bg-[#FF5F57]" />
+            <span className="w-[10px] h-[10px] rounded-full bg-[#FEBC2E]" />
+            <span className="w-[10px] h-[10px] rounded-full bg-[#28C840]" />
+            <div className="flex-1 mx-[12px] px-[10px] py-[3px] rounded-[4px] bg-white/[0.04] border border-white/[0.06] text-[10px] text-white/55 font-mono truncate">
+              gluestack.io/ui/docs/components/button
+            </div>
+          </div>
+          <div ref={viewportRef} className="relative bg-[#0F0E0E] overflow-hidden" style={{ height: frameHeight }}>
+            <motion.img
+              src="/storybook-examples/gluestack-full.png"
+              alt="Gluestack UI Button docs page"
+              className="w-full block"
+              initial={{ y: 0 }}
+              animate={{ y: -scrollAmount }}
+              transition={{
+                duration: 28,
+                ease: 'linear',
+                repeat: Infinity,
+                repeatType: 'reverse',
+              }}
+            />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-[20px] bg-gradient-to-b from-[#0F0E0E]/70 to-transparent" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[20px] bg-gradient-to-t from-[#0F0E0E]/70 to-transparent" />
+          </div>
+        </div>
+        <figcaption className="mt-[12px] flex items-baseline justify-between gap-[12px] text-[12px] leading-[18px]">
+          <span className="text-[var(--color-secondary-text)]">
+            <span className="font-[600] text-[var(--color-on-background)]">Gluestack UI</span>
+            <span className="mx-[6px]">·</span>
+            React Native components rendered live in the browser using react-native-web — the exact pattern this proposal uses.
           </span>
-          <Pill tone="sage">Same react-native-web pattern</Pill>
-        </div>
-        <div className="flex items-start justify-between gap-[8px] mb-[6px]">
-          <span className="text-[15px] leading-[20px] font-[700] text-[var(--color-on-background)]">
-            React Native components, live in the browser
-          </span>
-          <ExternalLink size={12} className="shrink-0 mt-[4px] text-[var(--color-secondary-text)] group-hover:text-[var(--color-on-background)] transition-colors" />
-        </div>
-        <p className="text-[12px] leading-[17px] font-[450] text-[var(--color-secondary-text)]">
-          Gluestack is a universal RN+web design system. Their docs render real React Native components in your browser using react-native-web — the exact technical pattern this proposal uses. Hover, click, change variants, see them animate. This is genuinely what Rosebud's Living Design System would look and feel like, just with Rosebud-specific components.
-        </p>
-        <div className="mt-[10px] text-[10px] leading-[14px] font-[500] text-[var(--color-secondary-text)] group-hover:text-[var(--color-on-background)] transition-colors truncate">
-          gluestack.io/ui/docs/components/button
-        </div>
-      </a>
+          <a
+            href="https://gluestack.io/ui/docs/components/button"
+            target="_blank"
+            rel="noreferrer"
+            className="shrink-0 inline-flex items-center gap-[5px] font-[600] text-[var(--color-on-background)]/80 hover:text-[var(--color-on-background)] transition-colors"
+          >
+            <span>Open</span>
+            <ExternalLink size={11} />
+          </a>
+        </figcaption>
+      </figure>
     </div>
   );
 }
@@ -1063,32 +1108,31 @@ function TrifectaPieces() {
   ];
 
   return (
-    <div className="mt-[20px] grid grid-cols-1 md:grid-cols-3 gap-[12px]">
+    <ol className="mt-[24px] border-t border-[var(--color-outline-light)]">
       {pieces.map((p, i) => (
-        <div
+        <li
           key={p.name}
-          className="p-[22px] rounded-[18px] bg-[var(--color-surface)] ring-1 ring-inset ring-[var(--color-outline-light)]/60 flex flex-col"
+          className="grid grid-cols-[28px_1fr] md:grid-cols-[28px_180px_1fr] gap-x-[20px] gap-y-[6px] py-[20px] border-b border-[var(--color-outline-light)]"
         >
-          <div className="flex items-center gap-[8px] mb-[6px]">
-            <span className="text-[14px] leading-[20px] font-[700] text-[var(--color-secondary-text)]">
-              {i + 1}
-            </span>
-            <span className="text-[16px] leading-[22px] font-[700] text-[var(--color-on-background)]">
-              {p.name}
-            </span>
+          <span className="text-[13px] leading-[24px] font-[600] text-[var(--color-secondary-text)] tabular-nums">
+            {String(i + 1).padStart(2, '0')}
+          </span>
+          <div className="md:contents">
+            <div>
+              <div className="text-[15px] leading-[22px] font-[600] text-[var(--color-on-background)]">
+                {p.name}
+              </div>
+              <div className="text-[12px] leading-[18px] font-[500] text-[var(--color-secondary-text)] mt-[2px]">
+                {p.role}
+              </div>
+            </div>
+            <p className="text-[14px] leading-[22px] font-[450] text-[var(--color-on-background)]/85 mt-[6px] md:mt-0">
+              {p.what}
+            </p>
           </div>
-          <div className="text-[11px] font-[700] tracking-[0.08em] uppercase mb-[8px]" style={{ color: p.accent }}>
-            {p.role}
-          </div>
-          <p className="text-[12px] leading-[18px] font-[450] text-[var(--color-secondary-text)] flex-1">
-            {p.what}
-          </p>
-          <div className="mt-[12px] pt-[10px] border-t border-[var(--color-outline-light)]/60 text-[10px] font-[700] tracking-[0.08em] uppercase text-[var(--color-secondary-text)]">
-            {p.tag}
-          </div>
-        </div>
+        </li>
       ))}
-    </div>
+    </ol>
   );
 }
 

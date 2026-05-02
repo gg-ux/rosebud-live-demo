@@ -261,7 +261,6 @@ const OLDER_ITERATIONS = [
 
 const LOADER_STYLES = [
   { id: 'squiggle', label: 'Squiggle' },
-  { id: 'squiggle-2', label: 'Squiggle 2' },
   { id: 'spinner', label: 'Spinner' },
   { id: 'dots', label: 'Dots' },
   { id: 'pulse', label: 'Pulse' },
@@ -487,8 +486,11 @@ export function Bloom() {
   },
 
   squiggle: {
-    web: `// JSX — single sine-wave path, drawn snake-style
+    web: `// JSX — faint placeholder path + snake-draw on top
 <svg viewBox="0 0 14 14" className="w-[14px] h-[14px]">
+  <path d="M 1 7 Q 3.5 3, 7 7 T 13 7"
+        fill="none" stroke="currentColor" strokeOpacity="0.25"
+        strokeWidth="1.5" strokeLinecap="round" />
   <path d="M 1 7 Q 3.5 3, 7 7 T 13 7"
         fill="none" stroke="currentColor"
         strokeWidth="1.5" strokeLinecap="round"
@@ -528,68 +530,15 @@ export function Squiggle({ color = '#191C1A' }) {
   }));
   return (
     <Svg width={14} height={14} viewBox="0 0 14 14">
+      <Path d="M 1 7 Q 3.5 3, 7 7 T 13 7"
+            fill="none" stroke={color} strokeOpacity={0.25}
+            strokeWidth={1.5} strokeLinecap="round" />
       <APath
         d="M 1 7 Q 3.5 3, 7 7 T 13 7"
         fill="none" stroke={color} strokeWidth={1.5}
         strokeLinecap="round" strokeDasharray="18"
         animatedProps={animatedProps}
       />
-    </Svg>
-  );
-}`,
-  },
-
-  'squiggle-2': {
-    web: `// JSX — wide repeating sine path, translates one period per cycle
-<svg viewBox="0 0 14 14" className="w-[14px] h-[14px] overflow-hidden">
-  <g className="animate-loader-squiggle-2">
-    <path
-      d="M -6 7 Q -3 3, 0 7 T 6 7 T 12 7 T 18 7 T 24 7 T 30 7"
-      fill="none" stroke="currentColor"
-      strokeWidth="1.5" strokeLinecap="round"
-    />
-  </g>
-</svg>
-
-/* CSS — translates the group by one wavelength (12 viewBox units)
-   linearly so the wave rolls continuously without re-drawing. */
-@keyframes loader-squiggle-2-flow {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-12px); }
-}
-.animate-loader-squiggle-2 {
-  animation: loader-squiggle-2-flow 1.6s linear infinite;
-}`,
-    rn: `// React Native (Reanimated v3) — animated <G> transform
-import Animated, {
-  useSharedValue, useAnimatedProps,
-  withRepeat, withTiming, Easing,
-} from 'react-native-reanimated';
-import Svg, { G, Path } from 'react-native-svg';
-import { useEffect } from 'react';
-
-const AG = Animated.createAnimatedComponent(G);
-
-export function Squiggle2({ color = '#191C1A' }) {
-  const v = useSharedValue(0);
-  useEffect(() => {
-    v.value = withRepeat(
-      withTiming(-12, { duration: 1600, easing: Easing.linear }),
-      -1, false
-    );
-  }, []);
-  const animatedProps = useAnimatedProps(() => ({
-    transform: \`translate(\${v.value} 0)\`,
-  }));
-  return (
-    <Svg width={14} height={14} viewBox="0 0 14 14">
-      <AG animatedProps={animatedProps}>
-        <Path
-          d="M -6 7 Q -3 3, 0 7 T 6 7 T 12 7 T 18 7 T 24 7 T 30 7"
-          fill="none" stroke={color} strokeWidth={1.5}
-          strokeLinecap="round"
-        />
-      </AG>
     </Svg>
   );
 }`,
@@ -772,12 +721,106 @@ function PlatformToggle({ value, onChange }) {
   );
 }
 
+function LoaderComparison() {
+  const [expanded, setExpanded] = useState(false);
+  // After the height animation finishes we let the wrapper overflow visibly
+  // so the phones' drop shadows aren't clipped to a hard edge.
+  const [overflowVisible, setOverflowVisible] = useState(false);
+  const aRef = useRef(null);
+  const bRef = useRef(null);
+
+  const replayBoth = () => {
+    aRef.current?.reset();
+    bRef.current?.reset();
+    // Let React commit the reset (phase → 'idle') before triggering.
+    setTimeout(() => {
+      aRef.current?.trigger();
+      bRef.current?.trigger();
+    }, 80);
+  };
+
+  const phones = [
+    { id: 'squiggle', label: 'Squiggle', ref: aRef },
+    { id: 'bloom',    label: 'Bloom',    ref: bRef },
+  ];
+
+  return (
+    <div className="mt-[16px] pb-[32px] border-b border-[var(--color-outline-light)]">
+      <button
+        onClick={() => setExpanded((e) => !e)}
+        className="flex items-center gap-[8px] text-[11px] font-[700] tracking-[0.08em] uppercase text-[var(--color-secondary-text)] hover:text-[var(--color-on-background)] transition-colors cursor-pointer"
+      >
+        <ChevronRight
+          size={12}
+          className={`shrink-0 transition-transform duration-200 ${expanded ? 'rotate-90' : ''}`}
+        />
+        <span>Compare loaders</span>
+      </button>
+      <AnimatePresence
+        initial={false}
+        onExitComplete={() => setOverflowVisible(false)}
+      >
+        {expanded && (
+          <motion.div
+            key="content"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+            onAnimationStart={() => setOverflowVisible(false)}
+            onAnimationComplete={() => setOverflowVisible(true)}
+            style={{ overflow: overflowVisible ? 'visible' : 'hidden' }}
+          >
+            <div className="pt-[20px]">
+              <p className="max-w-[680px] mb-[16px] text-[13px] leading-[20px] font-[450] text-[var(--color-secondary-text)]">
+                The two leading contenders side by side. Hit <strong className="font-[600] text-[var(--color-on-background)]">Replay both</strong> to start the flow on both phones in sync.
+              </p>
+              <div className="mb-[24px]">
+                <button
+                  onClick={replayBoth}
+                  className="inline-flex items-center gap-[6px] px-[14px] h-[34px] rounded-full text-[12px] font-[500] bg-[var(--color-on-background)] text-white hover:opacity-90 transition-opacity cursor-pointer"
+                >
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-[12px] h-[12px]">
+                    <path d="M2 3v4h4" />
+                    <path d="M2.5 11a6 6 0 1 0 1-7.5L2 7" />
+                  </svg>
+                  Replay both
+                </button>
+              </div>
+              <div className="flex flex-col sm:flex-row justify-center sm:justify-start items-start gap-[24px] sm:gap-[40px]">
+                {phones.map((p) => (
+                  <div key={p.id} className="w-full max-w-[340px] flex flex-col">
+                    <div className="flex items-center gap-[8px] mb-[12px]">
+                      <span className="w-[14px] h-[14px] flex items-center justify-center text-[var(--color-on-background)]">
+                        <LoaderIcon style={p.id} />
+                      </span>
+                      <span className="text-[13px] leading-[20px] font-[600] text-[var(--color-on-background)]">{p.label}</span>
+                    </div>
+                    <PhoneFrame showNavBar={false}>
+                      <ToolCallFlow
+                        ref={p.ref}
+                        scenario="creating-page"
+                        variant="fade-swap"
+                        loaderStyle={p.id}
+                      />
+                    </PhoneFrame>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 function LoaderGallery() {
   const [expanded, setExpanded] = useState(false);
   const [platform, setPlatform] = useState('web');
   const items = LOADER_STYLES.filter((s) => s.id !== 'none');
   return (
-    <div className="mt-[16px] pb-[32px] border-b border-[var(--color-outline-light)]">
+    <div className="mt-[16px] pb-[12px]">
       <button
         onClick={() => setExpanded((e) => !e)}
         className="flex items-center gap-[8px] text-[11px] font-[700] tracking-[0.08em] uppercase text-[var(--color-secondary-text)] hover:text-[var(--color-on-background)] transition-colors cursor-pointer"
@@ -863,14 +906,16 @@ function FinalProposalSection() {
         reverse={false}
         phone={
           <div>
-            <PhoneFrame showNavBar={false}>
-              <ToolCallFlow
-                ref={ref}
-                scenario="creating-page"
-                variant="fade-swap"
-                loaderStyle={loaderStyle}
-              />
-            </PhoneFrame>
+            <div data-export-phone="toolcalls-final">
+              <PhoneFrame showNavBar={false}>
+                <ToolCallFlow
+                  ref={ref}
+                  scenario="creating-page"
+                  variant="fade-swap"
+                  loaderStyle={loaderStyle}
+                />
+              </PhoneFrame>
+            </div>
             <Replay onClick={() => ref.current?.reset()} />
           </div>
         }
@@ -890,6 +935,50 @@ function FinalProposalSection() {
       />
       <SpecBlock behavior={FINAL_BEHAVIOR} sequence={S1_SEQUENCE} noBorder />
       <LoaderGallery />
+      <LoaderComparison />
+    </div>
+  );
+}
+
+function CollapsibleOlderIterations({ children }) {
+  const [expanded, setExpanded] = useState(false);
+  // Release overflow once the height animation finishes so phone drop
+  // shadows aren't clipped to the wrapper's bottom edge.
+  const [overflowVisible, setOverflowVisible] = useState(false);
+
+  return (
+    <div className="mb-[24px] md:mb-[32px]">
+      <button
+        onClick={() => setExpanded((e) => !e)}
+        className="group flex items-center gap-[12px] cursor-pointer"
+      >
+        <ChevronRight
+          size={20}
+          className={`shrink-0 transition-transform duration-200 text-[var(--color-secondary-text)] group-hover:text-[var(--color-on-background)] ${expanded ? 'rotate-90' : ''}`}
+        />
+        <h2 className="text-[24px] md:text-[32px] leading-[30px] md:leading-[40px] font-[700] tracking-[-0.02em] text-[var(--color-on-background)]">
+          Older Iterations
+        </h2>
+      </button>
+      <AnimatePresence
+        initial={false}
+        onExitComplete={() => setOverflowVisible(false)}
+      >
+        {expanded && (
+          <motion.div
+            key="content"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            onAnimationStart={() => setOverflowVisible(false)}
+            onAnimationComplete={() => setOverflowVisible(true)}
+            style={{ overflow: overflowVisible ? 'visible' : 'hidden' }}
+          >
+            <div className="pt-[24px]">{children}</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -1222,20 +1311,64 @@ function ScenarioTwoSection() {
   );
 }
 
+function ExportButton() {
+  const [busy, setBusy] = useState(false);
+
+  const handleClick = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const node = document.querySelector('[data-export-phone="toolcalls-final"]');
+      if (!node) {
+        console.warn('[export] toolcalls-final node not found');
+        return;
+      }
+      const htmlToImage = await import('html-to-image');
+      const dataUrl = await htmlToImage.toPng(node, { pixelRatio: 2, cacheBust: true });
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = `rosebud-toolcalls-final-${Date.now()}.png`;
+      a.click();
+    } catch (err) {
+      console.error('[export] failed:', err);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      disabled={busy}
+      className="inline-flex items-center gap-[6px] px-[12px] py-[7px] rounded-full text-[13px] font-[500] bg-[#191C1A] border border-[#191C1A] text-white hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity cursor-pointer mr-[8px]"
+    >
+      {busy ? 'Exporting…' : 'Export'}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-[12px] h-[12px]">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="7 10 12 15 17 10" />
+        <line x1="12" y1="15" x2="12" y2="3" />
+      </svg>
+    </button>
+  );
+}
+
 export function ToolCalls() {
   usePageActions(
-    <a
-      href={NOTION_URL}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-flex items-center gap-[6px] px-[12px] py-[7px] rounded-full text-[13px] font-[500] bg-white border border-[#C0C0BF] text-[#191C1A] hover:border-[#191C1A] transition-colors"
-    >
-      Notion Initiative
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-[12px] h-[12px]">
-        <path d="M7 17L17 7" />
-        <path d="M8 7h9v9" />
-      </svg>
-    </a>,
+    <>
+      <ExportButton />
+      <a
+        href={NOTION_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-[6px] px-[12px] py-[7px] rounded-full text-[13px] font-[500] bg-white border border-[#C0C0BF] text-[#191C1A] hover:border-[#191C1A] transition-colors"
+      >
+        Notion Initiative
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-[12px] h-[12px]">
+          <path d="M7 17L17 7" />
+          <path d="M8 7h9v9" />
+        </svg>
+      </a>
+    </>,
     [],
   );
 
@@ -1253,75 +1386,67 @@ export function ToolCalls() {
           <FinalProposalSection />
         </div>
 
-        <div className="max-w-[680px] mb-[24px] md:mb-[32px]">
-          <h2 className="text-[24px] md:text-[32px] leading-[30px] md:leading-[40px] font-[700] tracking-[-0.02em]">
-            Older Iterations
-          </h2>
-        </div>
-
-        <OlderIterationsSection />
-
-        <ScenarioTwoSection />
-
-        <div>
-          <ScenarioRow
-            reverse={false}
-            phone={<MentionsDatePhone />}
-            copy={
-              <div>
-                <Tagline>Scenario 3</Tagline>
-                <Title>User mentions a date</Title>
-                <NumberedInstructions
-                  items={[
-                    'Tap “Go deeper” to let Sage recall and search before replying.',
-                    'Tap the collapsed summary to expand and see the steps.',
-                  ]}
-                />
-              </div>
-            }
-          />
-          <SpecBlock behavior={SHARED_BEHAVIOR} sequence={S3_SEQUENCE} />
-        </div>
-
-        <div>
-          <ScenarioRow
-            reverse
-            phone={<ThinkingPhone />}
-            copy={
-              <div>
-                <Tagline>Scenario 4</Tagline>
-                <Title>Thinking enabled</Title>
-                <NumberedInstructions
-                  items={[
-                    'Tap “Go deeper” — thinking runs longer than other tool calls before the reply.',
-                    'Tap “Read 4 notes” to expand and see the thinking step that preceded it.',
-                  ]}
-                />
-              </div>
-            }
-          />
-          <SpecBlock behavior={SHARED_BEHAVIOR} sequence={S4_SEQUENCE} />
-        </div>
-
-        <div>
-          <ScenarioRow
-            reverse={false}
-            phone={<AfterTextPhone />}
-            copy={
-              <div>
-                <Tagline>Scenario 5</Tagline>
-                <Title>Tool call after a text reply</Title>
-                <NumberedInstructions
-                  items={[
-                    'Tap “Go deeper” — Sage replies first, then runs the tool call.',
-                    'The collapsed summary lands underneath the reply.',
-                  ]}
-                />
-              </div>
-            }
-          />
-          <SpecBlock behavior={SHARED_BEHAVIOR} sequence={S5_SEQUENCE} />
-        </div>
+        <CollapsibleOlderIterations>
+          <OlderIterationsSection />
+          <ScenarioTwoSection />
+          <div>
+            <ScenarioRow
+              reverse={false}
+              phone={<MentionsDatePhone />}
+              copy={
+                <div>
+                  <Tagline>Scenario 3</Tagline>
+                  <Title>User mentions a date</Title>
+                  <NumberedInstructions
+                    items={[
+                      'Tap “Go deeper” to let Rosebud recall and search before replying.',
+                      'Tap the collapsed summary to expand and see the steps.',
+                    ]}
+                  />
+                </div>
+              }
+            />
+            <SpecBlock behavior={SHARED_BEHAVIOR} sequence={S3_SEQUENCE} />
+          </div>
+          <div>
+            <ScenarioRow
+              reverse
+              phone={<ThinkingPhone />}
+              copy={
+                <div>
+                  <Tagline>Scenario 4</Tagline>
+                  <Title>Thinking enabled</Title>
+                  <NumberedInstructions
+                    items={[
+                      'Tap “Go deeper” — thinking runs longer than other tool calls before the reply.',
+                      'Tap “Read 4 notes” to expand and see the thinking step that preceded it.',
+                    ]}
+                  />
+                </div>
+              }
+            />
+            <SpecBlock behavior={SHARED_BEHAVIOR} sequence={S4_SEQUENCE} />
+          </div>
+          <div>
+            <ScenarioRow
+              reverse={false}
+              phone={<AfterTextPhone />}
+              copy={
+                <div>
+                  <Tagline>Scenario 5</Tagline>
+                  <Title>Tool call after a text reply</Title>
+                  <NumberedInstructions
+                    items={[
+                      'Tap “Go deeper” — Rosebud replies first, then runs the tool call.',
+                      'The collapsed summary lands underneath the reply.',
+                    ]}
+                  />
+                </div>
+              }
+            />
+            <SpecBlock behavior={SHARED_BEHAVIOR} sequence={S5_SEQUENCE} />
+          </div>
+        </CollapsibleOlderIterations>
       </section>
     </div>
   );
