@@ -343,7 +343,7 @@ export function DesignSystemWeb() {
               Foundations
             </span>
             <h1 className="text-[36px] leading-[42px] font-[700] tracking-[-0.02em] text-[var(--color-on-background)] mb-[8px]">
-              Design System (Web)
+              Design System (Web App)
             </h1>
             <p className="text-[15px] leading-[22px] font-[450] text-[var(--color-secondary-text)] max-w-[640px]">
               The web design system from <PathTag>Rising-Tide-Org/rosebud-react</PathTag> · <PathTag>apps/web</PathTag>.

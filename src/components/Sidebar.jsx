@@ -5,19 +5,19 @@ import { ChevronRight } from 'lucide-react';
 
 const SECTIONS = [
   {
-    label: 'Planning',
-    items: [{ path: '/living-design-system', label: 'Living Design System' }],
-  },
-  {
     label: 'Foundation',
     items: [
       { path: '/design-system', label: 'Design System' },
-      { path: '/design-system-web', label: 'Design System (Web)' },
+      { path: '/design-system-web', label: 'Design System (Web App)' },
     ],
   },
   {
     label: 'Concepts',
     items: [{ path: '/tool-calls', label: 'Tool Calls' }],
+  },
+  {
+    label: 'Planning',
+    items: [{ path: '/living-design-system', label: 'Living Design System' }],
   },
   {
     label: 'Archive',
