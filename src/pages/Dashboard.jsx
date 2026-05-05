@@ -1,35 +1,35 @@
 import { Link } from 'react-router-dom';
-import { Palette, Sparkles, Blocks, ArrowUpRight } from 'lucide-react';
+import { Smartphone, AppWindow, Globe, ArrowUpRight } from 'lucide-react';
 
 const ITEMS = [
   {
     path: '/design-system',
-    eyebrow: 'Foundation',
-    icon: Palette,
-    title: 'Design System',
+    eyebrow: 'Mobile',
+    icon: Smartphone,
+    title: 'Design System (Mobile App)',
     description:
-      'Color, typography, components, and patterns that anchor the product.',
-    meta: 'Tokens · Components',
+      'Tokens, components, and screens for the iOS and Android app — extracted from Figma.',
+    meta: 'React Native · Figma-sourced',
     accent: 'rose',
   },
   {
-    path: '/tool-calls',
-    eyebrow: 'Concepts',
-    icon: Sparkles,
-    title: 'Tool Calls',
+    path: '/design-system-web',
+    eyebrow: 'Web App',
+    icon: AppWindow,
+    title: 'Design System (Web App)',
     description:
-      "How the assistant shows its work without burying the reply.",
-    meta: '5 scenarios · 2 iterations',
+      'Real Chakra UI components from rosebud-react/apps/web. Prototypes here translate to prod with almost no rework.',
+    meta: 'Chakra UI · Live components',
     accent: 'sage',
   },
   {
-    path: '/living-design-system',
-    eyebrow: 'Planning',
-    icon: Blocks,
-    title: 'Living Design System',
+    path: '/design-system-website',
+    eyebrow: 'Marketing',
+    icon: Globe,
+    title: 'Design System (Website)',
     description:
-      'A proposal for closing the design–engineering gap with Storybook + react-native-web.',
-    meta: 'Proposal',
+      'Tokens and section patterns from the rosebud.app marketing site — for fast landing-page prototypes.',
+    meta: 'Tailwind · Webflow-sourced',
     accent: 'ivory',
   },
 ];
@@ -95,10 +95,10 @@ export function Dashboard() {
             <span className="text-[12px] font-[600] tracking-[0.08em] uppercase text-[#6D6C6A]">Design</span>
           </div>
           <h1 className="text-[32px] md:text-[44px] leading-[36px] md:leading-[50px] font-[700] tracking-[-0.025em] text-[#191C1A] mb-[10px]">
-            Design workspace
+            Design systems
           </h1>
-          <p className="text-[14px] md:text-[16px] leading-[22px] md:leading-[26px] font-[450] text-[#6D6C6A] max-w-[560px]">
-            System, in-progress concepts, and proposals — built in code so they grow alongside the product.
+          <p className="text-[14px] md:text-[16px] leading-[22px] md:leading-[26px] font-[450] text-[#6D6C6A] max-w-[580px]">
+            All three surfaces — mobile, web app, and marketing — in one place. Each page includes a "How to use with Claude" prompt cookbook so anyone can prototype on-brand.
           </p>
         </div>
 
