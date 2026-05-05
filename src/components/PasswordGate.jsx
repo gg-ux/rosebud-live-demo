@@ -20,6 +20,10 @@ import { useState, useEffect } from 'react';
 const ENCODED_PASSWORD = 'Ymxvb21pbmczMzM=';
 const STORAGE_KEY = 'rosebud-demo-unlocked';
 
+// TEMP: gate disabled. Site is open. Flip GATE_DISABLED to false to
+// re-enable the password gate.
+const GATE_DISABLED = true;
+
 export function PasswordGate({ children }) {
   const [unlocked, setUnlocked] = useState(false);
   const [checked, setChecked] = useState(false); // hydration guard
@@ -74,7 +78,7 @@ export function PasswordGate({ children }) {
   // flashing for visitors who already unlocked.
   if (!checked) return null;
 
-  if (unlocked) return children;
+  if (GATE_DISABLED || unlocked) return children;
 
   return (
     <div
