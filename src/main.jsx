@@ -11,6 +11,7 @@ import chakraTheme from './theme/index.js'
 const Dashboard = lazy(() => import('./pages/Dashboard.jsx').then(m => ({ default: m.Dashboard })))
 const DesignSystem = lazy(() => import('./pages/DesignSystem.jsx').then(m => ({ default: m.DesignSystem })))
 const DesignSystemWeb = lazy(() => import('./pages/DesignSystemWeb.jsx').then(m => ({ default: m.DesignSystemWeb })))
+const DesignSystemWebsite = lazy(() => import('./pages/DesignSystemWebsite.jsx').then(m => ({ default: m.DesignSystemWebsite })))
 const Concepts = lazy(() => import('./pages/Concepts.jsx').then(m => ({ default: m.Concepts })))
 const Presentation = lazy(() => import('./pages/Presentation.jsx').then(m => ({ default: m.Presentation })))
 const ToolCalls = lazy(() => import('./pages/ToolCalls.jsx').then(m => ({ default: m.ToolCalls })))
@@ -38,6 +39,7 @@ function AppRoutes() {
           <Route path="/patterns" element={<Concepts />} />
           <Route path="/design-system" element={<DesignSystem />} />
           <Route path="/design-system-web" element={<DesignSystemWeb />} />
+          <Route path="/design-system-website" element={<DesignSystemWebsite />} />
           <Route path="/therapist" element={<App />} />
           <Route path="/tool-calls" element={<ToolCalls />} />
           <Route path="/living-design-system" element={<LivingDesignSystem />} />

@@ -9,6 +9,7 @@ const SECTIONS = [
     items: [
       { path: '/design-system', label: 'Design System (Mobile App)' },
       { path: '/design-system-web', label: 'Design System (Web App)' },
+      { path: '/design-system-website', label: 'Design System (Website)' },
     ],
   },
   {
