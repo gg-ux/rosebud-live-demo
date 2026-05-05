@@ -21,9 +21,16 @@ import {
 
 const NAV = [
   {
+    group: 'Getting Started',
+    items: [{ id: 'how-to-use', label: 'How to use with Claude' }],
+  },
+  {
     group: 'Foundations',
     items: [
+      { id: 'source', label: 'Source of truth' },
       { id: 'colors', label: 'Colors' },
+      { id: 'md3-tokens', label: 'MD3 Semantic Tokens' },
+      { id: 'color-variants', label: 'Primary Color Variants' },
       { id: 'typography', label: 'Typography' },
       { id: 'spacing', label: 'Spacing' },
       { id: 'radius', label: 'Radius' },
@@ -160,6 +167,22 @@ function ComponentSpec({ name, children }) {
   );
 }
 
+function PathTag({ children }) {
+  return (
+    <span className="inline-block text-[11px] leading-[14px] font-mono text-[var(--color-secondary-text)] bg-[var(--color-surface-variant)] px-[6px] py-[2px] rounded-[4px]">
+      {children}
+    </span>
+  );
+}
+
+function CodeBlock({ children }) {
+  return (
+    <pre className="mt-[12px] p-[12px] rounded-[8px] bg-[#0F0E0E] text-[#F7F5F5] text-[12px] leading-[18px] font-mono overflow-x-auto whitespace-pre-wrap">
+      <code>{children}</code>
+    </pre>
+  );
+}
+
 /* ══════════════════════════════════════════════════════════
    PAGE
    ══════════════════════════════════════════════════════════ */
@@ -273,10 +296,108 @@ export function DesignSystem() {
         {/* ── Main content ── */}
         <main className="flex-1 min-w-0 px-[32px] lg:px-[48px] py-[48px]">
 
+          {/* Page header */}
+          <div className="mb-[40px] pb-[24px] border-b border-[var(--color-outline-light)]">
+            <span className="inline-block text-[11px] font-[700] uppercase tracking-[0.08em] text-[var(--color-secondary-text)] mb-[8px]">
+              Foundations
+            </span>
+            <h1 className="text-[36px] leading-[42px] font-[700] tracking-[-0.02em] text-[var(--color-on-background)] mb-[8px]">
+              Design System (Mobile App)
+            </h1>
+            <p className="text-[15px] leading-[22px] font-[450] text-[var(--color-secondary-text)] max-w-[680px]">
+              The mobile app design system from <PathTag>Rising-Tide-Org/rosebud-react</PathTag> · <PathTag>apps/native</PathTag>.
+              Built on Expo SDK 54 + react-native-paper (MD3 theming). Tokens on this page are now backed by the actual native source — see <a href="#source" className="underline">Source of truth</a>.
+            </p>
+          </div>
+
+          {/* ═══ GETTING STARTED ═══ */}
+
+          <Section id="how-to-use" title="How to use this page with Claude" description="Copy-paste these prompts when you want Claude to prototype mobile-app screens that match Rosebud's native design language.">
+            <div className="p-[24px] rounded-[12px] bg-[var(--color-surface-variant)] border border-[var(--color-outline-light)]">
+              <p className="text-[12px] font-[500] uppercase tracking-[0.06em] text-[var(--color-secondary-text)] mb-[10px]">1 · Bootstrap a new mobile prototype page</p>
+              <p className="text-[14px] leading-[20px] text-[var(--color-secondary-text)] mb-[12px]">
+                The mobile app is React Native, but this prototype repo is web-only. Prototype mobile UI here as <strong>Tailwind approximations</strong> using the real native tokens — same look and feel, ships in the browser. Drop a new file under <PathTag>src/pages/</PathTag>:
+              </p>
+              <CodeBlock>{`Create a mobile-style prototype page at src/pages/MyMobilePage.jsx using Tailwind CSS. Wrap content in a phone frame (use the existing PhoneFrame component from src/components/PhoneFrame.jsx) so it visually reads as mobile.
+
+Use the rosebud-react native tokens documented in /design-system. The actual source lives in apps/native/src/theme/ — read it via gh if you need exact values:
+gh api repos/Rising-Tide-Org/rosebud-react/contents/apps/native/src/theme/light.ts -H "Accept: application/vnd.github.raw"
+
+Rules:
+- Color discipline: the native app uses MD3 (Material Design 3) tokens. Primary actions use the active variant's primary color (default is black rgb(0,0,0); rose variant is rgb(227,22,101) = #E31665). Surfaces use 'surface' (white in light, rgb(30,30,32) in dark). Text uses 'onSurface' / 'onBackground'.
+- Typography: Circular Std family (Light, Book, BookItalic, Medium, Bold, Black). Use the MD3 typescale: displayLarge 24/500, titleMedium 16/500, bodyLarge 17/450, labelMedium 13/450, etc.
+- Spacing: 4px grid via space(n) — use Tailwind's [N] arbitrary values where N = n*4. So space(4) = 16px = p-[16px].
+- Radius: native uses a key-based scale: xxs 4 / xs 6 / sm 8 / md 10 / lg 12 / xl 16 / 2xl 18 / 3xl 24 / full 999. Match these exactly.
+
+Add a Route in src/main.jsx and (optionally) a sidebar entry in src/components/Sidebar.jsx.`}</CodeBlock>
+
+              <p className="text-[12px] font-[500] uppercase tracking-[0.06em] text-[var(--color-secondary-text)] mt-[24px] mb-[10px]">2 · Build a specific component or screen</p>
+              <p className="text-[14px] leading-[20px] text-[var(--color-secondary-text)] mb-[12px]">When you want to recreate one of the components or cards on this page:</p>
+              <CodeBlock>{`Build the [COMPONENT NAME — e.g. "JournalEntry card"] from /design-system. Use Tailwind. Match the spacing, typography, color tokens, and radius shown in the reference example exactly.
+
+The page renders these as visual approximations because we're in a web app. The real implementations live in apps/native/src/components/<Name>/index.tsx in the rosebud-react repo — read source there if you need exact behavior or props.`}</CodeBlock>
+
+              <p className="text-[12px] font-[500] uppercase tracking-[0.06em] text-[var(--color-secondary-text)] mt-[24px] mb-[10px]">3 · Pick the right primary variant</p>
+              <p className="text-[14px] leading-[20px] text-[var(--color-secondary-text)] mb-[12px]">The native app supports 6 primary color variants the user can pick from. If your prototype shouldn't be the default (black), tell Claude:</p>
+              <CodeBlock>{`Use the [rose | green | blue | orange | purple] primary variant from the native theme. The variant changes only the primary + onPrimary colors (and a few surface tints in dark mode) — everything else stays the same.
+
+Variant primaries:
+- default: black rgb(0,0,0)
+- rose:    rgb(227,22,101) #E31665   (the brand pink)
+- green:   rgb(29,155,94)
+- blue:    rgb(81,132,211)
+- orange:  rgb(218,101,90)
+- purple:  rgb(140,60,144)`}</CodeBlock>
+
+              <p className="text-[12px] font-[500] uppercase tracking-[0.06em] text-[var(--color-secondary-text)] mt-[24px] mb-[10px]">4 · Reference the native repo directly</p>
+              <CodeBlock>{`Read source from Rising-Tide-Org/rosebud-react via gh:
+gh api repos/Rising-Tide-Org/rosebud-react/contents/apps/native/src/<path> -H "Accept: application/vnd.github.raw"
+
+Key paths:
+- apps/native/src/theme/light.ts          — MD3 light theme
+- apps/native/src/theme/dark.ts           — MD3 dark theme
+- apps/native/src/theme/tokens.ts         — space(), radius(), border() helpers
+- apps/native/src/theme/fonts.ts          — Circular font weights + MD3 typescale
+- apps/native/src/theme/variants/         — 6 primary color variants
+- apps/native/src/components/<Name>/      — primitive component source`}</CodeBlock>
+
+              <p className="text-[12px] font-[500] uppercase tracking-[0.06em] text-[var(--color-secondary-text)] mt-[24px] mb-[10px]">Three styling worlds in this repo</p>
+              <ul className="text-[14px] leading-[22px] text-[var(--color-on-surface)] list-disc pl-[20px] space-y-[4px]">
+                <li><strong>Mobile App pages</strong> (this page) — Tailwind approximations of React Native components, framed in a phone mockup.</li>
+                <li><strong>Web App pages</strong> (/design-system-web) — real Chakra UI v2 with the rosebud-react theme.</li>
+                <li><strong>Website pages</strong> (/design-system-website) — Tailwind, no framework, marketing/landing style.</li>
+              </ul>
+              <p className="text-[13px] text-[var(--color-secondary-text)] mt-[8px]">Don't mix them on the same page. Pick one stack per prototype.</p>
+            </div>
+          </Section>
+
           {/* ═══ FOUNDATIONS ═══ */}
 
+          {/* Source of truth */}
+          <Section id="source" title="Source of truth" description="Where these tokens come from in the actual native codebase.">
+            <div className="p-[20px] rounded-[12px] bg-[var(--color-surface)] border border-[var(--color-outline-light)] space-y-[10px]">
+              <p className="text-[14px] leading-[22px] text-[var(--color-on-surface)]">
+                <strong>Stack:</strong> Expo SDK 54 + React Native 0.81.5 + react-native-paper 5.12 (MD3 theming).
+              </p>
+              <p className="text-[14px] leading-[22px] text-[var(--color-on-surface)]">
+                <strong>Theme files (pure data — no native deps, port verbatim):</strong>
+              </p>
+              <ul className="text-[13px] leading-[22px] text-[var(--color-secondary-text)] list-disc pl-[20px]">
+                <li><PathTag>apps/native/src/theme/light.ts</PathTag> · MD3 light theme + Rosebud extensions</li>
+                <li><PathTag>apps/native/src/theme/dark.ts</PathTag> · MD3 dark theme</li>
+                <li><PathTag>apps/native/src/theme/tokens.ts</PathTag> · <code className="font-mono">space()</code>, <code className="font-mono">radius()</code>, <code className="font-mono">border()</code> helpers</li>
+                <li><PathTag>apps/native/src/theme/fonts.ts</PathTag> · MD3 typescale + Circular weights</li>
+                <li><PathTag>apps/native/src/theme/variants/</PathTag> · 6 primary color variants (default, rose, green, blue, orange, purple)</li>
+                <li><PathTag>apps/native/src/components/</PathTag> · primitive component source</li>
+              </ul>
+              <p className="text-[13px] text-[var(--color-secondary-text)] pt-[8px]">
+                Note: this page predates the native code survey — the brand color scales (Rose Pink 900→50, Sage Green, etc.) below are an extended Figma palette Grace built that doesn't exist as scales in the native code itself. The native app uses raw MD3 colors. Both are documented; treat the brand scales as the design palette and the MD3 tokens as what's actually in production.
+              </p>
+            </div>
+          </Section>
+
           {/* Colors */}
-          <Section id="colors" title="Colors" description="The color system defines the core palette used across UI, brand, and marketing. Semantic tokens adapt to light and dark themes.">
+          <Section id="colors" title="Colors — Brand Scales (Figma extended palette)" description="The full extended brand palette as documented in Figma. Useful for picking accent shades. The native code only uses a subset of these — see MD3 Semantic Tokens below for what actually ships.">
             <SubSection title="Brand — Rose Pink">
               <div className="flex flex-wrap gap-[12px]">
                 {[['900','#630025'],['800','#7E0230'],['700','#A40742'],['600','#C50C51'],['500','#D6165B'],['400','#E31665'],['300','#F47EAC'],['200','#FFBDD6'],['100','#FFD8E7'],['50','#FFE2ED']].map(([n,h]) => (
@@ -327,8 +448,110 @@ export function DesignSystem() {
             </SubSection>
           </Section>
 
+          {/* MD3 Semantic Tokens — actual native source */}
+          <Section id="md3-tokens" title="MD3 Semantic Tokens (actual native source)" description="What's actually shipped in apps/native/src/theme/light.ts and dark.ts. The native app uses Material Design 3 tokens via react-native-paper.">
+            <SubSection title="Light theme">
+              <TokenTable
+                headers={['Token', 'rgb()']}
+                rows={[
+                  ['primary', 'rgb(0, 0, 0)'],
+                  ['onPrimary', 'rgb(250, 250, 250)'],
+                  ['primaryContainer', 'rgb(151, 247, 183)'],
+                  ['secondary', 'rgb(79, 99, 84)'],
+                  ['secondaryContainer', 'rgb(255, 255, 255)'],
+                  ['tertiary', 'rgb(59, 100, 112)'],
+                  ['tertiaryContainer', 'rgb(190, 234, 247)'],
+                  ['error', 'rgb(186, 26, 26)'],
+                  ['errorContainer', 'rgb(255, 218, 214)'],
+                  ['background', 'rgb(240, 240, 240)'],
+                  ['onBackground', 'rgb(25, 28, 26)'],
+                  ['surface', 'rgb(255, 255, 255)'],
+                  ['onSurface', 'rgb(25, 28, 26)'],
+                  ['surfaceVariant', 'rgb(220, 229, 219)'],
+                  ['onSurfaceVariant', 'rgb(65, 73, 66)'],
+                  ['outline', 'rgb(192, 192, 191)'],
+                  ['outlineLight', 'rgb(222, 222, 222)'],
+                  ['outlineVariant', 'rgb(201, 202, 201)'],
+                  ['backdrop', 'rgba(43, 50, 44, 0.4)'],
+                ]}
+              />
+            </SubSection>
+            <SubSection title="Rosebud extensions (light)">
+              <TokenTable
+                headers={['Token', 'rgb()', 'Use']}
+                rows={[
+                  ['assistant', '#2b6cb0', 'AI assistant accent (cool blue)'],
+                  ['backgroundOnSurface', 'rgb(248, 248, 248)', 'Background applied over a surface'],
+                  ['secondaryText', 'rgb(109, 108, 106)', 'Subdued body text'],
+                  ['secondaryTextOnSurface', 'rgb(139, 130, 139)', 'Subdued text over a surface'],
+                  ['blue', 'rgb(10, 132, 255)', 'Status/info accent'],
+                  ['yellow', 'rgb(253, 207, 8)', 'Warning accent'],
+                  ['green', 'rgb(32, 123, 0)', 'Success accent'],
+                  ['softIvory', 'rgba(115, 78, 15, 1)', 'Premium / soft warm accent'],
+                  ['sand', 'rgb(255, 243, 228)', 'Warm tinted background (callouts)'],
+                  ['surfaceGradient', "['rgba(255,255,255,1)', 'rgba(255,255,255,0)']", 'Top→transparent fade'],
+                  ['backgroundGradient', "['rgba(240,240,240,1)', 'rgba(240,240,240,0)']", 'Top→transparent fade'],
+                ]}
+              />
+            </SubSection>
+            <SubSection title="Dark theme (deltas from light)">
+              <TokenTable
+                headers={['Token', 'rgb()']}
+                rows={[
+                  ['primary', 'rgb(220, 220, 220)'],
+                  ['onPrimary', 'rgb(0, 0, 0)'],
+                  ['background', 'rgb(10, 12, 10)'],
+                  ['onBackground', 'rgb(225, 227, 222)'],
+                  ['surface', 'rgb(30, 30, 32)'],
+                  ['onSurface', 'rgb(225, 227, 222)'],
+                  ['surfaceVariant', 'rgb(65, 73, 66)'],
+                  ['outline', 'rgb(65, 73, 66)'],
+                  ['outlineLight', 'rgb(50, 50, 52)'],
+                  ['assistant', '#63b3ed'],
+                  ['secondaryText', 'rgb(100, 108, 106)'],
+                  ['green', 'rgb(64, 172, 26)'],
+                  ['softIvory', 'rgba(250, 216, 161, 1)'],
+                ]}
+              />
+            </SubSection>
+            <p className="mt-[16px] text-[12px] text-[var(--color-secondary-text)]">
+              <PathTag>apps/native/src/theme/light.ts</PathTag> · <PathTag>apps/native/src/theme/dark.ts</PathTag>
+            </p>
+          </Section>
+
+          {/* Primary Color Variants */}
+          <Section id="color-variants" title="Primary Color Variants" description="The native app supports 6 primary color variants the user can switch between. The variant only changes primary + onPrimary (and a few surface tints in dark mode); everything else stays the same.">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
+              {[
+                ['default', '#000000', '#FAFAFA', 'Black — the default neutral'],
+                ['rose', '#E31665', '#FFFFFF', 'rgb(227, 22, 101) — the brand pink'],
+                ['green', '#1D9B5E', '#FFFFFF', 'rgb(29, 155, 94)'],
+                ['blue', '#5184D3', '#FFFFFF', 'rgb(81, 132, 211)'],
+                ['orange', '#DA655A', '#FFFFFF', 'rgb(218, 101, 90)'],
+                ['purple', '#8C3C90', '#FFFFFF', 'rgb(140, 60, 144)'],
+              ].map(([name, primary, onPrimary, desc]) => (
+                <div key={name} className="p-[16px] rounded-[12px] bg-[var(--color-surface)] border border-[var(--color-outline-light)]">
+                  <div className="flex items-center gap-[12px] mb-[10px]">
+                    <div className="w-[40px] h-[40px] rounded-[10px]" style={{ backgroundColor: primary }} />
+                    <div>
+                      <p className="text-[14px] font-[600] text-[var(--color-on-surface)] capitalize">{name}</p>
+                      <p className="text-[12px] text-[var(--color-secondary-text)] font-mono">primary {primary}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-[8px]">
+                    <button className="px-[14px] h-[36px] rounded-[8px] text-[13px] font-[500]" style={{ backgroundColor: primary, color: onPrimary }}>Primary action</button>
+                    <span className="text-[12px] text-[var(--color-secondary-text)]">{desc}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="mt-[16px] text-[12px] text-[var(--color-secondary-text)]">
+              <PathTag>apps/native/src/theme/variants/</PathTag> · selected via <code className="font-mono">getColors(mode, color)</code> in <PathTag>variants/index.ts</PathTag>
+            </p>
+          </Section>
+
           {/* Typography */}
-          <Section id="typography" title="Typography" description="Circular Std is the primary typeface. Weights: Book (450), Medium (500), Bold (700).">
+          <Section id="typography" title="Typography" description="Circular Std family with 6 weights (Light, Book 450, BookItalic, Medium 500, Bold 700, Black). Type scale follows MD3 typescale via configureFonts().">
             <div className="overflow-x-auto rounded-[12px] border border-[var(--color-outline-light)]">
               <table className="w-full">
                 <thead>
@@ -370,10 +593,13 @@ export function DesignSystem() {
                 </tbody>
               </table>
             </div>
+            <p className="mt-[16px] text-[12px] text-[var(--color-secondary-text)]">
+              <PathTag>apps/native/src/theme/fonts.ts</PathTag> · MD3 typescale via <code className="font-mono">configureFonts(fontStyle)</code>
+            </p>
           </Section>
 
           {/* Spacing */}
-          <Section id="spacing" title="Spacing" description="4px modular scale for consistent rhythm. Named by multiplier (1 = 4px).">
+          <Section id="spacing" title="Spacing" description="4dp grid via the space(n) helper. n × 4 = px. .5 steps allowed; off-grid values warn in __DEV__.">
             <TokenTable
               headers={['Token', 'Value', 'Multiplier']}
               rows={[
@@ -400,10 +626,13 @@ export function DesignSystem() {
                 </div>
               ))}
             </div>
+            <p className="mt-[16px] text-[12px] text-[var(--color-secondary-text)]">
+              <PathTag>apps/native/src/theme/tokens.ts</PathTag> · <code className="font-mono">space(n: number)</code> exported helper
+            </p>
           </Section>
 
           {/* Radius */}
-          <Section id="radius" title="Radius" description="Consistent corner rounding to create a friendly, approachable visual language.">
+          <Section id="radius" title="Radius" description="Key-based scale. Use radius(key) helper. Matches the native source verbatim.">
             <TokenTable
               headers={['Token', 'Value']}
               rows={[
@@ -419,10 +648,13 @@ export function DesignSystem() {
                 </div>
               ))}
             </div>
+            <p className="mt-[16px] text-[12px] text-[var(--color-secondary-text)]">
+              <PathTag>apps/native/src/theme/tokens.ts</PathTag> · <code className="font-mono">radius(key: RadiusKey)</code> exported helper
+            </p>
           </Section>
 
           {/* Borders */}
-          <Section id="borders" title="Borders" description="A limited set of border widths for visual clarity and consistency.">
+          <Section id="borders" title="Borders" description="Key-based scale. Use border(key) helper. Matches the native source verbatim.">
             <TokenTable
               headers={['Token', 'Value']}
               rows={[['xs', '1px'], ['sm', '2px'], ['md', '4px'], ['lg', '6px'], ['xl', '8px']]}
@@ -435,6 +667,9 @@ export function DesignSystem() {
                 </div>
               ))}
             </div>
+            <p className="mt-[16px] text-[12px] text-[var(--color-secondary-text)]">
+              <PathTag>apps/native/src/theme/tokens.ts</PathTag> · <code className="font-mono">border(key: BorderKey)</code> exported helper
+            </p>
           </Section>
 
           {/* Shadows */}
