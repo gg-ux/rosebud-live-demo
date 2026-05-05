@@ -10,7 +10,10 @@ const SECTIONS = [
   },
   {
     label: 'Foundation',
-    items: [{ path: '/design-system', label: 'Design System' }],
+    items: [
+      { path: '/design-system', label: 'Design System' },
+      { path: '/design-system-web', label: 'Design System (Web)' },
+    ],
   },
   {
     label: 'Concepts',
