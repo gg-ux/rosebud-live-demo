@@ -83,7 +83,7 @@ export function Dashboard() {
         {/* Hero */}
         <div className="flex flex-col items-start">
           <h1 className="text-[32px] md:text-[44px] leading-[36px] md:leading-[50px] font-[700] tracking-[-0.025em] text-[#191C1A] mb-[10px]">
-            Rosebud Design Systems
+            Rosebud Design System
           </h1>
           <p className="text-[15px] md:text-[17px] leading-[22px] md:leading-[26px] font-[450] text-[#6D6C6A] max-w-[640px]">
             A calm, warm visual language for tools that help people grow. Disciplined color, editorial typography, soft organic shapes — one voice across mobile, web, and marketing.
