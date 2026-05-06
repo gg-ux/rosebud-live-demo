@@ -1,10 +1,19 @@
 import { useState, useEffect } from 'react';
-import { Sun, Moon, ChevronRight } from 'lucide-react';
+import { Sun, Moon, ChevronRight, Atom } from 'lucide-react';
 import { usePageActions } from '../components/Layout';
+import { DesignSystemSwitcher } from '../components/DesignSystemSwitcher';
 import {
-  Button, Input, Textarea, Searchbar, Switch, Checkbox, RadioButton,
-  SegmentedControl, CheckboxCard, Pill, Avatar, Tag, Snackbar, Infobar, Card,
-} from '../components';
+  PaperProvider, Button as PaperButton, TextInput as PaperTextInput,
+  Switch as PaperSwitch, Checkbox as PaperCheckbox, RadioButton as PaperRadio,
+  Searchbar as PaperSearchbar, Chip as PaperChip, Avatar as PaperAvatar,
+  Divider as PaperDivider, ActivityIndicator, ProgressBar,
+} from 'react-native-paper';
+import { View, Text as RNText } from 'react-native';
+import { getTheme } from '../native-theme/variants';
+// Tailwind Card / Avatar / Tag still used inside the Cards section.
+// Other primitives (Button, Input, Switch, etc.) now render via real
+// react-native-paper in the Native Primitives section.
+import { Avatar, Tag, Card } from '../components';
 import {
   JournalEntry, StreakCard, ValueCard, DailyPromptCard, QuoteCard,
   ReflectionCard, InsightCard, HaikuCard, AskRosebudCard, KeyThemeCard,
@@ -22,12 +31,14 @@ import {
 const NAV = [
   {
     group: 'Getting Started',
-    items: [{ id: 'how-to-use', label: 'How to use with Claude' }],
+    items: [
+      { id: 'source', label: 'Source of truth' },
+      { id: 'how-to-use', label: 'How to use with Claude' },
+    ],
   },
   {
     group: 'Foundations',
     items: [
-      { id: 'source', label: 'Source of truth' },
       { id: 'colors', label: 'Colors' },
       { id: 'md3-tokens', label: 'MD3 Semantic Tokens' },
       { id: 'color-variants', label: 'Primary Color Variants' },
@@ -42,38 +53,31 @@ const NAV = [
   {
     group: 'Actions',
     items: [
-      { id: 'buttons', label: 'Button' },
-      { id: 'button-pill', label: 'Button / Pill' },
+      { id: 'p-button', label: 'Button', stack: 'rn-paper' },
     ],
   },
   {
     group: 'Input & Selection',
     items: [
-      { id: 'input', label: 'Input' },
-      { id: 'textarea', label: 'Textarea' },
-      { id: 'searchbar', label: 'Searchbar' },
-      { id: 'checkbox', label: 'Checkbox' },
-      { id: 'checkbox-card', label: 'Checkbox Card' },
-      { id: 'radio', label: 'Radio Button' },
-      { id: 'switch', label: 'Switch' },
-      { id: 'segmented', label: 'Segmented Control' },
-    ],
-  },
-  {
-    group: 'Feedback',
-    items: [
-      { id: 'snackbar', label: 'Snackbar' },
-      { id: 'infobar', label: 'Infobar' },
+      { id: 'p-textinput', label: 'TextInput', stack: 'rn-paper' },
+      { id: 'p-searchbar', label: 'Searchbar', stack: 'rn-paper' },
+      { id: 'p-switch', label: 'Switch', stack: 'rn-paper' },
+      { id: 'p-checkbox', label: 'Checkbox', stack: 'rn-paper' },
+      { id: 'p-radio', label: 'Radio Button', stack: 'rn-paper' },
     ],
   },
   {
     group: 'Display',
     items: [
-      { id: 'cards', label: 'Card' },
-      { id: 'pills', label: 'Pill' },
-      { id: 'tags', label: 'Tag' },
-      { id: 'avatars', label: 'Avatar' },
+      { id: 'p-chip', label: 'Chip', stack: 'rn-paper' },
+      { id: 'p-avatar', label: 'Avatar', stack: 'rn-paper' },
+      { id: 'p-activity', label: 'Activity Indicator', stack: 'rn-paper' },
+      { id: 'p-progress', label: 'Progress Bar', stack: 'rn-paper' },
     ],
+  },
+  {
+    group: 'Cards',
+    items: [{ id: 'cards', label: 'Rosebud cards' }],
   },
   {
     group: 'Assets',
@@ -88,12 +92,13 @@ const NAV = [
 
 /* ── Layout helpers ── */
 
-function Section({ id, title, description, children }) {
+function Section({ id, title, description, stack, children }) {
   return (
     <section id={id} className="mb-[64px] scroll-mt-[80px]">
-      <h2 className="text-[24px] leading-[32px] font-[700] text-[var(--color-on-background)] mb-[4px]">
-        {title}
-      </h2>
+      <div className="flex items-center gap-[10px] mb-[4px] flex-wrap">
+        <h2 className="text-[24px] leading-[32px] font-[700] text-[var(--color-on-background)]">{title}</h2>
+        {stack === 'rn-paper' && <StackChip />}
+      </div>
       {description && (
         <p className="text-[15px] leading-[20px] font-[450] text-[var(--color-secondary-text)] mb-[24px]">
           {description}
@@ -102,6 +107,18 @@ function Section({ id, title, description, children }) {
       {!description && <div className="mb-[24px]" />}
       {children}
     </section>
+  );
+}
+
+function StackChip() {
+  return (
+    <span
+      className="inline-flex items-center gap-[5px] px-[8px] py-[2px] rounded-full bg-[var(--color-surface-variant)] border border-[var(--color-outline-light)] text-[10px] leading-[13px] font-[600] uppercase tracking-[0.06em] text-[var(--color-secondary-text)]"
+      title="Real react-native + react-native-paper component, rendered via react-native-web"
+    >
+      <Atom size={10} strokeWidth={2.2} />
+      React Native + Paper
+    </span>
   );
 }
 
@@ -230,21 +247,30 @@ export function DesignSystem() {
     [theme]
   );
 
+  // Paper theme uses the rose primary variant (the brand pink) by default.
+  // Native components on this page render through PaperProvider + RNW.
+  const paperTheme = getTheme(theme, 'rose');
+
   return (
+    <PaperProvider theme={paperTheme} settings={{ icon: () => null }}>
     <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-on-background)]">
 
       <div className="max-w-[1400px] mx-auto flex">
         {/* ── Sidebar ── */}
-        <nav className="hidden lg:block w-[200px] shrink-0 sticky top-[64px] h-[calc(100vh-64px)] overflow-y-auto border-r border-[var(--color-outline-light)] py-[24px] px-[12px]">
-          <div className="mb-[12px]">
+        <nav className="hidden lg:flex flex-col w-[200px] shrink-0 sticky top-[64px] h-[calc(100vh-64px)] border-r border-[var(--color-outline-light)]">
+          {/* Sticky top: title (with switcher) + search */}
+          <div className="shrink-0 px-[12px] pt-[24px] pb-[12px] border-b border-[var(--color-outline-light)] bg-[var(--color-background)]">
+            <DesignSystemSwitcher current="mobile" />
             <input
               type="text"
               value={sidebarSearch}
               onChange={(e) => setSidebarSearch(e.target.value)}
               placeholder="Search..."
-              className="w-full px-[10px] py-[6px] rounded-[8px] bg-[var(--color-surface-variant)] border border-[var(--color-outline-light)] text-[13px] leading-[18px] font-[450] text-[var(--color-on-surface)] placeholder:text-[var(--color-secondary-text)] outline-none focus:border-[var(--color-primary)] transition-colors"
+              className="mt-[14px] w-full px-[10px] py-[6px] rounded-[8px] bg-[var(--color-surface-variant)] border border-[var(--color-outline-light)] text-[13px] leading-[18px] font-[450] text-[var(--color-on-surface)] placeholder:text-[var(--color-secondary-text)] outline-none focus:border-[var(--color-primary)] transition-colors"
             />
           </div>
+          {/* Scrollable groups */}
+          <div className="flex-1 overflow-y-auto px-[12px] py-[12px] flex flex-col gap-[8px]">
           {NAV.map((group) => {
             const q = sidebarSearch.toLowerCase();
             const filteredItems = q
@@ -257,7 +283,7 @@ export function DesignSystem() {
               <div key={group.group} className="mb-[8px]">
                 <button
                   onClick={() => setCollapsed(c => ({ ...c, [group.group]: !c[group.group] }))}
-                  className="flex items-center gap-[6px] w-full py-[6px] text-[11px] leading-[14px] font-[700] uppercase tracking-[0.08em] text-[var(--color-secondary-text)] hover:text-[var(--color-on-surface)] transition-colors cursor-pointer"
+                  className="flex items-center gap-[6px] w-full py-[6px] text-[10px] leading-[14px] font-[700] uppercase tracking-[0.1em] text-[var(--color-secondary-text)]/85 hover:text-[var(--color-on-surface)] transition-colors cursor-pointer"
                 >
                   <ChevronRight
                     size={12}
@@ -275,14 +301,22 @@ export function DesignSystem() {
                         <a
                           href={`#${item.id}`}
                           className={`
-                            block px-[10px] py-[6px] rounded-[8px] text-[13px] leading-[18px] font-[450] transition-colors
+                            flex items-center gap-[6px] px-[10px] py-[6px] rounded-[8px] text-[13px] leading-[18px] font-[500] transition-colors
                             ${activeSection === item.id
-                              ? 'bg-[var(--color-surface)] text-[var(--color-on-surface)] font-[500]'
-                              : 'text-[var(--color-secondary-text)] hover:text-[var(--color-on-surface)] hover:bg-[var(--color-surface-variant)]'
+                              ? 'bg-[var(--color-background)] text-[var(--color-on-background)] font-[600]'
+                              : 'text-[var(--color-on-surface)] hover:bg-[var(--color-surface-variant)]'
                             }
                           `}
                         >
-                          {item.label}
+                          <span className="flex-1 truncate">{item.label}</span>
+                          {item.stack === 'rn-paper' && (
+                            <Atom
+                              size={11}
+                              strokeWidth={2.2}
+                              className="shrink-0 text-[var(--color-secondary-text)]"
+                              aria-label="React Native + Paper"
+                            />
+                          )}
                         </a>
                       </li>
                     ))}
@@ -291,6 +325,7 @@ export function DesignSystem() {
               </div>
             );
           })}
+          </div>
         </nav>
 
         {/* ── Main content ── */}
@@ -302,76 +337,15 @@ export function DesignSystem() {
               Foundations
             </span>
             <h1 className="text-[36px] leading-[42px] font-[700] tracking-[-0.02em] text-[var(--color-on-background)] mb-[8px]">
-              Design System (Mobile App)
+              Design System · Mobile App
             </h1>
             <p className="text-[15px] leading-[22px] font-[450] text-[var(--color-secondary-text)] max-w-[680px]">
               The mobile app design system from <PathTag>Rising-Tide-Org/rosebud-react</PathTag> · <PathTag>apps/native</PathTag>.
-              Built on Expo SDK 54 + react-native-paper (MD3 theming). Tokens on this page are now backed by the actual native source — see <a href="#source" className="underline">Source of truth</a>.
+              Built on Expo SDK 54 + react-native-paper (MD3 theming). Tokens on this page are backed by the actual native source.
             </p>
           </div>
 
           {/* ═══ GETTING STARTED ═══ */}
-
-          <Section id="how-to-use" title="How to use this page with Claude" description="Copy-paste these prompts when you want Claude to prototype mobile-app screens that match Rosebud's native design language.">
-            <div className="p-[24px] rounded-[12px] bg-[var(--color-surface-variant)] border border-[var(--color-outline-light)]">
-              <p className="text-[12px] font-[500] uppercase tracking-[0.06em] text-[var(--color-secondary-text)] mb-[10px]">1 · Bootstrap a new mobile prototype page</p>
-              <p className="text-[14px] leading-[20px] text-[var(--color-secondary-text)] mb-[12px]">
-                The mobile app is React Native, but this prototype repo is web-only. Prototype mobile UI here as <strong>Tailwind approximations</strong> using the real native tokens — same look and feel, ships in the browser. Drop a new file under <PathTag>src/pages/</PathTag>:
-              </p>
-              <CodeBlock>{`Create a mobile-style prototype page at src/pages/MyMobilePage.jsx using Tailwind CSS. Wrap content in a phone frame (use the existing PhoneFrame component from src/components/PhoneFrame.jsx) so it visually reads as mobile.
-
-Use the rosebud-react native tokens documented in /design-system. The actual source lives in apps/native/src/theme/ — read it via gh if you need exact values:
-gh api repos/Rising-Tide-Org/rosebud-react/contents/apps/native/src/theme/light.ts -H "Accept: application/vnd.github.raw"
-
-Rules:
-- Color discipline: the native app uses MD3 (Material Design 3) tokens. Primary actions use the active variant's primary color (default is black rgb(0,0,0); rose variant is rgb(227,22,101) = #E31665). Surfaces use 'surface' (white in light, rgb(30,30,32) in dark). Text uses 'onSurface' / 'onBackground'.
-- Typography: Circular Std family (Light, Book, BookItalic, Medium, Bold, Black). Use the MD3 typescale: displayLarge 24/500, titleMedium 16/500, bodyLarge 17/450, labelMedium 13/450, etc.
-- Spacing: 4px grid via space(n) — use Tailwind's [N] arbitrary values where N = n*4. So space(4) = 16px = p-[16px].
-- Radius: native uses a key-based scale: xxs 4 / xs 6 / sm 8 / md 10 / lg 12 / xl 16 / 2xl 18 / 3xl 24 / full 999. Match these exactly.
-
-Add a Route in src/main.jsx and (optionally) a sidebar entry in src/components/Sidebar.jsx.`}</CodeBlock>
-
-              <p className="text-[12px] font-[500] uppercase tracking-[0.06em] text-[var(--color-secondary-text)] mt-[24px] mb-[10px]">2 · Build a specific component or screen</p>
-              <p className="text-[14px] leading-[20px] text-[var(--color-secondary-text)] mb-[12px]">When you want to recreate one of the components or cards on this page:</p>
-              <CodeBlock>{`Build the [COMPONENT NAME — e.g. "JournalEntry card"] from /design-system. Use Tailwind. Match the spacing, typography, color tokens, and radius shown in the reference example exactly.
-
-The page renders these as visual approximations because we're in a web app. The real implementations live in apps/native/src/components/<Name>/index.tsx in the rosebud-react repo — read source there if you need exact behavior or props.`}</CodeBlock>
-
-              <p className="text-[12px] font-[500] uppercase tracking-[0.06em] text-[var(--color-secondary-text)] mt-[24px] mb-[10px]">3 · Pick the right primary variant</p>
-              <p className="text-[14px] leading-[20px] text-[var(--color-secondary-text)] mb-[12px]">The native app supports 6 primary color variants the user can pick from. If your prototype shouldn't be the default (black), tell Claude:</p>
-              <CodeBlock>{`Use the [rose | green | blue | orange | purple] primary variant from the native theme. The variant changes only the primary + onPrimary colors (and a few surface tints in dark mode) — everything else stays the same.
-
-Variant primaries:
-- default: black rgb(0,0,0)
-- rose:    rgb(227,22,101) #E31665   (the brand pink)
-- green:   rgb(29,155,94)
-- blue:    rgb(81,132,211)
-- orange:  rgb(218,101,90)
-- purple:  rgb(140,60,144)`}</CodeBlock>
-
-              <p className="text-[12px] font-[500] uppercase tracking-[0.06em] text-[var(--color-secondary-text)] mt-[24px] mb-[10px]">4 · Reference the native repo directly</p>
-              <CodeBlock>{`Read source from Rising-Tide-Org/rosebud-react via gh:
-gh api repos/Rising-Tide-Org/rosebud-react/contents/apps/native/src/<path> -H "Accept: application/vnd.github.raw"
-
-Key paths:
-- apps/native/src/theme/light.ts          — MD3 light theme
-- apps/native/src/theme/dark.ts           — MD3 dark theme
-- apps/native/src/theme/tokens.ts         — space(), radius(), border() helpers
-- apps/native/src/theme/fonts.ts          — Circular font weights + MD3 typescale
-- apps/native/src/theme/variants/         — 6 primary color variants
-- apps/native/src/components/<Name>/      — primitive component source`}</CodeBlock>
-
-              <p className="text-[12px] font-[500] uppercase tracking-[0.06em] text-[var(--color-secondary-text)] mt-[24px] mb-[10px]">Three styling worlds in this repo</p>
-              <ul className="text-[14px] leading-[22px] text-[var(--color-on-surface)] list-disc pl-[20px] space-y-[4px]">
-                <li><strong>Mobile App pages</strong> (this page) — Tailwind approximations of React Native components, framed in a phone mockup.</li>
-                <li><strong>Web App pages</strong> (/design-system-web) — real Chakra UI v2 with the rosebud-react theme.</li>
-                <li><strong>Website pages</strong> (/design-system-website) — Tailwind, no framework, marketing/landing style.</li>
-              </ul>
-              <p className="text-[13px] text-[var(--color-secondary-text)] mt-[8px]">Don't mix them on the same page. Pick one stack per prototype.</p>
-            </div>
-          </Section>
-
-          {/* ═══ FOUNDATIONS ═══ */}
 
           {/* Source of truth */}
           <Section id="source" title="Source of truth" description="Where these tokens come from in the actual native codebase.">
@@ -395,6 +369,93 @@ Key paths:
               </p>
             </div>
           </Section>
+
+          <Section id="how-to-use" title="How to use this page with Claude" description="Copy-paste these prompts when you want Claude to prototype mobile-app screens that match Rosebud's native design language.">
+            <div className="p-[24px] rounded-[12px] bg-[var(--color-surface-variant)] border border-[var(--color-outline-light)]">
+              <p className="text-[12px] font-[500] uppercase tracking-[0.06em] text-[var(--color-secondary-text)] mb-[10px]">1 · Bootstrap a new mobile prototype page</p>
+              <p className="text-[14px] leading-[20px] text-[var(--color-secondary-text)] mb-[12px]">
+                The native app is React Native + Expo + react-native-paper. This repo has <code className="font-mono">react-native-web</code> wired up so you can render the <em>actual</em> Paper components in the browser. Drop a new file under <PathTag>src/pages/</PathTag>:
+              </p>
+              <CodeBlock>{`Create a mobile-style prototype page at src/pages/MyMobilePage.jsx using react-native-paper components. The repo has react-native-web set up — these render as real DOM in the browser.
+
+Imports:
+import { PaperProvider, Button, TextInput, Switch, Checkbox, RadioButton, Searchbar, Chip, Avatar, ActivityIndicator, ProgressBar } from 'react-native-paper';
+import { View, Text } from 'react-native';
+import { getTheme } from '../native-theme/variants';
+import { PhoneFrame } from '../components/PhoneFrame';
+
+Wrap your page in:
+<PaperProvider theme={getTheme('light', 'rose')} settings={{ icon: () => null }}>
+  <PhoneFrame>
+    <View style={{ flex: 1, padding: 16, backgroundColor: paperTheme.colors.background }}>
+      ...your screen here, using Paper components...
+    </View>
+  </PhoneFrame>
+</PaperProvider>
+
+Rules:
+- Use Paper components (Button mode='contained' / TextInput mode='outlined' / etc.) — NOT Tailwind classes for primitives. The whole point of the RNW setup is that prototypes look and behave exactly like the native app.
+- Use 'react-native' for layout primitives: View, Text, ScrollView, Pressable. (These resolve to react-native-web in the browser.)
+- Style via the 'style' prop with theme colors: paperTheme.colors.surface, .onSurface, .primary, etc.
+- Pick a primary variant via getTheme(mode, color): 'default' | 'rose' | 'green' | 'blue' | 'orange' | 'purple'. Rose is the brand pink #E31665.
+- For typography, reference theme.fonts (configured from MD3 typescale).
+
+Add a Route in src/main.jsx and (optionally) a sidebar entry in src/components/Sidebar.jsx.`}</CodeBlock>
+
+              <p className="text-[12px] font-[500] uppercase tracking-[0.06em] text-[var(--color-secondary-text)] mt-[24px] mb-[10px]">2 · What does and doesn't work in the browser</p>
+              <p className="text-[14px] leading-[20px] text-[var(--color-secondary-text)] mb-[12px]">react-native-web translates RN to DOM, but the native app uses many Expo/RN packages with no web equivalent. When asking Claude to recreate a screen:</p>
+              <CodeBlock>{`Build the [SCREEN NAME] from rosebud-react/apps/native using react-native-paper components.
+
+What works in the browser (use freely):
+- Paper primitives: Button, TextInput, Switch, Checkbox, RadioButton, Searchbar, Chip, Avatar, ActivityIndicator, ProgressBar, Snackbar, Card, Banner
+- RN layout: View, Text, ScrollView, Pressable, Image
+- Linear gradients via 'expo-linear-gradient' won't work — use a CSS gradient on a styled View instead
+
+Stub or skip these (they require native modules not available on web):
+- @gorhom/bottom-sheet, react-native-keyboard-controller, react-native-pager-view
+- expo-blur, expo-haptics, expo-camera, expo-av, expo-local-authentication, expo-notifications
+- @shopify/flash-list (use FlatList from RN)
+- react-native-vector-icons (we stubbed it; use lucide-react if you need icons)
+- Reanimated 3 'springify()' animations and ZoomIn — fragile under RNW; prefer Animated from RN core
+
+If you need an icon, use lucide-react and place it inside <View>, not as a Paper icon prop.`}</CodeBlock>
+
+              <p className="text-[12px] font-[500] uppercase tracking-[0.06em] text-[var(--color-secondary-text)] mt-[24px] mb-[10px]">3 · Pick the right primary variant</p>
+              <CodeBlock>{`Use the [rose | green | blue | orange | purple] primary variant from the native theme via getTheme(mode, color):
+
+const paperTheme = getTheme(theme, 'rose');  // brand pink #E31665
+<PaperProvider theme={paperTheme}>...</PaperProvider>
+
+Variant primaries:
+- default: black rgb(0,0,0)
+- rose:    rgb(227,22,101) #E31665   (the brand pink)
+- green:   rgb(29,155,94)
+- blue:    rgb(81,132,211)
+- orange:  rgb(218,101,90)
+- purple:  rgb(140,60,144)`}</CodeBlock>
+
+              <p className="text-[12px] font-[500] uppercase tracking-[0.06em] text-[var(--color-secondary-text)] mt-[24px] mb-[10px]">4 · Reference the native repo directly</p>
+              <CodeBlock>{`Read source from Rising-Tide-Org/rosebud-react via gh:
+gh api repos/Rising-Tide-Org/rosebud-react/contents/apps/native/src/<path> -H "Accept: application/vnd.github.raw"
+
+Key paths:
+- apps/native/src/theme/light.ts          — MD3 light theme (already ported to src/native-theme/)
+- apps/native/src/theme/tokens.ts         — space(), radius(), border() helpers
+- apps/native/src/theme/fonts.ts          — Circular font weights + MD3 typescale
+- apps/native/src/theme/variants/         — 6 primary color variants
+- apps/native/src/components/<Name>/      — primitive component source (Button.tsx, FormTextInput.tsx, Panel/, etc.)`}</CodeBlock>
+
+              <p className="text-[12px] font-[500] uppercase tracking-[0.06em] text-[var(--color-secondary-text)] mt-[24px] mb-[10px]">Three styling worlds in this repo</p>
+              <ul className="text-[14px] leading-[22px] text-[var(--color-on-surface)] list-disc pl-[20px] space-y-[4px]">
+                <li><strong>Mobile App pages</strong> (this page) — real react-native-paper via react-native-web. Same library as production.</li>
+                <li><strong>Web App pages</strong> (/design-system-web) — real Chakra UI v2 with the rosebud-react web theme.</li>
+                <li><strong>Website pages</strong> (/design-system-website) — Tailwind, no framework, marketing/landing style.</li>
+              </ul>
+              <p className="text-[13px] text-[var(--color-secondary-text)] mt-[8px]">Don't mix stacks on the same page. Pick one per prototype.</p>
+            </div>
+          </Section>
+
+          {/* ═══ FOUNDATIONS ═══ */}
 
           {/* Colors */}
           <Section id="colors" title="Colors — Brand Scales (Figma extended palette)" description="The full extended brand palette as documented in Figma. Useful for picking accent shades. The native code only uses a subset of these — see MD3 Semantic Tokens below for what actually ships.">
@@ -706,193 +767,107 @@ Key paths:
             </SubSection>
           </Section>
 
-          {/* ═══ ACTIONS ═══ */}
+          {/* ═══ ACTIONS (live RN + Paper) ═══ */}
 
-          <Section id="buttons" title="Button" description="5 types × 3 sizes × 3 states × 3 icon modes = 117 variants. Font: 16px/500 Circular Std.">
-            <SubSection title="Types">
-              <ComponentSpec name="Default state">
-                <div className="flex flex-wrap items-center gap-[12px]">
-                  <Button variant="primary">Primary</Button>
-                  <Button variant="secondary">Secondary</Button>
-                  <Button variant="tertiary">Tertiary</Button>
-                  <Button variant="destructive">Destructive</Button>
-                  <Button variant="naked">Naked</Button>
-                </div>
-              </ComponentSpec>
-            </SubSection>
-            <SubSection title="Sizes">
-              <ComponentSpec name="Primary button at each size">
-                <div className="flex flex-wrap items-center gap-[12px]">
-                  <Button size="small">Small (36px)</Button>
-                  <Button size="regular">Regular (44px)</Button>
-                  <Button size="large">Large (48px)</Button>
-                </div>
-              </ComponentSpec>
-            </SubSection>
-            <SubSection title="With Icon">
-              <ComponentSpec name="Icon variants">
-                <div className="flex flex-wrap items-center gap-[12px]">
-                  <Button icon={<IconPlus />}>With icon</Button>
-                  <Button icon={<IconPlus />} iconOnly aria-label="Add" />
-                  <Button variant="secondary" icon={<IconPlus />}>Secondary</Button>
-                  <Button variant="naked" icon={<IconPlus />} iconOnly aria-label="More" />
-                </div>
-              </ComponentSpec>
-            </SubSection>
+          <Section id="p-button" title="Button" stack="rn-paper" description="react-native-paper Button. 5 modes (contained, outlined, text, elevated, contained-tonal). The active primary variant is rose (brand pink #E31665).">
+            <ComponentSpec name="Modes">
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
+                <PaperButton mode="contained">Contained</PaperButton>
+                <PaperButton mode="outlined">Outlined</PaperButton>
+                <PaperButton mode="text">Text</PaperButton>
+                <PaperButton mode="elevated">Elevated</PaperButton>
+                <PaperButton mode="contained-tonal">Contained-tonal</PaperButton>
+              </View>
+            </ComponentSpec>
             <SubSection title="States">
-              <ComponentSpec name="Disabled state">
-                <div className="flex flex-wrap items-center gap-[12px]">
-                  <Button disabled>Primary</Button>
-                  <Button variant="secondary" disabled>Secondary</Button>
-                  <Button variant="tertiary" disabled>Tertiary</Button>
-                  <Button variant="destructive" disabled>Destructive</Button>
-                  <Button variant="naked" disabled>Naked</Button>
-                </div>
+              <ComponentSpec name="Loading · Disabled">
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
+                  <PaperButton mode="contained" loading>Saving</PaperButton>
+                  <PaperButton mode="contained" disabled>Disabled</PaperButton>
+                  <PaperButton mode="outlined" disabled>Disabled outline</PaperButton>
+                </View>
               </ComponentSpec>
             </SubSection>
-            <SubSection title="Specs">
-              <TokenTable
-                headers={['Size', 'Height', 'Radius', 'Padding (text)', 'Padding (icon only)']}
-                rows={[
-                  ['Small', '36px', '8px', '8/24', '8/8'],
-                  ['Regular', '44px', '12px', '10/32', '10/10'],
-                  ['Large', '48px', '12px', '12/32', '12/12'],
-                ]}
-              />
-            </SubSection>
+            <p className="mt-[16px] text-[12px] text-[var(--color-secondary-text)]">
+              <PathTag>apps/native/src/components/Button.tsx</PathTag>
+            </p>
           </Section>
 
-          <Section id="button-pill" title="Button / Pill" description="Pill-shaped button variant. Radius: 999px, height: 36px.">
-            <ComponentSpec name="Pill button states">
-              <div className="flex flex-wrap items-center gap-[12px]">
-                <Button variant="tertiary" size="small" className="!rounded-full">Pill Default</Button>
-                <Button variant="tertiary" size="small" className="!rounded-full" disabled>Pill Disabled</Button>
-              </div>
-            </ComponentSpec>
-          </Section>
+          {/* ═══ INPUT & SELECTION (live RN + Paper) ═══ */}
 
-          {/* ═══ INPUT & SELECTION ═══ */}
-
-          <Section id="input" title="Input" description="Height: 56px, radius: 12px, padding: 16px. 6 states: Default, Active, Filled, Active Filled, Disabled, Disabled Filled.">
+          <Section id="p-textinput" title="TextInput" stack="rn-paper" description="react-native-paper TextInput. Two modes: flat and outlined. Wraps the native FormTextInput in apps/native.">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
-              <ComponentSpec name="Default">
-                <Input placeholder="Placeholder text" />
+              <ComponentSpec name="Flat">
+                <PaperTextInputDemo mode="flat" label="Email" placeholder="you@example.com" />
               </ComponentSpec>
-              <ComponentSpec name="With label + helper">
-                <Input label="Email" placeholder="you@example.com" helper="We'll never share your email." />
-              </ComponentSpec>
-              <ComponentSpec name="Error">
-                <Input label="Password" placeholder="Enter password" error="This field is required" />
-              </ComponentSpec>
-              <ComponentSpec name="Disabled">
-                <Input label="Name" placeholder="Disabled input" disabled />
+              <ComponentSpec name="Outlined">
+                <PaperTextInputDemo mode="outlined" label="Name" placeholder="Grace" />
               </ComponentSpec>
             </div>
+            <p className="mt-[16px] text-[12px] text-[var(--color-secondary-text)]">
+              <PathTag>apps/native/src/components/FormTextInput.tsx</PathTag>
+            </p>
           </Section>
 
-          <Section id="textarea" title="Textarea" description="Min height: 120px, radius: 12px, padding: 16/16/6/16.">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
-              <ComponentSpec name="Default">
-                <Textarea placeholder="Write something…" />
-              </ComponentSpec>
-              <ComponentSpec name="With error">
-                <Textarea label="Journal Entry" placeholder="Start writing…" error="Entry is too short" />
-              </ComponentSpec>
-            </div>
-          </Section>
-
-          <Section id="searchbar" title="Searchbar" description="Height: 56px, radius: 12px, with search icon. States: Default, Active, Filled, Searching, Disabled.">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
-              <ComponentSpec name="Default">
-                <Searchbar placeholder="Search entries…" />
-              </ComponentSpec>
-              <ComponentSpec name="Disabled">
-                <Searchbar placeholder="Search…" disabled />
-              </ComponentSpec>
-            </div>
-          </Section>
-
-          <Section id="checkbox" title="Checkbox" description="24×24px. Label font: 14px/450. Item spacing: 12px.">
-            <ComponentSpec name="States">
-              <div className="flex flex-col gap-[16px]">
-                <Checkbox checked={checkboxOn} onChange={setCheckboxOn} label="Accept terms" />
-                <Checkbox checked disabled label="Disabled checked" />
-                <Checkbox checked={false} disabled label="Disabled unchecked" />
-              </div>
+          <Section id="p-searchbar" title="Searchbar" stack="rn-paper" description="react-native-paper Searchbar. Used in entry list and explore.">
+            <ComponentSpec name="Default">
+              <PaperSearchbarDemo />
             </ComponentSpec>
           </Section>
 
-          <Section id="checkbox-card" title="Checkbox Card" description="Height: 56px, radius: 12px, padding: 16px. Selected state has 1px border.">
-            <ComponentSpec name="States">
-              <div className="flex flex-col gap-[12px] max-w-[400px]">
-                <CheckboxCard checked={cardChecked} onChange={setCardChecked}>Daily journaling</CheckboxCard>
-                <CheckboxCard checked={false} onChange={() => {}}>Meditation</CheckboxCard>
-                <CheckboxCard disabled>Disabled option</CheckboxCard>
-                <CheckboxCard checked disabled>Disabled selected</CheckboxCard>
-              </div>
+          <Section id="p-switch" title="Switch" stack="rn-paper" description="react-native-paper Switch. Used in SettingsList rows.">
+            <ComponentSpec name="On / Off">
+              <PaperSwitchDemo />
             </ComponentSpec>
           </Section>
 
-          <Section id="radio" title="Radio Button" description="24×24px. Label font: 14px/450.">
-            <ComponentSpec name="States">
-              <div className="flex flex-col gap-[16px]">
-                <RadioButton checked={radio === 'a'} onChange={setRadio} value="a" label="Option A" />
-                <RadioButton checked={radio === 'b'} onChange={setRadio} value="b" label="Option B" />
-                <RadioButton checked={radio === 'c'} onChange={setRadio} value="c" label="Option C" />
-              </div>
+          <Section id="p-checkbox" title="Checkbox" stack="rn-paper" description="react-native-paper Checkbox.">
+            <ComponentSpec name="With label">
+              <PaperCheckboxDemo />
             </ComponentSpec>
           </Section>
 
-          <Section id="switch" title="Switch" description="51×30px, radius: 12px. Thumb: 24×24px.">
-            <ComponentSpec name="States">
-              <div className="flex flex-col gap-[16px]">
-                <Switch checked={switchOn} onChange={setSwitchOn} label={switchOn ? 'On' : 'Off'} />
-                <Switch checked disabled label="Disabled on" />
-                <Switch checked={false} disabled label="Disabled off" />
-              </div>
+          <Section id="p-radio" title="Radio Button" stack="rn-paper" description="react-native-paper RadioButton.Group with three options.">
+            <ComponentSpec name="Group of 3">
+              <PaperRadioDemo />
             </ComponentSpec>
           </Section>
 
-          <Section id="segmented" title="Segmented Control" description="Height: 40px, padding: 8/24, border: 1px #C0C0BF. Selected: white bg, unselected: #F0F0F0.">
-            <ComponentSpec name="Interactive">
-              <SegmentedControl
-                segments={[
-                  { value: 'day', label: 'Day' },
-                  { value: 'week', label: 'Week' },
-                  { value: 'month', label: 'Month' },
-                ]}
-                value={segment}
-                onChange={setSegment}
-              />
+          {/* ═══ DISPLAY (live RN + Paper) ═══ */}
+
+          <Section id="p-chip" title="Chip" stack="rn-paper" description="react-native-paper Chip — the native equivalent of pills/tags.">
+            <ComponentSpec name="Default + selected">
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                <PaperChip>Mindfulness</PaperChip>
+                <PaperChip>Gratitude</PaperChip>
+                <PaperChip selected>Selected</PaperChip>
+              </View>
             </ComponentSpec>
           </Section>
 
-          {/* ═══ FEEDBACK ═══ */}
-
-          <Section id="snackbar" title="Snackbar" description="Black background (#000), white text, radius: 12px, padding: 12px, shadow: 0 4px 16px rgba(0,0,0,0.16). Font: 16px/500.">
-            <div className="flex flex-col gap-[12px] max-w-[400px]">
-              <ComponentSpec name="Types">
-                <div className="flex flex-col gap-[8px]">
-                  <Snackbar type="info">This is an info message</Snackbar>
-                  <Snackbar type="success">Action completed successfully</Snackbar>
-                  <Snackbar type="warning">Please check your input</Snackbar>
-                  <Snackbar type="error">Something went wrong</Snackbar>
-                </div>
-              </ComponentSpec>
-            </div>
+          <Section id="p-avatar" title="Avatar" stack="rn-paper" description="react-native-paper Avatar.Text. Three common sizes.">
+            <ComponentSpec name="Sizes">
+              <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
+                <PaperAvatar.Text size={32} label="GG" />
+                <PaperAvatar.Text size={48} label="GG" />
+                <PaperAvatar.Text size={64} label="GG" />
+              </View>
+            </ComponentSpec>
           </Section>
 
-          <Section id="infobar" title="Infobar" description="White background (#FFF), dark text (#191C1A), radius: 12px, padding: 12px. Font: 12px/450.">
-            <div className="flex flex-col gap-[12px] max-w-[500px]">
-              <ComponentSpec name="Types">
-                <div className="flex flex-col gap-[8px]">
-                  <Infobar type="Info">Informational message with more detail.</Infobar>
-                  <Infobar type="Success">Your changes have been saved.</Infobar>
-                  <Infobar type="Warning">This action cannot be undone.</Infobar>
-                  <Infobar type="Error">Failed to load data. Please retry.</Infobar>
-                </div>
-              </ComponentSpec>
-            </div>
+          <Section id="p-activity" title="Activity Indicator" stack="rn-paper" description="react-native-paper ActivityIndicator (Material spinner).">
+            <ComponentSpec name="Sizes">
+              <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
+                <ActivityIndicator size="small" />
+                <ActivityIndicator size="large" />
+              </View>
+            </ComponentSpec>
+          </Section>
+
+          <Section id="p-progress" title="Progress Bar" stack="rn-paper" description="react-native-paper ProgressBar. Used in onboarding and weekly report progress.">
+            <ComponentSpec name="60% complete">
+              <ProgressBar progress={0.6} />
+            </ComponentSpec>
           </Section>
 
           {/* ═══ DISPLAY ═══ */}
@@ -1066,40 +1041,6 @@ Key paths:
               </div>
             </SubSection>
           </Section>
-
-          <Section id="pills" title="Pill" description="Rounded full (999px), bg: #F8F8F8, text: #000, padding: 8/12, font: 13px/450.">
-            <ComponentSpec name="Variants">
-              <div className="flex flex-wrap gap-[8px]">
-                <Pill>Default pill</Pill>
-                <Pill icon={<IconStar />}>With icon</Pill>
-                <Pill icon={<span>😊</span>}>Emoji icon</Pill>
-                <Pill icon={<IconStar />} iconOnly />
-              </div>
-            </ComponentSpec>
-          </Section>
-
-          <Section id="tags" title="Tag" description="Rounded container for categorization.">
-            <ComponentSpec name="Examples">
-              <div className="flex flex-wrap gap-[8px]">
-                <Tag>Mindfulness</Tag>
-                <Tag>Gratitude</Tag>
-                <Tag>Reflection</Tag>
-                <Tag>Growth</Tag>
-                <Tag>Self-care</Tag>
-              </div>
-            </ComponentSpec>
-          </Section>
-
-          <Section id="avatars" title="Avatar" description="Circular. Sizes: 24px (base), or custom sm/md/lg.">
-            <ComponentSpec name="Sizes">
-              <div className="flex items-center gap-[16px]">
-                <Avatar name="Grace H" size="sm" />
-                <Avatar name="Grace H" size="md" />
-                <Avatar name="Grace H" size="lg" />
-              </div>
-            </ComponentSpec>
-          </Section>
-
           {/* ═══ ASSETS ═══ */}
 
           <Section id="icons" title="Icons" description="144 UI icons extracted from Figma. All SVGs, optimized for 20×20.">
@@ -1247,9 +1188,56 @@ Key paths:
       </div>
 
       <footer className="border-t border-[var(--color-outline-light)] py-[32px] text-center text-[12px] text-[var(--color-secondary-text)]">
-        Rosebud Design System &middot; Extracted from Figma &middot; {new Date().getFullYear()}
+        Rosebud Design System &middot; Sourced from rosebud-react/apps/native &middot; {new Date().getFullYear()}
       </footer>
     </div>
+    </PaperProvider>
+  );
+}
+
+/* ── Per-component RN+Paper demo helpers (each holds its own state) ── */
+
+function PaperTextInputDemo({ mode, label, placeholder }) {
+  const [val, setVal] = useState('');
+  return <PaperTextInput mode={mode} label={label} placeholder={placeholder} value={val} onChangeText={setVal} />;
+}
+
+function PaperSearchbarDemo() {
+  const [q, setQ] = useState('');
+  return <PaperSearchbar placeholder="Search entries…" value={q} onChangeText={setQ} />;
+}
+
+function PaperSwitchDemo() {
+  const [on, setOn] = useState(true);
+  return (
+    <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
+      <PaperSwitch value={on} onValueChange={setOn} />
+      <RNText style={{ fontSize: 14, color: '#5C5555' }}>{on ? 'On' : 'Off'}</RNText>
+    </View>
+  );
+}
+
+function PaperCheckboxDemo() {
+  const [on, setOn] = useState(true);
+  return (
+    <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+      <PaperCheckbox status={on ? 'checked' : 'unchecked'} onPress={() => setOn(!on)} />
+      <RNText style={{ fontSize: 14, color: '#5C5555' }}>Daily journaling</RNText>
+    </View>
+  );
+}
+
+function PaperRadioDemo() {
+  const [v, setV] = useState('a');
+  return (
+    <PaperRadio.Group value={v} onValueChange={setV}>
+      {[['a', 'Option A'], ['b', 'Option B'], ['c', 'Option C']].map(([val, label]) => (
+        <View key={val} style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+          <PaperRadio value={val} />
+          <RNText style={{ fontSize: 14, color: '#5C5555' }}>{label}</RNText>
+        </View>
+      ))}
+    </PaperRadio.Group>
   );
 }
 

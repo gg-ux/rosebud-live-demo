@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Sun, Moon, ChevronRight, ChevronDown, Star, ArrowRight, Menu as MenuIcon, X } from 'lucide-react';
 import { usePageActions } from '../components/Layout';
+import { DesignSystemSwitcher } from '../components/DesignSystemSwitcher';
 
 /* ══════════════════════════════════════════════════════════
    DESIGN SYSTEM (WEBSITE)
@@ -31,7 +32,13 @@ const TOK = {
 };
 
 const NAV = [
-  { group: 'Getting Started', items: [{ id: 'how-to-use', label: 'How to use with Claude' }] },
+  {
+    group: 'Getting Started',
+    items: [
+      { id: 'source', label: 'Source of truth' },
+      { id: 'how-to-use', label: 'How to use with Claude' },
+    ],
+  },
   {
     group: 'Foundations',
     items: [
@@ -246,16 +253,18 @@ export function DesignSystemWebsite() {
     <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-on-background)]">
       <div className="max-w-[1400px] mx-auto flex">
         {/* ── Sidebar ── */}
-        <nav className="hidden lg:block w-[230px] shrink-0 sticky top-[64px] h-[calc(100vh-64px)] overflow-y-auto border-r border-[var(--color-outline-light)] py-[24px] px-[12px]">
-          <div className="mb-[12px]">
+        <nav className="hidden lg:flex flex-col w-[230px] shrink-0 sticky top-[64px] h-[calc(100vh-64px)] border-r border-[var(--color-outline-light)]">
+          <div className="shrink-0 px-[12px] pt-[24px] pb-[12px] border-b border-[var(--color-outline-light)] bg-[var(--color-background)]">
+            <DesignSystemSwitcher current="website" />
             <input
               type="text"
               value={sidebarSearch}
               onChange={(e) => setSidebarSearch(e.target.value)}
               placeholder="Search..."
-              className="w-full px-[10px] py-[6px] rounded-[8px] bg-[var(--color-surface-variant)] border border-[var(--color-outline-light)] text-[13px] leading-[18px] font-[450] text-[var(--color-on-surface)] placeholder:text-[var(--color-secondary-text)] outline-none focus:border-[var(--color-primary)] transition-colors"
+              className="mt-[14px] w-full px-[10px] py-[6px] rounded-[8px] bg-[var(--color-surface-variant)] border border-[var(--color-outline-light)] text-[13px] leading-[18px] font-[450] text-[var(--color-on-surface)] placeholder:text-[var(--color-secondary-text)] outline-none focus:border-[var(--color-primary)] transition-colors"
             />
           </div>
+          <div className="flex-1 overflow-y-auto px-[12px] py-[12px] flex flex-col gap-[8px]">
           {NAV.map((group) => {
             const q = sidebarSearch.toLowerCase();
             const filteredItems = q
@@ -268,7 +277,7 @@ export function DesignSystemWebsite() {
               <div key={group.group} className="mb-[8px]">
                 <button
                   onClick={() => setCollapsed(c => ({ ...c, [group.group]: !c[group.group] }))}
-                  className="flex items-center gap-[6px] w-full py-[6px] text-[11px] leading-[14px] font-[700] uppercase tracking-[0.08em] text-[var(--color-secondary-text)] hover:text-[var(--color-on-surface)] transition-colors cursor-pointer"
+                  className="flex items-center gap-[6px] w-full py-[6px] text-[10px] leading-[14px] font-[700] uppercase tracking-[0.1em] text-[var(--color-secondary-text)]/85 hover:text-[var(--color-on-surface)] transition-colors cursor-pointer"
                 >
                   <ChevronRight size={12} className={`shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`} />
                   <span>{group.group}</span>
@@ -280,10 +289,10 @@ export function DesignSystemWebsite() {
                       <li key={item.id}>
                         <a
                           href={`#${item.id}`}
-                          className={`block px-[10px] py-[6px] rounded-[8px] text-[13px] leading-[18px] font-[450] transition-colors ${
+                          className={`block px-[10px] py-[6px] rounded-[8px] text-[13px] leading-[18px] font-[500] transition-colors ${
                             activeSection === item.id
-                              ? 'bg-[var(--color-surface)] text-[var(--color-on-surface)] font-[500]'
-                              : 'text-[var(--color-secondary-text)] hover:text-[var(--color-on-surface)] hover:bg-[var(--color-surface-variant)]'
+                              ? 'bg-[var(--color-background)] text-[var(--color-on-background)] font-[600]'
+                              : 'text-[var(--color-on-surface)] hover:bg-[var(--color-surface-variant)]'
                           }`}
                         >
                           {item.label}
@@ -295,6 +304,7 @@ export function DesignSystemWebsite() {
               </div>
             );
           })}
+          </div>
         </nav>
 
         {/* ── Main content ── */}
@@ -306,14 +316,34 @@ export function DesignSystemWebsite() {
               Foundations
             </span>
             <h1 className="text-[36px] leading-[42px] font-[700] tracking-[-0.02em] text-[var(--color-on-background)] mb-[8px]">
-              Design System (Website)
+              Design System · Website
             </h1>
             <p className="text-[15px] leading-[22px] font-[450] text-[var(--color-secondary-text)] max-w-[680px]">
               The marketing website at <PathTag>www.rosebud.app</PathTag>. Built on Webflow — three font families (Outfit, Montserrat, Circular), warm photographic heroes with a sage gradient overlay, no shadows, 24-px universal card radius, crimson <Code inline>#D6165B</Code> CTAs disciplined to primary actions only.
             </p>
           </div>
 
-          {/* ═══ HOW TO USE ═══ */}
+          {/* ═══ GETTING STARTED ═══ */}
+
+          <Section id="source" title="Source of truth" description="Where the tokens and patterns on this page come from.">
+            <div className="p-[20px] rounded-[12px] bg-[var(--color-surface)] border border-[var(--color-outline-light)] space-y-[10px]">
+              <p className="text-[14px] leading-[22px] text-[var(--color-on-surface)]">
+                <strong>Stack:</strong> Webflow-built marketing site at <PathTag>www.rosebud.app</PathTag>. No JS framework — static HTML/CSS with Webflow IX2 for animations.
+              </p>
+              <p className="text-[14px] leading-[22px] text-[var(--color-on-surface)]">
+                <strong>How tokens were extracted:</strong>
+              </p>
+              <ul className="text-[13px] leading-[22px] text-[var(--color-secondary-text)] list-disc pl-[20px]">
+                <li>Webflow <code className="font-mono">:root</code> custom properties (color names + hex values)</li>
+                <li>Computed styles pulled via headless Chromium on key sections (homepage, /science, /blog)</li>
+                <li>Type scale measured at 1440 viewport — sizes, weights, line-heights, letter-spacing</li>
+                <li>Spacing rhythm verified across multiple section types</li>
+              </ul>
+              <p className="text-[13px] text-[var(--color-secondary-text)] pt-[8px]">
+                Components on this page are Tailwind approximations because rosebud.app isn't built on a shared component library — it's Webflow-authored. The fastest way to prototype a new marketing page is Tailwind + the documented tokens, which is what the cookbook below recommends. To verify a specific layout that's not shown here, open the live site in <code className="font-mono">/browse</code>.
+              </p>
+            </div>
+          </Section>
 
           <Section id="how-to-use" title="How to use this page with Claude" description="Copy-paste these prompts when you want Claude to build a marketing page or landing-style prototype that matches Rosebud.app's design language.">
             <div className="p-[24px] rounded-[12px] bg-[var(--color-surface-variant)] border border-[var(--color-outline-light)]">

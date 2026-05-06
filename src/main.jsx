@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { ChakraProvider } from '@chakra-ui/react'
 import './index.css'
 import { PasswordGate } from './components/PasswordGate.jsx'
+import { PrivateRoute } from './components/PrivateRoute.jsx'
 import { Layout } from './components/Layout.jsx'
 import App from './App.jsx'
 import chakraTheme from './theme/index.js'
@@ -21,12 +22,13 @@ const LivingDesignSystemPresentation = lazy(() => import('./pages/LivingDesignSy
 function AppRoutes() {
   const { pathname } = useLocation();
   // Presentations are full-screen; skip the Layout chrome there.
+  // Both presentations are private — wrap in PrivateRoute.
   if (pathname === '/presentation' || pathname === '/living-design-system/present') {
     return (
       <Suspense fallback={null}>
         <Routes>
-          <Route path="/presentation" element={<Presentation />} />
-          <Route path="/living-design-system/present" element={<LivingDesignSystemPresentation />} />
+          <Route path="/presentation" element={<PrivateRoute><Presentation /></PrivateRoute>} />
+          <Route path="/living-design-system/present" element={<PrivateRoute><LivingDesignSystemPresentation /></PrivateRoute>} />
         </Routes>
       </Suspense>
     );
@@ -35,14 +37,16 @@ function AppRoutes() {
     <Layout>
       <Suspense fallback={null}>
         <Routes>
+          {/* Public — no gate */}
           <Route path="/" element={<Dashboard />} />
-          <Route path="/patterns" element={<Concepts />} />
           <Route path="/design-system" element={<DesignSystem />} />
           <Route path="/design-system-web" element={<DesignSystemWeb />} />
           <Route path="/design-system-website" element={<DesignSystemWebsite />} />
-          <Route path="/therapist" element={<App />} />
-          <Route path="/tool-calls" element={<ToolCalls />} />
-          <Route path="/living-design-system" element={<LivingDesignSystem />} />
+          {/* Private — gated by PrivateRoute (modal inside Layout) */}
+          <Route path="/patterns" element={<PrivateRoute><Concepts /></PrivateRoute>} />
+          <Route path="/therapist" element={<PrivateRoute><App /></PrivateRoute>} />
+          <Route path="/tool-calls" element={<PrivateRoute><ToolCalls /></PrivateRoute>} />
+          <Route path="/living-design-system" element={<PrivateRoute><LivingDesignSystem /></PrivateRoute>} />
         </Routes>
       </Suspense>
     </Layout>

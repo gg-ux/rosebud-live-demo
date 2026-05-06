@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { usePageActions } from '../components/Layout';
 import chakraTheme from '../theme/index.js';
+import { DesignSystemSwitcher } from '../components/DesignSystemSwitcher';
 
 /* ══════════════════════════════════════════════════════════
    DESIGN SYSTEM (WEB)
@@ -30,7 +31,10 @@ import chakraTheme from '../theme/index.js';
 const NAV = [
   {
     group: 'Getting Started',
-    items: [{ id: 'how-to-use', label: 'How to use with Claude' }],
+    items: [
+      { id: 'source', label: 'Source of truth' },
+      { id: 'how-to-use', label: 'How to use with Claude' },
+    ],
   },
   {
     group: 'Foundations',
@@ -276,16 +280,18 @@ export function DesignSystemWeb() {
     <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-on-background)]">
       <div className="max-w-[1400px] mx-auto flex">
         {/* ── Sidebar ── */}
-        <nav className="hidden lg:block w-[230px] shrink-0 sticky top-[64px] h-[calc(100vh-64px)] overflow-y-auto border-r border-[var(--color-outline-light)] py-[24px] px-[12px]">
-          <div className="mb-[12px]">
+        <nav className="hidden lg:flex flex-col w-[230px] shrink-0 sticky top-[64px] h-[calc(100vh-64px)] border-r border-[var(--color-outline-light)]">
+          <div className="shrink-0 px-[12px] pt-[24px] pb-[12px] border-b border-[var(--color-outline-light)] bg-[var(--color-background)]">
+            <DesignSystemSwitcher current="web" />
             <input
               type="text"
               value={sidebarSearch}
               onChange={(e) => setSidebarSearch(e.target.value)}
               placeholder="Search..."
-              className="w-full px-[10px] py-[6px] rounded-[8px] bg-[var(--color-surface-variant)] border border-[var(--color-outline-light)] text-[13px] leading-[18px] font-[450] text-[var(--color-on-surface)] placeholder:text-[var(--color-secondary-text)] outline-none focus:border-[var(--color-primary)] transition-colors"
+              className="mt-[14px] w-full px-[10px] py-[6px] rounded-[8px] bg-[var(--color-surface-variant)] border border-[var(--color-outline-light)] text-[13px] leading-[18px] font-[450] text-[var(--color-on-surface)] placeholder:text-[var(--color-secondary-text)] outline-none focus:border-[var(--color-primary)] transition-colors"
             />
           </div>
+          <div className="flex-1 overflow-y-auto px-[12px] py-[12px] flex flex-col gap-[8px]">
           {NAV.map((group) => {
             const q = sidebarSearch.toLowerCase();
             const filteredItems = q
@@ -298,7 +304,7 @@ export function DesignSystemWeb() {
               <div key={group.group} className="mb-[8px]">
                 <button
                   onClick={() => setCollapsed(c => ({ ...c, [group.group]: !c[group.group] }))}
-                  className="flex items-center gap-[6px] w-full py-[6px] text-[11px] leading-[14px] font-[700] uppercase tracking-[0.08em] text-[var(--color-secondary-text)] hover:text-[var(--color-on-surface)] transition-colors cursor-pointer"
+                  className="flex items-center gap-[6px] w-full py-[6px] text-[10px] leading-[14px] font-[700] uppercase tracking-[0.1em] text-[var(--color-secondary-text)]/85 hover:text-[var(--color-on-surface)] transition-colors cursor-pointer"
                 >
                   <ChevronRight
                     size={12}
@@ -316,10 +322,10 @@ export function DesignSystemWeb() {
                         <a
                           href={`#${item.id}`}
                           className={`
-                            block px-[10px] py-[6px] rounded-[8px] text-[13px] leading-[18px] font-[450] transition-colors
+                            block px-[10px] py-[6px] rounded-[8px] text-[13px] leading-[18px] font-[500] transition-colors
                             ${activeSection === item.id
-                              ? 'bg-[var(--color-surface)] text-[var(--color-on-surface)] font-[500]'
-                              : 'text-[var(--color-secondary-text)] hover:text-[var(--color-on-surface)] hover:bg-[var(--color-surface-variant)]'
+                              ? 'bg-[var(--color-background)] text-[var(--color-on-background)] font-[600]'
+                              : 'text-[var(--color-on-surface)] hover:bg-[var(--color-surface-variant)]'
                             }
                           `}
                         >
@@ -332,6 +338,7 @@ export function DesignSystemWeb() {
               </div>
             );
           })}
+          </div>
         </nav>
 
         {/* ── Main content ── */}
@@ -343,7 +350,7 @@ export function DesignSystemWeb() {
               Foundations
             </span>
             <h1 className="text-[36px] leading-[42px] font-[700] tracking-[-0.02em] text-[var(--color-on-background)] mb-[8px]">
-              Design System (Web App)
+              Design System · Web App
             </h1>
             <p className="text-[15px] leading-[22px] font-[450] text-[var(--color-secondary-text)] max-w-[640px]">
               The web design system from <PathTag>Rising-Tide-Org/rosebud-react</PathTag> · <PathTag>apps/web</PathTag>.
@@ -351,7 +358,25 @@ export function DesignSystemWeb() {
             </p>
           </div>
 
-          {/* ═══ HOW TO USE ═══ */}
+          {/* ═══ GETTING STARTED ═══ */}
+
+          <PageSection id="source" title="Source of truth" description="Where these tokens come from in the actual web codebase.">
+            <Box bg="bg" rounded="md" border="1px solid" borderColor="border" p={5}>
+              <Text fontSize="14px" mb={2}><strong>Stack:</strong> Next.js 15 + Chakra UI 2.5.5 + Emotion + framer-motion (Pages Router).</Text>
+              <Text fontSize="14px" mb={3}><strong>Theme files (ported verbatim into <PathTag>src/theme/</PathTag>):</strong></Text>
+              <Box as="ul" pl={5} fontSize="13px" color="textSecondary" sx={{ '& > li': { mb: 1 } }}>
+                <li><PathTag>apps/web/src/styles/theme/index.ts</PathTag> · main extendTheme() entry</li>
+                <li><PathTag>apps/web/src/styles/theme/colors.ts</PathTag> · brand, bloom, brandGray, gold, etc.</li>
+                <li><PathTag>apps/web/src/styles/theme/semanticTokens.ts</PathTag> · bg, text, border, divider, etc.</li>
+                <li><PathTag>apps/web/src/styles/theme/components/</PathTag> · 13 component overrides (Button, Input, Modal, Tabs, Menu, Link, Accordion, FormLabel, Panel, Skeleton, Flex, Text, scrollbar)</li>
+                <li><PathTag>apps/web/src/ui/</PathTag> · core, shared, blocks, modals, global chrome — primitive component source</li>
+                <li><PathTag>apps/web/src/ui/global/Fonts/index.tsx</PathTag> · Circular Std + Outfit @font-face declarations</li>
+              </Box>
+              <Text fontSize="13px" color="textSecondary" pt={3}>
+                Components on this page render with the <em>real</em> Chakra library + the ported theme. Code you build using these patterns translates to <PathTag>apps/web</PathTag> with almost no rework — it's the same library, the same tokens, the same component overrides.
+              </Text>
+            </Box>
+          </PageSection>
 
           <PageSection id="how-to-use" title="How to use this page with Claude" description="Copy-paste these prompts when you want Claude to build new web prototypes that match Rosebud's web design system.">
             <Box bg="bgSecondary" rounded="md" border="1px solid" borderColor="border" p={6}>

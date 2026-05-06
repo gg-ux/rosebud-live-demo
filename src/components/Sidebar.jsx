@@ -1,33 +1,38 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Lock } from 'lucide-react';
 
 const SECTIONS = [
   {
     label: 'Foundation',
     items: [
-      { path: '/design-system', label: 'Design System (Mobile App)' },
-      { path: '/design-system-web', label: 'Design System (Web App)' },
-      { path: '/design-system-website', label: 'Design System (Website)' },
+      { path: '/design-system', label: 'Design System · Mobile App' },
+      { path: '/design-system-web', label: 'Design System · Web App' },
+      { path: '/design-system-website', label: 'Design System · Website' },
     ],
   },
   {
     label: 'Concepts',
+    private: true,
     items: [{ path: '/tool-calls', label: 'Tool Calls' }],
   },
   {
     label: 'Planning',
+    private: true,
     items: [{ path: '/living-design-system', label: 'Living Design System' }],
   },
   {
     label: 'Archive',
+    private: true,
     items: [
       { path: '/patterns', label: 'Patterns' },
       { path: '/therapist', label: 'For Therapists' },
     ],
   },
 ];
+
+const PRIVATE_TOGGLE_KEY = 'rosebud-demo-show-private';
 
 function SidebarItem({ item, isActive }) {
   return (
@@ -61,6 +66,9 @@ function CollapsibleSection({ section, isActive, forceOpen }) {
           className={`shrink-0 transition-transform duration-200 ${expanded ? 'rotate-90' : ''}`}
         />
         <span>{section.label}</span>
+        {section.private && (
+          <Lock size={10} className="shrink-0 text-[var(--color-secondary-text)]/60" aria-label="Private" />
+        )}
       </button>
       <AnimatePresence initial={false}>
         {expanded && (
@@ -84,15 +92,58 @@ function CollapsibleSection({ section, isActive, forceOpen }) {
   );
 }
 
+function PrivateToggle({ on, onChange }) {
+  return (
+    <label className="flex items-center justify-between gap-[10px] px-[10px] py-[8px] rounded-[8px] hover:bg-[var(--color-surface-variant)] cursor-pointer transition-colors">
+      <span className="text-[12px] leading-[16px] font-[500] text-[var(--color-secondary-text)]">Show private pages</span>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={on}
+        onClick={(e) => { e.preventDefault(); onChange(!on); }}
+        className={`relative shrink-0 w-[28px] h-[16px] rounded-full transition-colors ${
+          on ? 'bg-[var(--color-on-background)]' : 'bg-[var(--color-outline-light)]'
+        }`}
+      >
+        <span
+          className={`absolute top-[2px] left-[2px] w-[12px] h-[12px] rounded-full bg-white transition-transform shadow-sm ${
+            on ? 'translate-x-[12px]' : ''
+          }`}
+        />
+      </button>
+    </label>
+  );
+}
+
 export function Sidebar({ open }) {
   const { pathname } = useLocation();
   const [query, setQuery] = useState('');
+  const [showPrivate, setShowPrivate] = useState(false);
+
+  // Load persisted toggle state on mount.
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(PRIVATE_TOGGLE_KEY) === 'yes') setShowPrivate(true);
+    } catch { /* ignore */ }
+  }, []);
+
+  const handleTogglePrivate = (next) => {
+    setShowPrivate(next);
+    try {
+      if (next) localStorage.setItem(PRIVATE_TOGGLE_KEY, 'yes');
+      else localStorage.removeItem(PRIVATE_TOGGLE_KEY);
+    } catch { /* ignore */ }
+  };
+
   const isActive = (path) => pathname === path;
 
   const q = query.trim().toLowerCase();
   const filtered = useMemo(() => {
-    if (!q) return SECTIONS;
-    return SECTIONS
+    // Hide private sections by default. Search bypasses the filter so a typed
+    // query can find anything (Grace's escape hatch).
+    const visible = q ? SECTIONS : SECTIONS.filter((s) => showPrivate || !s.private);
+    if (!q) return visible;
+    return visible
       .map((s) => ({
         ...s,
         items: s.items.filter(
@@ -100,7 +151,7 @@ export function Sidebar({ open }) {
         ),
       }))
       .filter((s) => s.items.length > 0);
-  }, [q]);
+  }, [q, showPrivate]);
 
   return (
     <aside
@@ -109,7 +160,7 @@ export function Sidebar({ open }) {
       }`}
       aria-hidden={!open}
     >
-      <div className="w-[240px] h-full flex flex-col px-[12px] py-[12px] gap-[10px] overflow-y-auto">
+      <div className="w-[240px] h-full flex flex-col px-[12px] py-[12px] gap-[10px]">
         <input
           type="text"
           value={query}
@@ -117,18 +168,24 @@ export function Sidebar({ open }) {
           placeholder="Search…"
           className="w-full px-[10px] py-[6px] rounded-[8px] bg-[var(--color-surface-variant)] border border-[var(--color-outline-light)] text-[13px] leading-[18px] font-[450] text-[var(--color-on-surface)] placeholder:text-[var(--color-secondary-text)] outline-none focus:border-[var(--color-primary)] transition-colors"
         />
-        {filtered.length === 0 ? (
-          <p className="px-[10px] py-[8px] text-[12px] text-[var(--color-secondary-text)]/70">No matches</p>
-        ) : (
-          filtered.map((section, idx) => (
-            <CollapsibleSection
-              key={idx}
-              section={section}
-              isActive={isActive}
-              forceOpen={!!q}
-            />
-          ))
-        )}
+        <div className="flex-1 overflow-y-auto flex flex-col gap-[10px]">
+          {filtered.length === 0 ? (
+            <p className="px-[10px] py-[8px] text-[12px] text-[var(--color-secondary-text)]/70">No matches</p>
+          ) : (
+            filtered.map((section, idx) => (
+              <CollapsibleSection
+                key={idx}
+                section={section}
+                isActive={isActive}
+                forceOpen={!!q}
+              />
+            ))
+          )}
+        </div>
+        {/* Bottom: private-pages toggle */}
+        <div className="pt-[8px] border-t border-[var(--color-outline-light)]">
+          <PrivateToggle on={showPrivate} onChange={handleTogglePrivate} />
+        </div>
       </div>
     </aside>
   );

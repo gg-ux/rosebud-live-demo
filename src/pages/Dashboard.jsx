@@ -1,22 +1,20 @@
 import { Link } from 'react-router-dom';
-import { Smartphone, AppWindow, Globe, ArrowUpRight } from 'lucide-react';
+import { Smartphone, AppWindow, Globe, ArrowRight } from 'lucide-react';
 
 const ITEMS = [
   {
     path: '/design-system',
-    eyebrow: 'Mobile',
     icon: Smartphone,
-    title: 'Design System (Mobile App)',
+    title: 'Mobile App',
     description:
-      'Tokens, components, and screens for the iOS and Android app — extracted from Figma.',
-    meta: 'React Native · Figma-sourced',
+      'Real react-native-paper components from rosebud-react/apps/native, rendered via react-native-web. Same library and theme as the production iOS/Android app.',
+    meta: 'react-native-paper · Live components',
     accent: 'rose',
   },
   {
     path: '/design-system-web',
-    eyebrow: 'Web App',
     icon: AppWindow,
-    title: 'Design System (Web App)',
+    title: 'Web App',
     description:
       'Real Chakra UI components from rosebud-react/apps/web. Prototypes here translate to prod with almost no rework.',
     meta: 'Chakra UI · Live components',
@@ -24,9 +22,8 @@ const ITEMS = [
   },
   {
     path: '/design-system-website',
-    eyebrow: 'Marketing',
     icon: Globe,
-    title: 'Design System (Website)',
+    title: 'Website',
     description:
       'Tokens and section patterns from the rosebud.app marketing site — for fast landing-page prototypes.',
     meta: 'Tailwind · Webflow-sourced',
@@ -59,14 +56,11 @@ function DashboardCard({ item }) {
         <div className={`w-[40px] h-[40px] rounded-[12px] flex items-center justify-center ${iconCls}`}>
           <Icon size={18} strokeWidth={1.8} />
         </div>
-        <ArrowUpRight
+        <ArrowRight
           size={18}
-          className="text-[#C0C0BF] group-hover:text-[#191C1A] group-hover:-translate-y-[2px] group-hover:translate-x-[2px] transition-all"
+          className="text-[#C0C0BF] group-hover:text-[#191C1A] group-hover:translate-x-[3px] transition-all"
         />
       </div>
-      <span className="block text-[10px] font-[700] tracking-[0.08em] uppercase text-[#6D6C6A] mb-[8px]">
-        {item.eyebrow}
-      </span>
       <h2 className="text-[19px] md:text-[21px] leading-[24px] md:leading-[26px] font-[700] tracking-[-0.01em] text-[#191C1A] mb-[6px]">
         {item.title}
       </h2>
@@ -88,17 +82,11 @@ export function Dashboard() {
       <div className="relative max-w-[1100px] w-full mx-auto px-[20px] md:px-[24px] py-[40px] md:py-[64px] flex flex-col gap-[28px] md:gap-[40px] flex-1">
         {/* Hero */}
         <div className="flex flex-col items-start">
-          <div className="flex items-center gap-[10px] mb-[14px]">
-            <img src="/favicon-rosebud.svg" alt="" className="w-[28px] h-[28px]" />
-            <span className="text-[15px] font-[700] tracking-[-0.01em] text-[#191C1A]">rosebud</span>
-            <span className="w-[3px] h-[3px] rounded-full bg-[#C0C0BF]" />
-            <span className="text-[12px] font-[600] tracking-[0.08em] uppercase text-[#6D6C6A]">Design</span>
-          </div>
           <h1 className="text-[32px] md:text-[44px] leading-[36px] md:leading-[50px] font-[700] tracking-[-0.025em] text-[#191C1A] mb-[10px]">
-            Design systems
+            Rosebud Design Systems
           </h1>
-          <p className="text-[14px] md:text-[16px] leading-[22px] md:leading-[26px] font-[450] text-[#6D6C6A] max-w-[580px]">
-            All three surfaces — mobile, web app, and marketing — in one place. Each page includes a "How to use with Claude" prompt cookbook so anyone can prototype on-brand.
+          <p className="text-[15px] md:text-[17px] leading-[22px] md:leading-[26px] font-[450] text-[#6D6C6A] max-w-[640px]">
+            A calm, warm visual language for tools that help people grow. Disciplined color, editorial typography, soft organic shapes — one voice across mobile, web, and marketing.
           </p>
         </div>
 

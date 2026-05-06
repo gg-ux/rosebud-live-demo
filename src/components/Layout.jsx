@@ -33,9 +33,10 @@ export function Layout({ children }) {
       <div className="min-h-screen flex flex-col bg-[var(--color-background)] text-[var(--color-on-background)]">
         <header className="sticky top-0 z-50 h-[56px] flex items-center justify-between px-[16px] md:px-[24px] bg-[var(--color-surface)]/95 backdrop-blur border-b border-[var(--color-outline-light)]">
           <div className="flex items-center gap-[8px]">
-            <a href="/" className="flex items-center gap-[8px] hover:opacity-80 transition-opacity">
-              <img src="/favicon-rosebud.svg" alt="Rosebud" className="w-[22px] h-[22px]" />
+            <a href="/" className="flex items-baseline gap-[10px] hover:opacity-80 transition-opacity">
+              <img src="/favicon-rosebud.svg" alt="Rosebud" className="w-[22px] h-[22px] self-center" />
               <span className="hidden sm:inline text-[17px] leading-[24px] font-[700] text-[var(--color-on-background)]">rosebud</span>
+              <span className="hidden sm:inline -ml-[4px] text-[11px] leading-[14px] font-[600] tracking-[0.1em] uppercase text-[var(--color-secondary-text)]">design</span>
             </a>
             <button
               onClick={() => setSidebarOpen((o) => !o)}
