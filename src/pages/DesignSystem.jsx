@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Sun, Moon, ChevronRight, Atom } from 'lucide-react';
+import { Sun, Moon, ChevronRight, Atom, Search, X as XIcon, Check, Compass, Plus, Lightbulb, BookOpen, Fingerprint, MessageCircleQuestion, Info, CheckCircle2, TriangleAlert, XCircle, Bell } from 'lucide-react';
+import roseLogo from '../branding/logo-icon-color.svg';
 import { usePageActions } from '../components/Layout';
 import { DesignSystemSwitcher } from '../components/DesignSystemSwitcher';
+import { useTheme } from '../hooks/useTheme';
 import {
   PaperProvider, Button as PaperButton, TextInput as PaperTextInput,
   Switch as PaperSwitch, Checkbox as PaperCheckbox, RadioButton as PaperRadio,
   Searchbar as PaperSearchbar, Chip as PaperChip, Avatar as PaperAvatar,
   Divider as PaperDivider, ActivityIndicator, ProgressBar,
+  Text as PaperText,
+  useTheme as usePaperTheme,
 } from 'react-native-paper';
-import { View, Text as RNText } from 'react-native';
+import { View, Text as RNText, Pressable } from 'react-native';
 import { getTheme } from '../native-theme/variants';
 // Tailwind Card / Avatar / Tag still used inside the Cards section.
 // Other primitives (Button, Input, Switch, etc.) now render via real
@@ -19,7 +23,7 @@ import {
   ReflectionCard, InsightCard, HaikuCard, AskRosebudCard, KeyThemeCard,
   WeeklyReportLocked, LockedFeatureCard, UpgradeCard, PersonaCard,
   GoalsCard, FeedbackPromptCard, EmotionalLandscapeCard, EntryDraftCard,
-  GratitudeChallengeCard, LoadingCard,
+  GratitudeChallengeCard,
 } from '../components/cards';
 
 /* ══════════════════════════════════════════════════════════
@@ -27,6 +31,13 @@ import {
    Modeled after Material Design 3 + Shopify Polaris:
    Foundations → Components (grouped by function)
    ══════════════════════════════════════════════════════════ */
+
+// Standard mobile frame width — applied to every full-width component
+// (Bottom Sheet, Bottom Nav, Pickers, Snackbar/Infobar/Tooltip, Grouped List,
+// Choice Tile) for visual cohesion. Matches iPhone X-15 base width (375).
+// Compact components that intentionally stay smaller (Dialog system alert,
+// Time Picker wheel) are exempt.
+const MOBILE_W = 375;
 
 const NAV = [
   {
@@ -60,24 +71,54 @@ const NAV = [
     group: 'Input & Selection',
     items: [
       { id: 'p-textinput', label: 'TextInput', stack: 'rn-paper' },
+      { id: 'p-textarea', label: 'Textarea', stack: 'rn-paper' },
       { id: 'p-searchbar', label: 'Searchbar', stack: 'rn-paper' },
-      { id: 'p-switch', label: 'Switch', stack: 'rn-paper' },
-      { id: 'p-checkbox', label: 'Checkbox', stack: 'rn-paper' },
+      { id: 'p-switch', label: 'Switch', stack: 'rn' },
+      { id: 'p-checkbox', label: 'Checkbox', stack: 'rn' },
       { id: 'p-radio', label: 'Radio Button', stack: 'rn-paper' },
+      { id: 'p-segmented', label: 'Segmented Control', stack: 'rn' },
+      { id: 'p-choice-tile', label: 'Choice Tile', stack: 'rn' },
     ],
   },
   {
     group: 'Display',
     items: [
       { id: 'p-chip', label: 'Chip', stack: 'rn-paper' },
+      { id: 'p-tag', label: 'Tag', stack: 'rn' },
       { id: 'p-avatar', label: 'Avatar', stack: 'rn-paper' },
       { id: 'p-activity', label: 'Activity Indicator', stack: 'rn-paper' },
       { id: 'p-progress', label: 'Progress Bar', stack: 'rn-paper' },
+      { id: 'p-grouped-list', label: 'Grouped List', stack: 'rn' },
+    ],
+  },
+  {
+    group: 'Feedback',
+    items: [
+      { id: 'p-snackbar', label: 'Snackbar', stack: 'rn-paper' },
+      { id: 'p-infobar', label: 'Infobar', stack: 'rn' },
+      { id: 'p-toast', label: 'Toast', stack: 'rn' },
+      { id: 'p-tooltip', label: 'Tooltip', stack: 'rn' },
+    ],
+  },
+  {
+    group: 'Surfaces & Navigation',
+    items: [
+      { id: 'bottom-sheet', label: 'Bottom Sheet', stack: 'rn' },
+      { id: 'bottom-nav', label: 'Bottom Nav', stack: 'rn' },
+      { id: 'p-dialog', label: 'Dialog', stack: 'rn-paper' },
+    ],
+  },
+  {
+    group: 'Pickers',
+    items: [
+      { id: 'p-datepicker', label: 'Date Picker', stack: 'rn' },
+      { id: 'p-timepicker', label: 'Time Picker', stack: 'rn' },
+      { id: 'p-weekdaypicker', label: 'Weekday Picker', stack: 'rn' },
     ],
   },
   {
     group: 'Cards',
-    items: [{ id: 'cards', label: 'Rosebud cards' }],
+    items: [{ id: 'cards', label: 'Cards' }],
   },
   {
     group: 'Assets',
@@ -97,7 +138,8 @@ function Section({ id, title, description, stack, children }) {
     <section id={id} className="mb-[64px] scroll-mt-[80px]">
       <div className="flex items-center gap-[10px] mb-[4px] flex-wrap">
         <h2 className="text-[24px] leading-[32px] font-[700] text-[var(--color-on-background)]">{title}</h2>
-        {stack === 'rn-paper' && <StackChip />}
+        {stack === 'rn-paper' && <StackChip variant="paper" />}
+        {stack === 'rn' && <StackChip variant="rn" />}
       </div>
       {description && (
         <p className="text-[15px] leading-[20px] font-[450] text-[var(--color-secondary-text)] mb-[24px]">
@@ -110,21 +152,35 @@ function Section({ id, title, description, stack, children }) {
   );
 }
 
-function StackChip() {
+function StackChip({ variant = 'paper' }) {
+  const isPaper = variant === 'paper';
+  const label = isPaper ? 'React Native + Paper' : 'React Native + Paper (Mirror)';
+  const tooltip = isPaper ? (
+    <>
+      Rendered with the actual <code className="font-mono">react-native-paper</code> component + <code className="font-mono">react-native-web</code>, themed from the ported <code className="font-mono">apps/native/src/theme/</code>. Same component code that ships in the iOS/Android app.
+    </>
+  ) : (
+    <>
+      A <strong>visual mirror</strong> of Figma + production, built from <code className="font-mono">react-native</code> primitives (View / Pressable / Text) + <code className="font-mono">lucide-react</code> icons, but still themed via the Paper theme + Paper <code className="font-mono">Text</code> for typography. Used when Paper's component is broken in this RNW environment (e.g. <code className="font-mono">Switch</code>, <code className="font-mono">Checkbox</code>) or when production uses a non-Paper package (Bottom Sheet via Modalize, Pickers via datetimepicker).
+    </>
+  );
   return (
-    <span
-      className="inline-flex items-center gap-[5px] px-[8px] py-[2px] rounded-full bg-[var(--color-surface-variant)] border border-[var(--color-outline-light)] text-[10px] leading-[13px] font-[600] uppercase tracking-[0.06em] text-[var(--color-secondary-text)]"
-      title="Real react-native + react-native-paper component, rendered via react-native-web"
-    >
+    <span className="relative group inline-flex items-center gap-[5px] px-[8px] py-[2px] rounded-full bg-[var(--color-surface-variant)] border border-[var(--color-outline-light)] text-[10px] leading-[13px] font-[600] uppercase tracking-[0.06em] text-[var(--color-secondary-text)] cursor-help">
       <Atom size={10} strokeWidth={2.2} />
-      React Native + Paper
+      {label}
+      <span
+        role="tooltip"
+        className="absolute top-full left-0 mt-[8px] z-50 w-[300px] px-[12px] py-[10px] rounded-[8px] bg-[var(--color-on-background)] text-[var(--color-background)] text-[12px] leading-[18px] font-[450] normal-case tracking-normal opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity pointer-events-none shadow-[0_4px_16px_rgba(0,0,0,0.15)]"
+      >
+        {tooltip}
+      </span>
     </span>
   );
 }
 
 function SubSection({ title, children }) {
   return (
-    <div className="mb-[32px]">
+    <div className="mt-[32px] mb-[16px] first:mt-0">
       <h3 className="text-[17px] leading-[23px] font-[500] text-[var(--color-on-surface-variant)] mb-[16px]">{title}</h3>
       {children}
     </div>
@@ -175,10 +231,20 @@ function Swatch({ name, hex, className }) {
   );
 }
 
-function ComponentSpec({ name, children }) {
+function ComponentSpec({ name, children, bare = false }) {
+  // `bare` drops the surface bg + border so demos that ARE white surfaces
+  // themselves (TextInput, Textarea, Searchbar) stay visible against the
+  // page bg instead of disappearing into a white-on-white wrapper.
+  // Omit `name` to render only the children with no label (useful when one
+  // container holds multiple variants that don't need separate captions).
+  const wrapperClass = bare
+    ? 'pt-[8px]'
+    : 'p-[24px] rounded-[12px] bg-[var(--color-surface)] border border-[var(--color-outline-light)]';
   return (
-    <div className="p-[24px] rounded-[12px] bg-[var(--color-surface)] border border-[var(--color-outline-light)]">
-      <p className="text-[12px] leading-[16px] font-[500] text-[var(--color-secondary-text)] uppercase tracking-wider mb-[16px]">{name}</p>
+    <div className={wrapperClass}>
+      {name && (
+        <p className="text-[12px] leading-[16px] font-[500] text-[var(--color-secondary-text)] uppercase tracking-wider mb-[16px]">{name}</p>
+      )}
       {children}
     </div>
   );
@@ -200,6 +266,24 @@ function CodeBlock({ children }) {
   );
 }
 
+// Collapsible code-snippet panel under a component demo. `path` is the file in
+// rosebud-react where the component lives (or "n/a" for demo-only). `note`
+// is a short caption — e.g. "Mirrors apps/native/src/components/Button.tsx"
+// or "Add as src/components/Switch.tsx".
+function CodeSnippet({ path, note, children }) {
+  return (
+    <details className="mt-[16px] group">
+      <summary className="cursor-pointer text-[13px] leading-[18px] font-[500] text-[var(--color-secondary-text)] hover:text-[var(--color-on-surface)] inline-flex items-center gap-[6px] select-none">
+        <ChevronRight size={14} className="transition-transform group-open:rotate-90" />
+        Show code
+        {path && <span className="font-mono text-[11px] text-[var(--color-secondary-text-on-surface)]">· {path}</span>}
+      </summary>
+      {note && <p className="mt-[8px] text-[12px] leading-[18px] text-[var(--color-secondary-text)]">{note}</p>}
+      <CodeBlock>{children}</CodeBlock>
+    </details>
+  );
+}
+
 /* ══════════════════════════════════════════════════════════
    PAGE
    ══════════════════════════════════════════════════════════ */
@@ -210,14 +294,10 @@ export function DesignSystem() {
   const [cardChecked, setCardChecked] = useState(true);
   const [radio, setRadio] = useState('a');
   const [segment, setSegment] = useState('week');
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useTheme();
   const [activeSection, setActiveSection] = useState('colors');
   const [collapsed, setCollapsed] = useState({});
   const [sidebarSearch, setSidebarSearch] = useState('');
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -247,9 +327,11 @@ export function DesignSystem() {
     [theme]
   );
 
-  // Paper theme uses the rose primary variant (the brand pink) by default.
-  // Native components on this page render through PaperProvider + RNW.
-  const paperTheme = getTheme(theme, 'rose');
+  // Paper theme uses the default primary variant (black in light, light gray
+  // in dark) — matches what ships in apps/native/src/theme/light.ts. Users
+  // can switch to rose/green/blue/orange/purple in the actual app; that
+  // option is documented in the "Primary Color Variants" section.
+  const paperTheme = getTheme(theme, 'default');
 
   return (
     <PaperProvider theme={paperTheme} settings={{ icon: () => null }}>
@@ -266,7 +348,7 @@ export function DesignSystem() {
               value={sidebarSearch}
               onChange={(e) => setSidebarSearch(e.target.value)}
               placeholder="Search..."
-              className="mt-[14px] w-full px-[10px] py-[6px] rounded-[8px] bg-[var(--color-surface-variant)] border border-[var(--color-outline-light)] text-[13px] leading-[18px] font-[450] text-[var(--color-on-surface)] placeholder:text-[var(--color-secondary-text)] outline-none focus:border-[var(--color-primary)] transition-colors"
+              className="mt-[14px] w-full px-[10px] py-[6px] rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-outline-light)] text-[13px] leading-[18px] font-[450] text-[var(--color-on-surface)] placeholder:text-[var(--color-secondary-text)] outline-none focus:border-[var(--color-primary)] transition-colors"
             />
           </div>
           {/* Scrollable groups */}
@@ -303,7 +385,7 @@ export function DesignSystem() {
                           className={`
                             flex items-center gap-[6px] px-[10px] py-[6px] rounded-[8px] text-[13px] leading-[18px] font-[500] transition-colors
                             ${activeSection === item.id
-                              ? 'bg-[var(--color-background)] text-[var(--color-on-background)] font-[600]'
+                              ? 'bg-[var(--color-surface-variant)] text-[var(--color-on-background)] font-[600]'
                               : 'text-[var(--color-on-surface)] hover:bg-[var(--color-surface-variant)]'
                             }
                           `}
@@ -769,16 +851,20 @@ Key paths:
 
           {/* ═══ ACTIONS (live RN + Paper) ═══ */}
 
-          <Section id="p-button" title="Button" stack="rn-paper" description="react-native-paper Button. 5 modes (contained, outlined, text, elevated, contained-tonal). The active primary variant is rose (brand pink #E31665).">
+          <Section id="p-button" title="Button" stack="rn-paper" description="react-native-paper Button. 5 modes (contained, outlined, text, elevated, contained-tonal). Default primary variant matches production: black in light, light gray in dark.">
             <ComponentSpec name="Modes">
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
-                <PaperButton mode="contained">Contained</PaperButton>
-                <PaperButton mode="outlined">Outlined</PaperButton>
-                <PaperButton mode="text">Text</PaperButton>
-                <PaperButton mode="elevated">Elevated</PaperButton>
-                <PaperButton mode="contained-tonal">Contained-tonal</PaperButton>
-              </View>
+              <PaperButtonModesDemo />
             </ComponentSpec>
+            <SubSection title="Sizes">
+              <ComponentSpec name="xs · sm · md · lg (production: 28 / 42 / 48 / 56h)">
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
+                  <PaperButton mode="contained" style={{ borderRadius: 12 }} contentStyle={{ height: 28, paddingHorizontal: 12 }} labelStyle={{ fontSize: 13, fontWeight: '500' }}>xs</PaperButton>
+                  <PaperButton mode="contained" style={{ borderRadius: 12 }} contentStyle={{ height: 42 }} labelStyle={{ fontSize: 14, fontWeight: '500' }}>sm</PaperButton>
+                  <PaperButton mode="contained" style={{ borderRadius: 12 }} contentStyle={{ height: 48 }} labelStyle={{ fontSize: 16, fontWeight: '500' }}>md</PaperButton>
+                  <PaperButton mode="contained" style={{ borderRadius: 12 }} contentStyle={{ height: 56 }} labelStyle={{ fontSize: 16, fontWeight: '500' }}>lg</PaperButton>
+                </View>
+              </ComponentSpec>
+            </SubSection>
             <SubSection title="States">
               <ComponentSpec name="Loading · Disabled">
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
@@ -791,58 +877,441 @@ Key paths:
             <p className="mt-[16px] text-[12px] text-[var(--color-secondary-text)]">
               <PathTag>apps/native/src/components/Button.tsx</PathTag>
             </p>
+            <CodeSnippet
+              path="apps/native/src/components/Button.tsx"
+              note="Wraps Paper's Button. Adds size variants (xs/sm/md/lg → 28/42/48/56h), variant='primary' for explicit primary bg, and destructive prop for error-color labels."
+            >{`import Button from 'components/Button'
+
+<Button mode="contained">Save</Button>
+<Button mode="outlined">Cancel</Button>
+<Button mode="text">Skip</Button>
+
+<Button mode="contained" loading>Saving</Button>
+<Button mode="contained" disabled>Disabled</Button>
+
+<Button mode="contained" variant="primary" size="lg">
+  Get Bloom
+</Button>
+<Button mode="text" destructive>Delete entry</Button>`}</CodeSnippet>
           </Section>
 
           {/* ═══ INPUT & SELECTION (live RN + Paper) ═══ */}
 
-          <Section id="p-textinput" title="TextInput" stack="rn-paper" description="react-native-paper TextInput. Two modes: flat and outlined. Wraps the native FormTextInput in apps/native.">
+          <Section id="p-textinput" title="TextInput" stack="rn-paper" description="The rosebud FormTextInput wraps Paper's outlined TextInput. 56px height, 12px radius, surface bg, 16px horizontal padding, Body Medium 16/22. Label above the field, outline transparent at rest and outlineLight (#DEDEDE) on focus.">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
-              <ComponentSpec name="Flat">
-                <PaperTextInputDemo mode="flat" label="Email" placeholder="you@example.com" />
+              <ComponentSpec name="Default" bare>
+                <PaperTextInputDemo label="Email" placeholder="you@example.com" />
               </ComponentSpec>
-              <ComponentSpec name="Outlined">
-                <PaperTextInputDemo mode="outlined" label="Name" placeholder="Grace" />
+              <ComponentSpec name="With description" bare>
+                <PaperTextInputDemo label="Name" placeholder="Grace" description="Used to personalize prompts." />
               </ComponentSpec>
             </div>
             <p className="mt-[16px] text-[12px] text-[var(--color-secondary-text)]">
               <PathTag>apps/native/src/components/FormTextInput.tsx</PathTag>
             </p>
+            <CodeSnippet
+              path="apps/native/src/components/FormTextInput.tsx"
+              note="Wraps Paper's outlined TextInput. Renders label as a separate Text above the field, transparent rest outline, outlineLight on focus, 56h × 12px radius."
+            >{`import FormTextInput from 'components/FormTextInput'
+
+<FormTextInput
+  label="Email"
+  placeholder="you@example.com"
+  value={email}
+  onChangeText={setEmail}
+/>
+
+<FormTextInput
+  label="Bio"
+  placeholder="Tell us about yourself"
+  description="Used to personalize prompts."
+  value={bio}
+  onChangeText={setBio}
+  charLimit={500}
+/>`}</CodeSnippet>
+          </Section>
+
+          <Section id="p-textarea" title="Textarea" stack="rn-paper" description="Multi-line variant of TextInput with a character counter. Same surface bg + 12px radius + transparent-at-rest outline.">
+            <ComponentSpec name="With character limit" bare>
+              <PaperTextareaDemo placeholder="Imagine a world where creativity knows no bounds." charLimit={500} />
+            </ComponentSpec>
+            <p className="mt-[16px] text-[12px] text-[var(--color-secondary-text)]">
+              <PathTag>apps/native/src/components/FormTextInput.tsx · multiline</PathTag>
+            </p>
+            <CodeSnippet
+              path="apps/native/src/components/FormTextInput.tsx"
+              note="Pass `multiline` + `charLimit` to FormTextInput for the Textarea variant. Char counter renders below the field automatically."
+            >{`<FormTextInput
+  placeholder="Imagine a world where creativity knows no bounds."
+  value={text}
+  onChangeText={setText}
+  multiline
+  charLimit={500}
+/>`}</CodeSnippet>
           </Section>
 
           <Section id="p-searchbar" title="Searchbar" stack="rn-paper" description="react-native-paper Searchbar. Used in entry list and explore.">
-            <ComponentSpec name="Default">
+            <ComponentSpec name="Default" bare>
               <PaperSearchbarDemo />
             </ComponentSpec>
+            <CodeSnippet
+              path="react-native-paper · Searchbar"
+              note="Paper Searchbar with default magnify icon (production uses MaterialCommunityIcons via react-native-vector-icons; stubbed in this demo, so we pass explicit lucide render fns)."
+            >{`import { Searchbar, useTheme } from 'react-native-paper'
+
+const [q, setQ] = useState('')
+const t = useTheme()
+
+<Searchbar
+  placeholder="Search entries…"
+  value={q}
+  onChangeText={setQ}
+  elevation={0}
+  style={{
+    backgroundColor: t.colors.surface,
+    borderWidth: 1,
+    borderColor: t.colors.outlineLight,
+    borderRadius: 12,
+  }}
+/>`}</CodeSnippet>
           </Section>
 
-          <Section id="p-switch" title="Switch" stack="rn-paper" description="react-native-paper Switch. Used in SettingsList rows.">
+          <Section id="p-switch" title="Switch" stack="rn" description="Custom 51×30 Pressable + View toggle. Paper's MD3 Switch ignores `thumbColor` (paints thumb same color as on-track), so we build it from RN primitives.">
             <ComponentSpec name="On / Off">
               <PaperSwitchDemo />
             </ComponentSpec>
+            <CodeSnippet
+              path="apps/native/src/components/Switch.tsx (new file)"
+              note="Drop into rosebud-react as a new file. Uses `useTheme<RBTheme>()` for tokens — same theme that ships in the app."
+            >{`import { Pressable, View } from 'react-native'
+import { useTheme } from 'react-native-paper'
+import { RBTheme } from 'theme'
+
+type Props = {
+  value: boolean
+  onValueChange: (next: boolean) => void
+  disabled?: boolean
+}
+
+export default function Switch({ value, onValueChange, disabled }: Props) {
+  const t = useTheme<RBTheme>()
+  const trackBg = value ? t.colors.primary : t.colors.outlineLight
+  return (
+    <Pressable
+      onPress={() => !disabled && onValueChange(!value)}
+      accessibilityRole="switch"
+      accessibilityState={{ checked: value, disabled }}
+      style={{
+        width: 51,
+        height: 30,
+        borderRadius: 999,
+        backgroundColor: trackBg,
+        padding: 2,
+        opacity: disabled ? 0.5 : 1,
+      }}
+    >
+      <View
+        style={{
+          width: 26,
+          height: 26,
+          borderRadius: 999,
+          backgroundColor: t.colors.surface,
+          transform: [{ translateX: value ? 21 : 0 }],
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: value ? 0.05 : 0.08,
+          shadowRadius: value ? 2 : 4,
+          elevation: 2,
+        }}
+      />
+    </Pressable>
+  )
+}`}</CodeSnippet>
           </Section>
 
-          <Section id="p-checkbox" title="Checkbox" stack="rn-paper" description="react-native-paper Checkbox.">
+          <Section id="p-checkbox" title="Checkbox" stack="rn" description="Custom 24×24 Pressable + View + lucide Check. Paper's Checkbox renders the box via `react-native-vector-icons` (stubbed in this repo), so we draw it manually.">
             <ComponentSpec name="With label">
               <PaperCheckboxDemo />
             </ComponentSpec>
+            <CodeSnippet
+              path="apps/native/src/components/Checkbox.tsx (new file)"
+              note="On native, swap lucide for `react-native-vector-icons` MaterialCommunityIcons (`check`)."
+            >{`import { Pressable, View } from 'react-native'
+import { Text, useTheme } from 'react-native-paper'
+import { Check } from 'lucide-react-native'
+import { RBTheme } from 'theme'
+
+type Props = {
+  value: boolean
+  onValueChange: (next: boolean) => void
+  label?: string
+  disabled?: boolean
+}
+
+export default function Checkbox({ value, onValueChange, label, disabled }: Props) {
+  const t = useTheme<RBTheme>()
+  return (
+    <Pressable
+      onPress={() => !disabled && onValueChange(!value)}
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked: value, disabled }}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        opacity: disabled ? 0.5 : 1,
+      }}
+    >
+      <View
+        style={{
+          width: 24,
+          height: 24,
+          borderRadius: 6,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: value ? t.colors.primary : t.colors.surface,
+          borderWidth: 1,
+          borderColor: value ? t.colors.primary : t.colors.secondaryTextOnSurface,
+        }}
+      >
+        {value && <Check size={16} strokeWidth={3} color={t.colors.onPrimary} />}
+      </View>
+      {label && (
+        <Text variant="bodyMedium" style={{ color: t.colors.onSurface }}>
+          {label}
+        </Text>
+      )}
+    </Pressable>
+  )
+}`}</CodeSnippet>
           </Section>
 
           <Section id="p-radio" title="Radio Button" stack="rn-paper" description="react-native-paper RadioButton.Group with three options.">
             <ComponentSpec name="Group of 3">
               <PaperRadioDemo />
             </ComponentSpec>
+            <CodeSnippet
+              path="react-native-paper · RadioButton.Group"
+              note="Pass `uncheckedColor` so the unchecked stroke uses Figma's secondaryTextOnSurface (#8B828B) instead of Paper's default sage onSurfaceVariant."
+            >{`import { RadioButton, Text, useTheme } from 'react-native-paper'
+import { View } from 'react-native'
+
+const [v, setV] = useState('a')
+const t = useTheme()
+
+<RadioButton.Group value={v} onValueChange={setV}>
+  {[['a', 'Option A'], ['b', 'Option B'], ['c', 'Option C']].map(([val, label]) => (
+    <View key={val} style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+      <RadioButton value={val} uncheckedColor={t.colors.secondaryTextOnSurface} />
+      <Text variant="bodyMedium">{label}</Text>
+    </View>
+  ))}
+</RadioButton.Group>`}</CodeSnippet>
+          </Section>
+
+          <Section id="p-segmented" title="Segmented Control" stack="rn" description="Toggle between 2-3 options. Selected segment: surface bg + primary text. Unselected: background bg + secondaryText.">
+            <ComponentSpec name="3 segments">
+              <SegmentedControlDemo />
+            </ComponentSpec>
+            <CodeSnippet
+              path="apps/native/src/components/SegmentedControl.tsx (new file)"
+              note="3-segment toggle with rounded outer corners only (10px), shared 1px outline. Selected segment uses surface bg, others use background."
+            >{`import { Pressable, View } from 'react-native'
+import { Text, useTheme } from 'react-native-paper'
+import { RBTheme } from 'theme'
+
+type Props<T extends string> = {
+  options: { value: T; label: string }[]
+  value: T
+  onValueChange: (v: T) => void
+}
+
+export default function SegmentedControl<T extends string>({ options, value, onValueChange }: Props<T>) {
+  const t = useTheme<RBTheme>()
+  return (
+    <View style={{ flexDirection: 'row', alignSelf: 'flex-start' }}>
+      {options.map((opt, i) => {
+        const isSelected = opt.value === value
+        const isFirst = i === 0
+        const isLast = i === options.length - 1
+        return (
+          <Pressable
+            key={opt.value}
+            onPress={() => onValueChange(opt.value)}
+            style={{
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              backgroundColor: isSelected ? t.colors.surface : t.colors.background,
+              borderWidth: 1,
+              borderColor: t.colors.outline,
+              borderLeftWidth: isFirst ? 1 : 0,
+              borderTopLeftRadius: isFirst ? 10 : 0,
+              borderBottomLeftRadius: isFirst ? 10 : 0,
+              borderTopRightRadius: isLast ? 10 : 0,
+              borderBottomRightRadius: isLast ? 10 : 0,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 14,
+                lineHeight: 20,
+                fontWeight: isSelected ? '500' : '450',
+                color: isSelected ? t.colors.onSurface : t.colors.secondaryText,
+              }}
+            >
+              {opt.label}
+            </Text>
+          </Pressable>
+        )
+      })}
+    </View>
+  )
+}`}</CodeSnippet>
+          </Section>
+
+          <Section id="p-choice-tile" title="Choice Tile" stack="rn" description="Selectable card with label + checkbox on the right. Multi-select pattern (e.g. feedback reasons, onboarding preferences). Default = no border, selected = 1px primary border.">
+            <ComponentSpec name="3 options · multi-select">
+              <ChoiceTileDemo />
+            </ComponentSpec>
+            <CodeSnippet
+              path="apps/native/src/components/ChoiceTile.tsx (new file)"
+              note="Reuses the Checkbox component from above. 56h row with 12px radius, primary border on selected state. Use as a controlled list — parent owns the Set of selected values."
+            >{`import { Pressable, View } from 'react-native'
+import { Text, useTheme } from 'react-native-paper'
+import { Check } from 'lucide-react-native'
+import { RBTheme } from 'theme'
+
+type Props = {
+  label: string
+  selected: boolean
+  onToggle: () => void
+  disabled?: boolean
+}
+
+export default function ChoiceTile({ label, selected, onToggle, disabled }: Props) {
+  const t = useTheme<RBTheme>()
+  return (
+    <Pressable
+      onPress={() => !disabled && onToggle()}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 12,
+        padding: 16,
+        height: 56,
+        backgroundColor: t.colors.surface,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: selected ? t.colors.primary : 'transparent',
+        opacity: disabled ? 0.5 : 1,
+      }}
+    >
+      <Text
+        variant="bodyMedium"
+        style={{ flex: 1, color: disabled ? t.colors.outline : t.colors.onSurface }}
+      >
+        {label}
+      </Text>
+      <View
+        style={{
+          width: 24,
+          height: 24,
+          borderRadius: 6,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: selected ? t.colors.primary : t.colors.surface,
+          borderWidth: 1,
+          borderColor: selected ? t.colors.primary : t.colors.secondaryTextOnSurface,
+        }}
+      >
+        {selected && <Check size={16} strokeWidth={3} color={t.colors.onPrimary} />}
+      </View>
+    </Pressable>
+  )
+}`}</CodeSnippet>
           </Section>
 
           {/* ═══ DISPLAY (live RN + Paper) ═══ */}
 
           <Section id="p-chip" title="Chip" stack="rn-paper" description="react-native-paper Chip — the native equivalent of pills/tags.">
             <ComponentSpec name="Default + selected">
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                <PaperChip>Mindfulness</PaperChip>
-                <PaperChip>Gratitude</PaperChip>
-                <PaperChip selected>Selected</PaperChip>
+              <PaperChipDemo />
+            </ComponentSpec>
+            <CodeSnippet
+              path="react-native-paper · Chip"
+              note="Override bg with backgroundOnSurface (#F8F8F8) — Paper's default surfaceVariant is sage in this theme."
+            >{`import { Chip, useTheme } from 'react-native-paper'
+
+const t = useTheme()
+
+<Chip
+  style={{ backgroundColor: t.colors.backgroundOnSurface }}
+  textStyle={{ color: t.colors.onSurface }}
+>
+  Mindfulness
+</Chip>
+
+<Chip
+  selected
+  style={{ backgroundColor: t.colors.primary }}
+  textStyle={{ color: t.colors.onPrimary }}
+>
+  Selected
+</Chip>`}</CodeSnippet>
+          </Section>
+
+          <Section id="p-tag" title="Tag" stack="rn" description="Small label chip — different from Chip in that it's compact, non-interactive, and used for emotion/category labels.">
+            <ComponentSpec name="Default">
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+                {['Proud', 'Calm', 'Hopeful', 'Curious', 'Grateful'].map((label) => (
+                  <View
+                    key={label}
+                    style={{
+                      backgroundColor: 'rgb(248, 248, 248)',
+                      borderRadius: 6,
+                      paddingHorizontal: 6,
+                      paddingVertical: 4,
+                      height: 22,
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <PaperText
+                      variant="bodySmall"
+                      style={{ fontSize: 13, lineHeight: 15, color: '#191C1A' }}
+                    >
+                      {label}
+                    </PaperText>
+                  </View>
+                ))}
               </View>
             </ComponentSpec>
+            <CodeSnippet
+              path="apps/native/src/components/Tag.tsx (new file)"
+              note="Smaller and more compact than Chip — used inline in Journal Entry, Reflection, Insight cards for emotion labels."
+            >{`import { View } from 'react-native'
+import { Text, useTheme } from 'react-native-paper'
+import { RBTheme } from 'theme'
+
+export default function Tag({ label }: { label: string }) {
+  const t = useTheme<RBTheme>()
+  return (
+    <View
+      style={{
+        backgroundColor: t.colors.backgroundOnSurface,
+        borderRadius: 6,
+        paddingHorizontal: 6,
+        paddingVertical: 4,
+        height: 22,
+        justifyContent: 'center',
+      }}
+    >
+      <Text style={{ fontSize: 13, lineHeight: 15, color: t.colors.onSurface }}>
+        {label}
+      </Text>
+    </View>
+  )
+}`}</CodeSnippet>
           </Section>
 
           <Section id="p-avatar" title="Avatar" stack="rn-paper" description="react-native-paper Avatar.Text. Three common sizes.">
@@ -853,6 +1322,16 @@ Key paths:
                 <PaperAvatar.Text size={64} label="GG" />
               </View>
             </ComponentSpec>
+            <CodeSnippet
+              path="react-native-paper · Avatar"
+              note="Avatar.Text for initials (default uses primary bg + onPrimary text). Use Avatar.Image when you have a photo URL."
+            >{`import { Avatar } from 'react-native-paper'
+
+<Avatar.Text size={32} label="GG" />
+<Avatar.Text size={48} label="GG" />
+<Avatar.Text size={64} label="GG" />
+
+<Avatar.Image size={48} source={{ uri: photoUrl }} />`}</CodeSnippet>
           </Section>
 
           <Section id="p-activity" title="Activity Indicator" stack="rn-paper" description="react-native-paper ActivityIndicator (Material spinner).">
@@ -862,12 +1341,489 @@ Key paths:
                 <ActivityIndicator size="large" />
               </View>
             </ComponentSpec>
+            <CodeSnippet path="react-native-paper · ActivityIndicator">{`import { ActivityIndicator } from 'react-native-paper'
+
+<ActivityIndicator size="small" />
+<ActivityIndicator size="large" />
+<ActivityIndicator animating={loading} color={theme.colors.primary} />`}</CodeSnippet>
           </Section>
 
           <Section id="p-progress" title="Progress Bar" stack="rn-paper" description="react-native-paper ProgressBar. Used in onboarding and weekly report progress.">
             <ComponentSpec name="60% complete">
-              <ProgressBar progress={0.6} />
+              <PaperProgressDemo />
             </ComponentSpec>
+            <CodeSnippet
+              path="react-native-paper · ProgressBar"
+              note="Override `style.backgroundColor` to outlineLight — Paper's default track is sage surfaceVariant in this theme."
+            >{`import { ProgressBar, useTheme } from 'react-native-paper'
+
+const t = useTheme()
+
+<ProgressBar
+  progress={0.6}
+  color={t.colors.primary}
+  style={{ backgroundColor: t.colors.outlineLight }}
+/>`}</CodeSnippet>
+          </Section>
+
+          <Section id="p-grouped-list" title="Grouped List" stack="rn" description="Settings-style list of rows in a grouped card. Each row has label on left, optional accessory on right (chevron, label, switch).">
+            <ComponentSpec name="Standard rows">
+              <GroupedListDemo />
+            </ComponentSpec>
+            <CodeSnippet
+              path="apps/native/src/components/GroupedList.tsx (new file)"
+              note="Each row: 56h, padding 8/16, separator line in backgroundOnSurface between siblings. Accessory variants: chevron (navigate), label+chevron (selected value), switch (toggle), none (action row). Wraps existing Switch from above."
+            >{`import { Pressable, View } from 'react-native'
+import { Text, useTheme } from 'react-native-paper'
+import { ChevronRight } from 'lucide-react-native'
+import { RBTheme } from 'theme'
+import Switch from './Switch'
+
+type RowAccessory =
+  | { kind: 'chevron' }
+  | { kind: 'label'; value: string }
+  | { kind: 'switch'; value: boolean; onValueChange: (v: boolean) => void }
+  | { kind: 'none' }
+
+type Row = {
+  label: string
+  accessory?: RowAccessory
+  onPress?: () => void
+}
+
+export function GroupedList({ rows }: { rows: Row[] }) {
+  const t = useTheme<RBTheme>()
+  return (
+    <View
+      style={{
+        backgroundColor: t.colors.surface,
+        borderRadius: 12,
+        overflow: 'hidden',
+      }}
+    >
+      {rows.map((row, i) => (
+        <Pressable
+          key={i}
+          onPress={row.onPress}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            minHeight: 56,
+            borderTopWidth: i > 0 ? 1 : 0,
+            borderTopColor: t.colors.backgroundOnSurface,
+          }}
+        >
+          <Text variant="bodyMedium" style={{ color: t.colors.onSurface }}>
+            {row.label}
+          </Text>
+          <Accessory accessory={row.accessory} />
+        </Pressable>
+      ))}
+    </View>
+  )
+}
+
+function Accessory({ accessory }: { accessory?: RowAccessory }) {
+  const t = useTheme<RBTheme>()
+  if (!accessory || accessory.kind === 'none') return null
+  if (accessory.kind === 'chevron') {
+    return <ChevronRight size={20} color={t.colors.secondaryText} />
+  }
+  if (accessory.kind === 'label') {
+    return (
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+        <Text variant="bodyMedium" style={{ color: t.colors.secondaryTextOnSurface }}>
+          {accessory.value}
+        </Text>
+        <ChevronRight size={20} color={t.colors.secondaryText} />
+      </View>
+    )
+  }
+  if (accessory.kind === 'switch') {
+    return <Switch value={accessory.value} onValueChange={accessory.onValueChange} />
+  }
+  return null
+}`}</CodeSnippet>
+          </Section>
+
+          {/* ═══ SURFACES & NAVIGATION ═══ */}
+
+          <Section id="bottom-sheet" title="Bottom Sheet" stack="rn" description="Modal sheet that slides up from the bottom. Always uses a symbol from the design system — never an emoji. Single-button variant for confirmations and feature intros; two-button variant for choice flows. Native uses the Modalize package.">
+            <ComponentSpec>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
+                <BottomSheetDemo
+                  sticker={<img src={roseLogo} width={56} height={56} alt="" />}
+                  title="Bloom with 15% off applied!"
+                  body="Your Rosebud Bloom subscription now includes a 15% discount. Enjoy more growth for less."
+                  ctaLabel="Enjoy Rosebud"
+                />
+                <BottomSheetDemo
+                  sticker={
+                    <View
+                      style={{
+                        width: 64,
+                        height: 64,
+                        borderRadius: 999,
+                        backgroundColor: '#97F7B7',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <MessageCircleQuestion size={36} strokeWidth={1.8} color="#00210F" />
+                    </View>
+                  }
+                  title="Ask Rosebud"
+                  body="Personal companions that match your mood and voice to guide your journaling."
+                  ctaLabel="Try out"
+                  secondaryCtaLabel="Later"
+                />
+              </div>
+            </ComponentSpec>
+            <p className="mt-[16px] text-[12px] text-[var(--color-secondary-text)]">
+              <PathTag>apps/native uses Modalize</PathTag>
+            </p>
+            <CodeSnippet
+              path="apps/native — Modalize wrapper"
+              note="Native uses `react-native-modalize`. The visual layout below is what's inside the sheet — drop into a Modalize children prop, or recreate as a standalone component if Modalize isn't available."
+            >{`import { Modalize } from 'react-native-modalize'
+import { View } from 'react-native'
+import { Button, Text, useTheme } from 'react-native-paper'
+import { RBTheme } from 'theme'
+
+type Props = {
+  visible: boolean
+  onClose: () => void
+  sticker: React.ReactNode      // SVG illustration, NOT emoji
+  title: string
+  body: string
+  ctaLabel: string
+  secondaryCtaLabel?: string    // when given, renders a 2-button row
+  onCta: () => void
+  onSecondaryCta?: () => void
+}
+
+export default function BottomSheet({ visible, onClose, sticker, title, body, ctaLabel, secondaryCtaLabel, onCta, onSecondaryCta }: Props) {
+  const t = useTheme<RBTheme>()
+  return (
+    <Modalize
+      onClose={onClose}
+      adjustToContentHeight
+      modalStyle={{ backgroundColor: t.colors.background, borderTopLeftRadius: 16, borderTopRightRadius: 16 }}
+      handleStyle={{ backgroundColor: t.colors.outline, width: 36, height: 4, borderRadius: 999 }}
+    >
+      <View style={{ padding: 32, paddingTop: 24, paddingBottom: 48, gap: 32 }}>
+        <View style={{ alignItems: 'center', gap: 24 }}>
+          {sticker}
+          <View style={{ alignSelf: 'stretch', gap: 12 }}>
+            <Text variant="displaySmall" style={{ color: t.colors.onSurface, textAlign: 'center' }}>{title}</Text>
+            <Text variant="bodyMedium" style={{ color: t.colors.onSurface, textAlign: 'center' }}>{body}</Text>
+          </View>
+        </View>
+        {secondaryCtaLabel ? (
+          <View style={{ flexDirection: 'row', gap: 12 }}>
+            <Button mode="outlined" onPress={onSecondaryCta} style={{ flex: 1, borderRadius: 12 }}>{secondaryCtaLabel}</Button>
+            <Button mode="contained" onPress={onCta} style={{ flex: 1, borderRadius: 12 }}>{ctaLabel}</Button>
+          </View>
+        ) : (
+          <Button mode="contained" onPress={onCta} style={{ borderRadius: 12 }}>{ctaLabel}</Button>
+        )}
+      </View>
+    </Modalize>
+  )
+}`}</CodeSnippet>
+          </Section>
+
+          <Section id="bottom-nav" title="Bottom Nav" stack="rn" description="Tab bar at the bottom of every screen. Mirrors apps/native AppTabBar.">
+            <ComponentSpec name="5 tabs · click to change active · Insights badge">
+              <BottomNavDemo />
+            </ComponentSpec>
+            <p className="mt-[16px] text-[12px] text-[var(--color-secondary-text)]">
+              <PathTag>apps/native/src/components/AppTabBar</PathTag>
+            </p>
+          </Section>
+
+          <Section id="p-dialog" title="Dialog" stack="rn-paper" description="Compact system-alert with icon + title + body + 2 buttons. Surface bg, 10px radius, 320w, 1px outlineLight separator between header and body. Tight padding for an iOS-alert feel.">
+            <ComponentSpec name="Confirmation">
+              <DialogDemo />
+            </ComponentSpec>
+            <CodeSnippet
+              path="react-native-paper · Dialog (or custom)"
+              note="Paper has Dialog/Dialog.Title/Dialog.Content/Dialog.Actions but defaults differ from Figma. The visual below mirrors Figma exactly — wrap in Paper Portal+Modal for the overlay layer."
+            >{`import { Portal, Dialog, Button, Text, useTheme } from 'react-native-paper'
+import { View } from 'react-native'
+import { Bell } from 'lucide-react-native'
+
+export function ConfirmDialog({ visible, onDismiss, onConfirm, title, body, cancelLabel, confirmLabel }) {
+  const t = useTheme()
+  return (
+    <Portal>
+      <Dialog
+        visible={visible}
+        onDismiss={onDismiss}
+        style={{ backgroundColor: t.colors.surface, borderRadius: 10 }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 24, paddingVertical: 12 }}>
+          <Bell size={20} color={t.colors.primary} />
+          <Text variant="titleSmall" style={{ flex: 1, color: t.colors.onSurface, fontWeight: '500' }}>
+            {title}
+          </Text>
+        </View>
+        <View style={{ height: 1, backgroundColor: t.colors.outlineLight }} />
+        <View style={{ paddingHorizontal: 24, paddingVertical: 16 }}>
+          <Text variant="bodySmall" style={{ color: t.colors.onSurface }}>
+            {body}
+          </Text>
+        </View>
+        <View style={{ flexDirection: 'row', gap: 8, paddingHorizontal: 24, paddingBottom: 24 }}>
+          <Button mode="outlined" onPress={onDismiss} style={{ flex: 1, borderRadius: 8 }}>
+            {cancelLabel}
+          </Button>
+          <Button mode="contained" onPress={onConfirm} style={{ flex: 1, borderRadius: 8 }}>
+            {confirmLabel}
+          </Button>
+        </View>
+      </Dialog>
+    </Portal>
+  )
+}`}</CodeSnippet>
+          </Section>
+
+          {/* ═══ PICKERS ═══ */}
+
+          <Section id="p-datepicker" title="Date Picker" stack="rn" description="Calendar grid for picking a date. Native uses iOS DateTimePicker inside a Modalize bottom sheet.">
+            <ComponentSpec name="June · click any day">
+              <DatePickerDemo />
+            </ComponentSpec>
+            <p className="mt-[16px] text-[12px] text-[var(--color-secondary-text)]">
+              <PathTag>apps/native/src/components/DatePickerModal.tsx</PathTag>
+            </p>
+          </Section>
+
+          <Section id="p-timepicker" title="Time Picker" stack="rn" description="iOS-style wheel time picker. Native presents the system DateTimePicker inside a bottom sheet — this is a visual mock of the wheel UI.">
+            <ComponentSpec name="9:00 AM">
+              <TimePickerDemo />
+            </ComponentSpec>
+            <p className="mt-[16px] text-[12px] text-[var(--color-secondary-text)]">
+              <PathTag>apps/native/src/components/TimePicker.tsx</PathTag>
+            </p>
+          </Section>
+
+          <Section id="p-weekdaypicker" title="Weekday Picker" stack="rn" description="Horizontal row of 7 days for navigating to a specific day. Selected day = filled circle, days with entries = checkmark, empty = stroke circle.">
+            <ComponentSpec name="Click to select · Tu/We have entries · Th is today">
+              <WeekdayPickerDemo />
+            </ComponentSpec>
+            <p className="mt-[16px] text-[12px] text-[var(--color-secondary-text)]">
+              <PathTag>apps/native/src/components/WeekDayPicker.tsx</PathTag>
+            </p>
+          </Section>
+
+          {/* ═══ FEEDBACK (Snackbar / Toast) ═══ */}
+
+          <Section id="p-snackbar" title="Snackbar" stack="rn-paper" description="Persistent banner with icon + message. 4 types: info / success / warning / error. Bg primary (#000), white text, 12px radius, padding 12, drop shadow.">
+            <ComponentSpec name="4 types">
+              <View style={{ gap: 8 }}>
+                <SnackbarDemo type="info" message="This is information bar. Just piece of info." />
+                <SnackbarDemo type="success" message="Success! You performed an action successfully!" />
+                <SnackbarDemo type="warning" message="This is warning state, pay attention to what happened." />
+                <SnackbarDemo type="error" message="An error occurred. Please try again." />
+              </View>
+            </ComponentSpec>
+            <CodeSnippet
+              path="react-native-paper · Snackbar"
+              note="Wraps Paper's Snackbar with Rosebud's themed bg + icon mapping. Production uses MaterialCommunityIcons; this demo uses lucide for the same visual."
+            >{`import { Snackbar, Text, useTheme } from 'react-native-paper'
+import { View } from 'react-native'
+import { Info, CheckCircle2, TriangleAlert, XCircle } from 'lucide-react-native'
+
+const ICONS = {
+  info: Info,
+  success: CheckCircle2,
+  warning: TriangleAlert,
+  error: XCircle,
+}
+
+export function RBSnackbar({ visible, onDismiss, type = 'info', message }) {
+  const t = useTheme()
+  const Icon = ICONS[type]
+  return (
+    <Snackbar
+      visible={visible}
+      onDismiss={onDismiss}
+      style={{ backgroundColor: t.colors.primary, borderRadius: 12 }}
+    >
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <Icon size={20} color={t.colors.onPrimary} strokeWidth={2} />
+        <Text style={{ color: t.colors.onPrimary, fontSize: 16, lineHeight: 22 }}>
+          {message}
+        </Text>
+      </View>
+    </Snackbar>
+  )
+}`}</CodeSnippet>
+          </Section>
+
+          <Section id="p-infobar" title="Infobar" stack="rn" description="Light banner alert with icon + body. 4 types matching Snackbar but with surface (white) bg + onSurface text — for less interruptive contextual messages.">
+            <ComponentSpec name="4 types">
+              <View style={{ gap: 8 }}>
+                <InfobarDemo type="info" body="Voice transcription is set up. It allows you to capture your speech with clarity and precision." />
+                <InfobarDemo type="success" body="Your changes have been saved." />
+                <InfobarDemo type="warning" body="Your microphone permission is set to ask each time." />
+                <InfobarDemo type="error" body="Transcription can hallucinate and add words during silence. Make sure your mic is on and speak clearly." />
+              </View>
+            </ComponentSpec>
+            <CodeSnippet
+              path="apps/native/src/components/Infobar.tsx (new file)"
+              note="Light variant of Snackbar — surface bg + onSurface text. Use for contextual messages that aren't transient (e.g. inline tips, transcription warnings)."
+            >{`import { View } from 'react-native'
+import { Text, useTheme } from 'react-native-paper'
+import { Info, CheckCircle2, TriangleAlert, XCircle } from 'lucide-react-native'
+import { RBTheme } from 'theme'
+
+const ICONS = {
+  info: { Icon: Info, color: '#0A84FF' },
+  success: { Icon: CheckCircle2, color: '#207B00' },
+  warning: { Icon: TriangleAlert, color: '#D97706' },
+  error: { Icon: XCircle, color: '#BA1A1A' },
+}
+
+type Props = { type: 'info' | 'success' | 'warning' | 'error'; body: string }
+
+export default function Infobar({ type, body }: Props) {
+  const t = useTheme<RBTheme>()
+  const { Icon, color } = ICONS[type]
+  return (
+    <View
+      style={{
+        backgroundColor: t.colors.surface,
+        borderRadius: 12,
+        padding: 12,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+      }}
+    >
+      <Icon size={20} color={color} strokeWidth={2} />
+      <Text variant="bodySmall" style={{ flex: 1, color: t.colors.onSurface, fontSize: 12, lineHeight: 16 }}>
+        {body}
+      </Text>
+    </View>
+  )
+}`}</CodeSnippet>
+          </Section>
+
+          <Section id="p-toast" title="Toast" stack="rn" description="Lighter-weight transient notification — text-only, no icon. Same dark surface as Snackbar but simpler content.">
+            <ComponentSpec name="Default">
+              <View
+                style={{
+                  backgroundColor: '#000000',
+                  borderRadius: 12,
+                  paddingHorizontal: 12,
+                  paddingVertical: 12,
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.16,
+                  shadowRadius: 16,
+                  elevation: 6,
+                  alignSelf: 'flex-start',
+                }}
+              >
+                <PaperText
+                  variant="titleMedium"
+                  style={{ fontSize: 16, lineHeight: 22, color: '#FFFFFF' }}
+                >
+                  Success! Your changes have been saved.
+                </PaperText>
+              </View>
+            </ComponentSpec>
+            <CodeSnippet
+              path="apps/native/src/components/Toast.tsx (new file)"
+              note="Toasts are typically auto-dismissed after 2-3s. Use a Modal or react-native-toast-message library for the timing layer."
+            >{`import { View } from 'react-native'
+import { Text, useTheme } from 'react-native-paper'
+import { RBTheme } from 'theme'
+
+export default function Toast({ message }: { message: string }) {
+  const t = useTheme<RBTheme>()
+  return (
+    <View
+      style={{
+        backgroundColor: t.colors.primary,
+        borderRadius: 12,
+        paddingHorizontal: 12,
+        paddingVertical: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.16,
+        shadowRadius: 16,
+        elevation: 6,
+      }}
+    >
+      <Text style={{ fontSize: 16, lineHeight: 22, color: t.colors.onPrimary }}>
+        {message}
+      </Text>
+    </View>
+  )
+}`}</CodeSnippet>
+          </Section>
+
+          <Section id="p-tooltip" title="Tooltip" stack="rn" description="Coachmark-style tooltip with title + step counter + body + Next button. Used in onboarding tours. Surface bg, 12px radius, drop shadow.">
+            <ComponentSpec name="Coachmark · 1 of 6">
+              <TooltipDemo
+                title="Quick tour"
+                step="1 / 6"
+                body={'This is your daily space to reflect,\nset intentions, and stay on top of your goals.'}
+                ctaLabel="Next"
+              />
+            </ComponentSpec>
+            <CodeSnippet
+              path="apps/native/src/components/Coachmark.tsx (new file)"
+              note="Use within an onboarding overlay (Modal + dim backdrop). Anchor to a target element with a small caret/triangle pointing down."
+            >{`import { View } from 'react-native'
+import { Text, Button, useTheme } from 'react-native-paper'
+import { RBTheme } from 'theme'
+
+type Props = {
+  title: string
+  step?: string                // e.g. '1 / 6'
+  body: string
+  ctaLabel: string
+  onNext: () => void
+}
+
+export default function Coachmark({ title, step, body, ctaLabel, onNext }: Props) {
+  const t = useTheme<RBTheme>()
+  return (
+    <View
+      style={{
+        backgroundColor: t.colors.surface,
+        borderRadius: 12,
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        gap: 9,
+        alignItems: 'flex-end',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.12,
+        shadowRadius: 24,
+        elevation: 8,
+      }}
+    >
+      <View style={{ alignSelf: 'stretch', gap: 8 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' }}>
+          <Text variant="titleLarge" style={{ color: t.colors.onSurface }}>{title}</Text>
+          {step && <Text variant="labelLarge" style={{ color: t.colors.secondaryText }}>{step}</Text>}
+        </View>
+        <Text variant="bodySmall" style={{ color: t.colors.onSurface }}>{body}</Text>
+      </View>
+      <Button mode="text" onPress={onNext} labelStyle={{ fontSize: 16, fontWeight: '500' }}>
+        {ctaLabel}
+      </Button>
+    </View>
+  )
+}`}</CodeSnippet>
           </Section>
 
           {/* ═══ DISPLAY ═══ */}
@@ -925,7 +1881,10 @@ Key paths:
 
             <SubSection title="Key Themes">
               <div className="max-w-[420px]">
-                <KeyThemeCard themes={['Personal Growth', 'Relationships', 'Self-care', 'Career', 'Mindfulness']} />
+                <KeyThemeCard
+                  subtitle="Personal Growth & Environment"
+                  themes={['Personal Growth', 'Relationships', 'Self-care', 'Career', 'Mindfulness']}
+                />
               </div>
             </SubSection>
 
@@ -953,6 +1912,8 @@ Key paths:
             <SubSection title="Ask Rosebud">
               <div className="max-w-[420px]">
                 <AskRosebudCard
+                  date="June 14"
+                  time="12:08"
                   question="How has my emotional state evolved?"
                   answer="Over the past month, your emotional state has shown a pattern of increasing calm and fewer instances of stress."
                 />
@@ -996,15 +1957,13 @@ Key paths:
             <SubSection title="Locked / Upgrade">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px] max-w-[850px]">
                 <WeeklyReportLocked />
-                <LockedFeatureCard icon="🔒" title="Unlock Ask Rosebud" body="Unlock Rosebud's full potential and gain deeper insight into your journal." />
-                <UpgradeCard title="Unlock with Bloom" body="Access premium features and deeper personalized insights." />
+                <UpgradeCard title="Unlock with Bloom" body="Unlock Rosebud's full potential and gain deeper insight into your patterns." />
+                <LockedFeatureCard
+                  title="Unlock Ask Rosebud"
+                  progress={0.3}
+                  footer="Requires at least 1,500 words."
+                />
                 <GratitudeChallengeCard subtitle="Build a daily gratitude habit" ctaLabel="View challenge" daysCompleted={3} />
-              </div>
-            </SubSection>
-
-            <SubSection title="Loading">
-              <div className="max-w-[420px]">
-                <LoadingCard progress={0.7} />
               </div>
             </SubSection>
 
@@ -1062,7 +2021,7 @@ Key paths:
               ].map((name) => (
                 <div key={name} className="group flex flex-col items-center gap-[4px]">
                   <div className="w-[40px] h-[40px] rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-outline-light)] flex items-center justify-center group-hover:border-[var(--color-outline)] transition-colors">
-                    <img src={new URL(`../icons/${name}.svg`, import.meta.url).href} alt={name} className="w-[20px] h-[20px]" loading="lazy" />
+                    <img src={new URL(`../icons/${name}.svg`, import.meta.url).href} alt={name} className="w-[20px] h-[20px] icon-dark-invert" loading="lazy" />
                   </div>
                   <span className="text-[9px] leading-[12px] text-[var(--color-secondary-text)] text-center truncate w-full">{name}</span>
                 </div>
@@ -1197,47 +2156,1095 @@ Key paths:
 
 /* ── Per-component RN+Paper demo helpers (each holds its own state) ── */
 
-function PaperTextInputDemo({ mode, label, placeholder }) {
+function PaperButtonModesDemo() {
+  // Match apps/native/src/components/Button.tsx + Figma:
+  // 12px radius, 48px height, label Circular Medium 16/22.
+  // Outlined uses outlineVariant (#C9CAC9) — neutral, not sage.
+  // Elevated overrides Paper's sage-tinted elevation.level1 with surface.
+  const t = usePaperTheme();
+  const shared = {
+    style: { borderRadius: 12 },
+    contentStyle: { height: 48 },
+    labelStyle: { fontSize: 16, fontWeight: '500' },
+  };
+  const outlinedTheme = { colors: { ...t.colors, outline: t.colors.outlineVariant } };
+  return (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
+      <PaperButton mode="contained" {...shared}>Contained</PaperButton>
+      <PaperButton mode="outlined" theme={outlinedTheme} {...shared}>Outlined</PaperButton>
+      <PaperButton mode="text" {...shared}>Text</PaperButton>
+      <PaperButton mode="elevated" buttonColor={t.colors.surface} {...shared}>Elevated</PaperButton>
+      <PaperButton mode="contained-tonal" {...shared}>Contained-tonal</PaperButton>
+    </View>
+  );
+}
+
+// Matches Figma Input 5597:7818 + apps/native FormTextInput.tsx:
+// - bg surface, 12px radius, 56px height (16h × 16h padding),
+//   Body Medium W06 (16/22) text
+// - At rest: NO outline (Figma 5597:7822). On focus: 1px outlineLight stroke
+//   (Figma 5597:7819 active state, fill_4ZCFGJ #DEDEDE)
+// - Label above (production FormTextInput pattern), description below in
+//   secondaryText (subtle help)
+function PaperTextInputDemo({ label, placeholder, description }) {
   const [val, setVal] = useState('');
-  return <PaperTextInput mode={mode} label={label} placeholder={placeholder} value={val} onChangeText={setVal} />;
+  const t = usePaperTheme();
+  return (
+    <View style={{ width: '100%' }}>
+      {label && (
+        <PaperText
+          variant="bodyMedium"
+          style={{ color: t.colors.secondaryText, paddingVertical: 8, paddingHorizontal: 4 }}
+        >
+          {label}
+        </PaperText>
+      )}
+      <PaperTextInput
+        mode="outlined"
+        placeholder={placeholder}
+        value={val}
+        onChangeText={setVal}
+        style={{ backgroundColor: t.colors.surface }}
+        outlineColor="transparent"
+        activeOutlineColor={t.colors.outlineLight}
+        underlineColor="transparent"
+        activeUnderlineColor="transparent"
+        contentStyle={{ borderRadius: 12, paddingHorizontal: 16, paddingVertical: 0 }}
+        outlineStyle={{ borderWidth: 1, borderRadius: 12 }}
+        placeholderTextColor={t.colors.secondaryTextOnSurface || t.colors.secondaryText}
+        cursorColor={t.colors.primary}
+      />
+      {description && (
+        <PaperText
+          variant="bodySmall"
+          style={{ color: t.colors.secondaryText, paddingTop: 8, paddingHorizontal: 4 }}
+        >
+          {description}
+        </PaperText>
+      )}
+    </View>
+  );
+}
+
+// Matches Figma Textarea 5597:7834:
+// - bg surface, 12px radius, 120px height, padding 16px 16px 6px (top/sides
+//   16, bottom 6 to leave room for the char counter row inside the field)
+// - Body Medium W06 (16/22) text
+// - At rest: no outline. On focus: 1px outlineLight stroke.
+function PaperTextareaDemo({ placeholder, charLimit = 500 }) {
+  const [val, setVal] = useState('');
+  const t = usePaperTheme();
+  return (
+    <View style={{ width: '100%' }}>
+      <PaperTextInput
+        mode="outlined"
+        placeholder={placeholder}
+        value={val}
+        onChangeText={(v) => setVal(v.slice(0, charLimit))}
+        multiline
+        numberOfLines={4}
+        style={{ backgroundColor: t.colors.surface, minHeight: 120 }}
+        outlineColor="transparent"
+        activeOutlineColor={t.colors.outlineLight}
+        underlineColor="transparent"
+        activeUnderlineColor="transparent"
+        contentStyle={{ borderRadius: 12, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 6 }}
+        outlineStyle={{ borderWidth: 1, borderRadius: 12 }}
+        placeholderTextColor={t.colors.secondaryTextOnSurface || t.colors.secondaryText}
+        cursorColor={t.colors.primary}
+      />
+      <PaperText
+        variant="labelMedium"
+        style={{
+          alignSelf: 'flex-end',
+          paddingTop: 6,
+          paddingRight: 4,
+          color: t.colors.secondaryText,
+        }}
+      >
+        {val.length} / {charLimit}
+      </PaperText>
+    </View>
+  );
 }
 
 function PaperSearchbarDemo() {
   const [q, setQ] = useState('');
-  return <PaperSearchbar placeholder="Search entries…" value={q} onChangeText={setQ} />;
+  const t = usePaperTheme();
+  // Paper's default 'magnify' icon won't render because we stub
+  // react-native-vector-icons. Provide lucide icons explicitly.
+  return (
+    <PaperSearchbar
+      placeholder="Search entries…"
+      value={q}
+      onChangeText={setQ}
+      elevation={0}
+      icon={({ color, size }) => <Search size={size || 20} color={color || t.colors.onSurface} />}
+      clearIcon={({ color, size }) => <XIcon size={size || 18} color={color || t.colors.onSurface} />}
+      style={{ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.outlineLight, borderRadius: 12 }}
+      inputStyle={{ color: t.colors.onSurface }}
+      placeholderTextColor={t.colors.secondaryTextOnSurface || t.colors.secondaryText}
+    />
+  );
 }
 
 function PaperSwitchDemo() {
   const [on, setOn] = useState(true);
+  const t = usePaperTheme();
+  // Paper's MD3 Switch overrides our thumbColor with theme-derived values
+  // (the thumb ends up the same color as the on track — invisible). Build a
+  // custom toggle matching Figma 5597:6993: 51×30 track, 26×26 thumb, 999px
+  // radius, surface thumb in both states with subtle shadow.
+  const trackBg = on ? t.colors.primary : t.colors.outlineLight;
   return (
-    <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
-      <PaperSwitch value={on} onValueChange={setOn} />
-      <RNText style={{ fontSize: 14, color: '#5C5555' }}>{on ? 'On' : 'Off'}</RNText>
-    </View>
+    <Pressable
+      onPress={() => setOn(!on)}
+      accessibilityRole="switch"
+      accessibilityState={{ checked: on }}
+      style={{
+        width: 51,
+        height: 30,
+        borderRadius: 999,
+        backgroundColor: trackBg,
+        padding: 2,
+        justifyContent: 'center',
+      }}
+    >
+      <View
+        style={{
+          width: 26,
+          height: 26,
+          borderRadius: 999,
+          backgroundColor: t.colors.surface,
+          transform: [{ translateX: on ? 21 : 0 }],
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: on ? 0.05 : 0.08,
+          shadowRadius: on ? 2 : 4,
+          elevation: 2,
+        }}
+      />
+    </Pressable>
   );
 }
 
 function PaperCheckboxDemo() {
   const [on, setOn] = useState(true);
+  const t = usePaperTheme();
+  // Paper's Checkbox renders the box via react-native-vector-icons, which is
+  // stubbed in this repo (Rolldown can't parse its JSX). Build the visual
+  // ourselves: 24×24, 6px radius, 1px stroke #8B828B unchecked, primary
+  // bg + lucide Check when checked. Matches Figma component 5597:6953.
   return (
-    <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-      <PaperCheckbox status={on ? 'checked' : 'unchecked'} onPress={() => setOn(!on)} />
-      <RNText style={{ fontSize: 14, color: '#5C5555' }}>Daily journaling</RNText>
-    </View>
+    <Pressable
+      onPress={() => setOn(!on)}
+      style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}
+    >
+      <View
+        style={{
+          width: 24,
+          height: 24,
+          borderRadius: 6,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: on ? t.colors.primary : t.colors.surface,
+          borderWidth: 1,
+          borderColor: on ? t.colors.primary : t.colors.secondaryTextOnSurface,
+        }}
+      >
+        {on && <Check size={16} strokeWidth={3} color={t.colors.onPrimary} />}
+      </View>
+      <PaperText variant="bodyMedium" style={{ color: t.colors.onSurface }}>Daily journaling</PaperText>
+    </Pressable>
   );
 }
 
 function PaperRadioDemo() {
   const [v, setV] = useState('a');
+  const t = usePaperTheme();
   return (
     <PaperRadio.Group value={v} onValueChange={setV}>
       {[['a', 'Option A'], ['b', 'Option B'], ['c', 'Option C']].map(([val, label]) => (
         <View key={val} style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-          <PaperRadio value={val} />
-          <RNText style={{ fontSize: 14, color: '#5C5555' }}>{label}</RNText>
+          <PaperRadio value={val} uncheckedColor={t.colors.secondaryTextOnSurface} />
+          <PaperText variant="bodyMedium" style={{ color: t.colors.onSurface }}>{label}</PaperText>
         </View>
       ))}
     </PaperRadio.Group>
+  );
+}
+
+// Figma Pill: bg #F8F8F8 (= backgroundOnSurface token), 999px radius, black text.
+// Paper's default Chip uses surfaceVariant which is sage in this theme.
+function PaperChipDemo() {
+  const t = usePaperTheme();
+  const chipStyle = { backgroundColor: t.colors.backgroundOnSurface };
+  const chipText = { color: t.colors.onSurface };
+  const selectedStyle = { backgroundColor: t.colors.primary };
+  const selectedText = { color: t.colors.onPrimary };
+  return (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+      <PaperChip style={chipStyle} textStyle={chipText}>Mindfulness</PaperChip>
+      <PaperChip style={chipStyle} textStyle={chipText}>Gratitude</PaperChip>
+      <PaperChip selected style={selectedStyle} textStyle={selectedText}>Selected</PaperChip>
+    </View>
+  );
+}
+
+// Paper ProgressBar's default track is surfaceVariant (sage). Override with
+// outlineLight for a neutral track that matches Figma's gray pattern.
+function PaperProgressDemo() {
+  const t = usePaperTheme();
+  return <ProgressBar progress={0.6} style={{ backgroundColor: t.colors.outlineLight }} />;
+}
+
+// Static mock of Figma 5753:9739 (Bottom Sheet, Type=Info / Type=Upgrade /
+// Type=Choice). 16px top corners, background bg, 24px content gap, 32px
+// between content + button, padding 24px 32px 48px. Top shadow per
+// effect_26EKCT (0px -8px 24px rgba(0,0,0,0.08)). Drag handle bar added
+// (standard pattern, Figma's "header" SVG includes it).
+//
+// Sticker is an SVG illustration (Rosebud logo, fingerprint, chat bubble) —
+// rendered directly without a circle wrapper to match Figma. Pass an optional
+// `secondaryCtaLabel` to render a 2-button row (secondary outlined + primary).
+function BottomSheetDemo({ title, body, ctaLabel, secondaryCtaLabel, sticker }) {
+  const t = usePaperTheme();
+  const sharedBtn = {
+    style: { borderRadius: 12, flex: 1 },
+    contentStyle: { height: 48 },
+    labelStyle: { fontSize: 16, fontWeight: '500' },
+  };
+  const outlinedTheme = { colors: { ...t.colors, outline: t.colors.outlineVariant } };
+  return (
+    <View
+      style={{
+        width: '100%',
+        maxWidth: MOBILE_W,
+        alignSelf: 'center',
+        backgroundColor: t.colors.background,
+        borderTopLeftRadius: 16,
+        borderTopRightRadius: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -8 },
+        shadowOpacity: 0.08,
+        shadowRadius: 24,
+        elevation: 8,
+        overflow: 'hidden',
+      }}
+    >
+      <View style={{ paddingTop: 12, paddingBottom: 4, alignItems: 'center' }}>
+        <View
+          style={{
+            width: 36,
+            height: 4,
+            borderRadius: 999,
+            backgroundColor: t.colors.outline,
+          }}
+        />
+      </View>
+      <View style={{ paddingHorizontal: 20, paddingTop: 24, paddingBottom: 32, gap: 24 }}>
+        <View style={{ alignItems: 'center', gap: 20 }}>
+          <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+            {sticker}
+          </View>
+          <View style={{ alignSelf: 'stretch', gap: 12 }}>
+            <PaperText
+              variant="displaySmall"
+              style={{ color: t.colors.onSurface, textAlign: 'center' }}
+            >
+              {title}
+            </PaperText>
+            <PaperText
+              variant="bodyMedium"
+              style={{ color: t.colors.onSurface, textAlign: 'center' }}
+            >
+              {body}
+            </PaperText>
+          </View>
+        </View>
+        {secondaryCtaLabel ? (
+          <View style={{ flexDirection: 'row', gap: 12 }}>
+            <PaperButton mode="outlined" theme={outlinedTheme} {...sharedBtn}>
+              {secondaryCtaLabel}
+            </PaperButton>
+            <PaperButton mode="contained" {...sharedBtn}>{ctaLabel}</PaperButton>
+          </View>
+        ) : (
+          <PaperButton mode="contained" {...sharedBtn} style={{ borderRadius: 12 }}>
+            {ctaLabel}
+          </PaperButton>
+        )}
+      </View>
+    </View>
+  );
+}
+
+// Static mock of Figma Grouped List + Grouped List Item (5599:6404 / 5599:6269).
+// Card with surface bg, 12px radius. Each row 56h, padding 8/16, separator
+// line in backgroundOnSurface (#F8F8F8) between rows. Accessory variants:
+// chevron, label+chevron, switch.
+function GroupedListDemo() {
+  const t = usePaperTheme();
+  const [notif, setNotif] = useState(true);
+  const [hap, setHap] = useState(false);
+  const rows = [
+    { label: 'Account', accessory: { kind: 'chevron' } },
+    { label: 'Week begins', accessory: { kind: 'label', value: 'Monday' } },
+    { label: 'Theme', accessory: { kind: 'label', value: 'Auto' } },
+    { label: 'Notifications', accessory: { kind: 'switch', value: notif, onValueChange: setNotif } },
+    { label: 'Haptics', accessory: { kind: 'switch', value: hap, onValueChange: setHap } },
+  ];
+  return (
+    <View
+      style={{
+        backgroundColor: t.colors.surface,
+        borderRadius: 12,
+        overflow: 'hidden',
+        width: '100%',
+        maxWidth: MOBILE_W,
+      }}
+    >
+      {rows.map((row, i) => (
+        <View
+          key={i}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            minHeight: 56,
+            borderTopWidth: i > 0 ? 1 : 0,
+            borderTopColor: t.colors.backgroundOnSurface,
+          }}
+        >
+          <PaperText variant="bodyMedium" style={{ color: t.colors.onSurface }}>
+            {row.label}
+          </PaperText>
+          {row.accessory.kind === 'chevron' && (
+            <ChevronRight size={20} color={t.colors.secondaryText} />
+          )}
+          {row.accessory.kind === 'label' && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <PaperText variant="bodyMedium" style={{ color: t.colors.secondaryTextOnSurface }}>
+                {row.accessory.value}
+              </PaperText>
+              <ChevronRight size={20} color={t.colors.secondaryText} />
+            </View>
+          )}
+          {row.accessory.kind === 'switch' && (
+            <Pressable
+              onPress={() => row.accessory.onValueChange(!row.accessory.value)}
+              accessibilityRole="switch"
+              accessibilityState={{ checked: row.accessory.value }}
+              style={{
+                width: 51,
+                height: 30,
+                borderRadius: 999,
+                backgroundColor: row.accessory.value ? t.colors.primary : t.colors.outlineLight,
+                padding: 2,
+              }}
+            >
+              <View
+                style={{
+                  width: 26,
+                  height: 26,
+                  borderRadius: 999,
+                  backgroundColor: t.colors.surface,
+                  transform: [{ translateX: row.accessory.value ? 21 : 0 }],
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: row.accessory.value ? 0.05 : 0.08,
+                  shadowRadius: row.accessory.value ? 2 : 4,
+                  elevation: 2,
+                }}
+              />
+            </Pressable>
+          )}
+        </View>
+      ))}
+    </View>
+  );
+}
+
+// Static mock of Figma Dialog 6338:5641 — system-alert style.
+// Compact 280w (iOS-alert feel), centered content, tight padding. bg surface,
+// 10px radius, 1px outlineLight separator between header and body.
+function DialogDemo() {
+  const t = usePaperTheme();
+  return (
+    <View
+      style={{
+        backgroundColor: t.colors.surface,
+        borderRadius: 10,
+        width: '100%',
+        maxWidth: 320,
+        paddingTop: 10,
+        paddingBottom: 16,
+        gap: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.12,
+        shadowRadius: 24,
+        elevation: 8,
+      }}
+    >
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 8,
+          paddingHorizontal: 16,
+          paddingVertical: 2,
+        }}
+      >
+        <Bell size={16} color={t.colors.onSurface} strokeWidth={2} />
+        <PaperText
+          variant="labelLarge"
+          style={{ flex: 1, color: t.colors.onSurface, fontWeight: '500' }}
+        >
+          A Quick Note
+        </PaperText>
+        <XIcon size={16} color={t.colors.secondaryText} strokeWidth={2} />
+      </View>
+      <View style={{ height: 1, backgroundColor: t.colors.outlineLight }} />
+      <View style={{ paddingHorizontal: 16, paddingVertical: 4 }}>
+        <PaperText variant="bodySmall" style={{ color: t.colors.onSurface }}>
+          Rosebud is an AI thinking partner designed to help you reflect, not a
+          replacement for a therapist or mental health professional.
+        </PaperText>
+      </View>
+      <View style={{ flexDirection: 'row', gap: 6, paddingHorizontal: 16, marginTop: 2 }}>
+        <PaperButton
+          mode="outlined"
+          theme={{ colors: { ...t.colors, outline: t.colors.outlineVariant } }}
+          style={{ flex: 1, borderRadius: 8 }}
+          contentStyle={{ height: 36 }}
+          labelStyle={{ fontSize: 14, fontWeight: '500' }}
+        >
+          Go Back
+        </PaperButton>
+        <PaperButton
+          mode="contained"
+          style={{ flex: 1, borderRadius: 8 }}
+          contentStyle={{ height: 36 }}
+          labelStyle={{ fontSize: 14, fontWeight: '500' }}
+        >
+          I Understand
+        </PaperButton>
+      </View>
+    </View>
+  );
+}
+
+// Static interactive mock of Figma Checkbox Card / Choice Tile 5514:3492.
+// Row layout: label on left + 24×24 checkbox on right, gap 12, padding 16,
+// 56h, 12px radius, surface bg. Default: transparent border. Selected: 1px
+// primary border. Common feedback / multi-select pattern.
+function ChoiceTileDemo() {
+  const t = usePaperTheme();
+  const [selected, setSelected] = useState(new Set(['inaccurate']));
+  const toggle = (v) => {
+    setSelected((s) => {
+      const next = new Set(s);
+      if (next.has(v)) next.delete(v);
+      else next.add(v);
+      return next;
+    });
+  };
+  const options = [
+    { value: 'inaccurate', label: 'Summary was inaccurate' },
+    { value: 'tone', label: 'Tone felt off' },
+    { value: 'incomplete', label: 'Missed important context' },
+  ];
+  return (
+    <View style={{ gap: 8, width: '100%', maxWidth: MOBILE_W }}>
+      {options.map(({ value, label }) => {
+        const isSelected = selected.has(value);
+        return (
+          <Pressable
+            key={value}
+            onPress={() => toggle(value)}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 12,
+              padding: 16,
+              height: 56,
+              backgroundColor: t.colors.surface,
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: isSelected ? t.colors.primary : 'transparent',
+            }}
+          >
+            <PaperText variant="bodyMedium" style={{ flex: 1, color: t.colors.onSurface }}>
+              {label}
+            </PaperText>
+            <View
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: 6,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: isSelected ? t.colors.primary : t.colors.surface,
+                borderWidth: 1,
+                borderColor: isSelected ? t.colors.primary : t.colors.secondaryTextOnSurface,
+              }}
+            >
+              {isSelected && <Check size={16} strokeWidth={3} color={t.colors.onPrimary} />}
+            </View>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+// Static mock of Figma Infobar 5600:5934 — light variant of Snackbar.
+// surface bg, 12px radius, padding 12, row gap 12. Icon colored per type
+// (info=blue, success=green, warning=orange, error=red), body Caption (12/16)
+// in onSurface. Width hugs content; in production typically 370 wide.
+function InfobarDemo({ type, body }) {
+  const t = usePaperTheme();
+  const ICONS = {
+    info: { Icon: Info, color: t.colors.blue || '#0A84FF' },
+    success: { Icon: CheckCircle2, color: t.colors.green || '#207B00' },
+    warning: { Icon: TriangleAlert, color: '#D97706' },
+    error: { Icon: XCircle, color: t.colors.error || '#BA1A1A' },
+  };
+  const { Icon, color } = ICONS[type];
+  return (
+    <View
+      style={{
+        backgroundColor: t.colors.surface,
+        borderRadius: 12,
+        padding: 12,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        alignSelf: 'flex-start',
+        maxWidth: MOBILE_W,
+      }}
+    >
+      <Icon size={20} color={color} strokeWidth={2} />
+      <PaperText
+        variant="bodySmall"
+        style={{ flex: 1, color: t.colors.onSurface, fontSize: 12, lineHeight: 16 }}
+      >
+        {body}
+      </PaperText>
+    </View>
+  );
+}
+
+// Static mock of Figma Coachmark 4606:3925.
+// Surface bg, 12px radius, padding 12 24, gap 9, alignItems flex-end (Next
+// button right-aligned), drop shadow effect_QDECBX (0px 4px 24px @ 12%).
+function TooltipDemo({ title, step, body, ctaLabel }) {
+  const t = usePaperTheme();
+  return (
+    <View
+      style={{
+        backgroundColor: t.colors.surface,
+        borderRadius: 12,
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        gap: 9,
+        alignItems: 'flex-end',
+        alignSelf: 'flex-start',
+        maxWidth: MOBILE_W,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.12,
+        shadowRadius: 24,
+        elevation: 8,
+      }}
+    >
+      <View style={{ alignSelf: 'stretch', gap: 8 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' }}>
+          <PaperText variant="titleLarge" style={{ color: t.colors.onSurface }}>
+            {title}
+          </PaperText>
+          {step && (
+            <PaperText variant="labelLarge" style={{ color: t.colors.secondaryText }}>
+              {step}
+            </PaperText>
+          )}
+        </View>
+        <PaperText variant="bodySmall" style={{ color: t.colors.onSurface }}>
+          {body}
+        </PaperText>
+      </View>
+      <PaperButton
+        mode="text"
+        labelStyle={{ fontSize: 16, fontWeight: '500', color: t.colors.onSurface }}
+      >
+        {ctaLabel}
+      </PaperButton>
+    </View>
+  );
+}
+
+// Static mock of Figma Snackbar 4366:321 — 4 types (info/success/warning/error).
+// All variants share the same shape: bg primary (#000), 12px radius, padding 12,
+// row content with icon + Title Medium (16/22) text in onPrimary. Drop shadow
+// per effect_H4D9JU. Icon color matches surface (white) on the dark bg.
+function SnackbarDemo({ type, message }) {
+  const t = usePaperTheme();
+  const ICONS = { info: Info, success: CheckCircle2, warning: TriangleAlert, error: XCircle };
+  const Icon = ICONS[type];
+  return (
+    <View
+      style={{
+        backgroundColor: t.colors.primary,
+        borderRadius: 12,
+        padding: 12,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.16,
+        shadowRadius: 16,
+        elevation: 6,
+        alignSelf: 'flex-start',
+      }}
+    >
+      <Icon size={20} color={t.colors.onPrimary} strokeWidth={2} />
+      <PaperText
+        variant="titleMedium"
+        style={{ color: t.colors.onPrimary, fontSize: 16, lineHeight: 22 }}
+      >
+        {message}
+      </PaperText>
+    </View>
+  );
+}
+
+// Static interactive mock of Figma Segmented Control 5597:6870.
+// Selected segment: surface bg + onSurface label medium. Unselected: background
+// bg (sage-free #F0F0F0) + secondaryText label. Outer corners 10px, shared 1px
+// outline border. Label is Label Large (14/20 Circular Std).
+function SegmentedControlDemo() {
+  const [v, setV] = useState('week');
+  const t = usePaperTheme();
+  const options = [
+    { value: 'week', label: 'Week' },
+    { value: 'month', label: 'Month' },
+    { value: 'year', label: 'Year' },
+  ];
+  return (
+    <View style={{ flexDirection: 'row', alignSelf: 'flex-start' }}>
+      {options.map((opt, i) => {
+        const isSelected = opt.value === v;
+        const isFirst = i === 0;
+        const isLast = i === options.length - 1;
+        return (
+          <Pressable
+            key={opt.value}
+            onPress={() => setV(opt.value)}
+            style={{
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              backgroundColor: isSelected ? t.colors.surface : t.colors.background,
+              borderWidth: 1,
+              borderColor: t.colors.outline,
+              borderLeftWidth: isFirst ? 1 : 0,
+              borderTopLeftRadius: isFirst ? 10 : 0,
+              borderBottomLeftRadius: isFirst ? 10 : 0,
+              borderTopRightRadius: isLast ? 10 : 0,
+              borderBottomRightRadius: isLast ? 10 : 0,
+            }}
+          >
+            <PaperText
+              variant="labelLarge"
+              style={{
+                fontWeight: isSelected ? '500' : '450',
+                color: isSelected ? t.colors.onSurface : t.colors.secondaryText,
+              }}
+            >
+              {opt.label}
+            </PaperText>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+// Static mock of Figma 4477:6778 Calendar component.
+// - Outer: surface bg, 12px radius, 16px padding, 15px gap, width 396
+// - Header row (Mo Tu We Th Fr Sa Su): Label Large in secondaryText
+// - Day cell: 36×36, 12px radius — out-of-month opacity 0.5, selected = primary bg + onPrimary text
+function DatePickerDemo() {
+  const t = usePaperTheme();
+  const [selected, setSelected] = useState({ row: 1, col: 1 });
+  const labels = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+  // June 2024 starts on Saturday; week 1 = May 26-Jun 2 (Mo-Su layout)
+  const cells = [
+    [26, 27, 28, 29, 30, 31, 1, true],
+    [2, 3, 4, 5, 6, 7, 8],
+    [9, 10, 11, 12, 13, 14, 15],
+    [16, 17, 18, 19, 20, 21, 22],
+    [23, 24, 25, 26, 27, 28, 29],
+    [30, 1, 2, 3, 4, 5, 6, false],
+  ];
+  // Mark out-of-month cells: row 0 days 1-6 are May (out), col 6 day=1 is in.
+  // Row 5 col 0 = Jun 30 (in), 1-6 = July (out).
+  const isOutOfMonth = (rowIdx, colIdx) => {
+    if (rowIdx === 0) return colIdx < 6;
+    if (rowIdx === 5) return colIdx > 0;
+    return false;
+  };
+  return (
+    <View
+      style={{
+        backgroundColor: t.colors.surface,
+        borderRadius: 12,
+        padding: 16,
+        gap: 15,
+        width: '100%',
+        maxWidth: MOBILE_W,
+      }}
+    >
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        {labels.map((d) => (
+          <View key={d} style={{ width: 36, alignItems: 'center' }}>
+            <PaperText
+              variant="labelLarge"
+              style={{ fontSize: 14, lineHeight: 20, fontWeight: '500', color: t.colors.secondaryText }}
+            >
+              {d}
+            </PaperText>
+          </View>
+        ))}
+      </View>
+      <View style={{ gap: 6 }}>
+        {cells.map((row, rowIdx) => (
+          <View key={rowIdx} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            {row.slice(0, 7).map((day, colIdx) => {
+              const out = isOutOfMonth(rowIdx, colIdx);
+              const isSelected = selected.row === rowIdx && selected.col === colIdx;
+              return (
+                <Pressable
+                  key={colIdx}
+                  onPress={() => setSelected({ row: rowIdx, col: colIdx })}
+                  style={({ hovered }) => ({
+                    width: 36,
+                    height: 36,
+                    borderRadius: 12,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: isSelected
+                      ? t.colors.primary
+                      : hovered
+                      ? t.colors.backgroundOnSurface
+                      : 'transparent',
+                  })}
+                >
+                  <PaperText
+                    variant="titleMedium"
+                    style={{
+                      fontSize: 16,
+                      lineHeight: 22,
+                      fontWeight: '500',
+                      color: isSelected ? t.colors.onPrimary : t.colors.secondaryText,
+                      opacity: out ? 0.5 : 1,
+                    }}
+                  >
+                    {day}
+                  </PaperText>
+                </Pressable>
+              );
+            })}
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+// Static mock of iOS-style wheel Time Picker.
+// 3 columns (hour, minute, AM/PM), 5 visible rows, center row selected (full
+// opacity + primary color), surrounding rows fade with opacity. Center has a
+// subtle pill highlight matching iOS wheel pickers.
+function TimePickerDemo() {
+  const t = usePaperTheme();
+  const ROW_H = 36;
+  const hours = ['7', '8', '9', '10', '11'];
+  const minutes = ['58', '59', '00', '01', '02'];
+  const periods = ['', 'AM', 'PM', '', ''];
+  const center = 2;
+  const fades = [0.25, 0.5, 1, 0.5, 0.25];
+  const Column = ({ items, paddingRight = 0, paddingLeft = 0 }) => (
+    <View style={{ alignItems: 'center', paddingHorizontal: 8, paddingRight, paddingLeft }}>
+      {items.map((v, i) => (
+        <View key={i} style={{ height: ROW_H, justifyContent: 'center' }}>
+          <PaperText
+            variant="displaySmall"
+            style={{
+              fontSize: 22,
+              lineHeight: 28,
+              fontWeight: i === center ? '500' : '400',
+              color: t.colors.onSurface,
+              opacity: fades[i],
+              minWidth: 30,
+              textAlign: 'center',
+            }}
+          >
+            {v}
+          </PaperText>
+        </View>
+      ))}
+    </View>
+  );
+  return (
+    <View
+      style={{
+        backgroundColor: t.colors.surface,
+        borderRadius: 12,
+        padding: 12,
+        width: '100%',
+        maxWidth: 320,
+        alignSelf: 'flex-start',
+        position: 'relative',
+        height: ROW_H * 5 + 24,
+        justifyContent: 'center',
+        overflow: 'hidden',
+      }}
+    >
+      <View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          left: 12,
+          right: 12,
+          top: 12 + ROW_H * center,
+          height: ROW_H,
+          borderRadius: 8,
+          backgroundColor: t.colors.backgroundOnSurface,
+        }}
+      />
+      <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+        <Column items={hours} />
+        <Column items={minutes} />
+        <Column items={periods} />
+      </View>
+    </View>
+  );
+}
+
+// Static mock of Figma Week Days 5599:27211 + apps/native WeekDayPicker.
+// 7 columns (Sa Su Mo Tu We Th Fr in startOfWeek order). Each column: day
+// letter (Body Small in secondaryTextOnSurface) above a 28×28 status circle.
+// Selected day: primary fill + onPrimary text. Day with entry: filled
+// checkmark-circle. Empty: stroke circle. Today: thicker stroke.
+function WeekdayPickerDemo() {
+  const t = usePaperTheme();
+  const [selectedDay, setSelectedDay] = useState('Mo');
+  const dayMeta = {
+    Sa: 'empty', Su: 'empty', Mo: 'empty', Tu: 'entry',
+    We: 'entry', Th: 'today', Fr: 'empty',
+  };
+  const days = ['Sa', 'Su', 'Mo', 'Tu', 'We', 'Th', 'Fr'].map((label) => ({
+    label,
+    state: label === selectedDay ? 'selected' : dayMeta[label],
+  }));
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+        maxWidth: MOBILE_W,
+      }}
+    >
+      {days.map(({ label, state }) => {
+        const isSelected = state === 'selected';
+        const hasEntry = state === 'entry';
+        const isToday = state === 'today';
+        return (
+          <Pressable
+            key={label}
+            onPress={() => setSelectedDay(label)}
+            style={({ hovered }) => ({
+              alignItems: 'center',
+              gap: 6,
+              width: 32,
+              opacity: hovered && !isSelected ? 0.7 : 1,
+            })}
+          >
+            <PaperText
+              variant="bodySmall"
+              style={{
+                fontSize: 13,
+                lineHeight: 18,
+                fontWeight: '450',
+                color: t.colors.secondaryTextOnSurface,
+              }}
+            >
+              {label}
+            </PaperText>
+            <View
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: 999,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: isSelected || hasEntry ? t.colors.primary : 'transparent',
+                borderWidth: isSelected || hasEntry ? 0 : isToday ? 2 : 1.5,
+                borderColor: t.colors.onSurface,
+              }}
+            >
+              {hasEntry && <Check size={14} strokeWidth={3} color={t.colors.onPrimary} />}
+            </View>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+// Static mock of Figma 5600:6198 (Main Nav Bar / navigation/main-navigation).
+// - Outer: surface bg, height 86, padding 0px 24px 27px, top shadow
+//   0px -8px 32px rgba(0,0,0,0.08), gap 10 (between row and bottom safe area)
+// - Tab buttons: column, gap 3, width 44, icon 22×22, label Label Small
+//   (12/17 Circular Std Book), active fill primary, inactive fill outline
+// - Compose FAB: 56×56, 24px radius (squircle), primary bg, white plus icon
+// - Insights tab: black 18px notification badge with white "1" caption
+// - Tab order (Figma): Today / Explore / [FAB compose] / Insights / History
+function BottomNavDemo() {
+  const t = usePaperTheme();
+  const [activeTab, setActiveTab] = useState('today');
+  const tabs = [
+    { name: 'today', label: 'Today', Icon: Sun },
+    { name: 'explore', label: 'Explore', Icon: Compass },
+    { name: 'compose', label: '', Icon: Plus, fab: true },
+    { name: 'insights', label: 'Insights', Icon: Lightbulb, badge: 1 },
+    { name: 'history', label: 'History', Icon: BookOpen },
+  ].map((tab) => ({ ...tab, active: tab.name === activeTab }));
+  return (
+    <View
+      style={{
+        backgroundColor: t.colors.surface,
+        // Production has 86h with a 27px iOS safe-area inset at the bottom.
+        // On web there's no safe area, so we render the visible portion only:
+        // 64h with a small bottom inset that keeps the FAB bottom aligned with
+        // the label baseline.
+        height: 64,
+        paddingTop: 8,
+        paddingHorizontal: 24,
+        paddingBottom: 8,
+        justifyContent: 'flex-end',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -8 },
+        shadowOpacity: 0.08,
+        shadowRadius: 32,
+        elevation: 8,
+        maxWidth: MOBILE_W,
+        alignSelf: 'center',
+        width: '100%',
+      }}
+    >
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'flex-end',
+        }}
+      >
+        {tabs.map(({ name, label, Icon, active, fab, badge }) => {
+          if (fab) {
+            // FAB bottom aligns with the label baseline of sibling tabs. The
+            // 56×56 button is taller than the 41h tab buttons (icon + 3 + label),
+            // so it naturally extends ~15px above the nav-bar top edge.
+            // translateY 0 puts its bottom at the same flex-end baseline.
+            return (
+              <Pressable
+                key={name}
+                onPress={() => setActiveTab(name)}
+                style={({ hovered, pressed }) => ({
+                  width: 56,
+                  height: 56,
+                  borderRadius: 24,
+                  backgroundColor: t.colors.primary,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.12,
+                  shadowRadius: 12,
+                  elevation: 6,
+                  opacity: pressed ? 0.85 : hovered ? 0.92 : 1,
+                })}
+              >
+                <Icon size={22} color={t.colors.onPrimary} strokeWidth={2.5} />
+              </Pressable>
+            );
+          }
+          const color = active ? t.colors.primary : t.colors.outline;
+          return (
+            <Pressable
+              key={name}
+              onPress={() => setActiveTab(name)}
+              style={({ hovered }) => ({
+                alignItems: 'center',
+                gap: 3,
+                width: 44,
+                opacity: hovered && !active ? 0.7 : 1,
+              })}
+            >
+              <View>
+                <Icon size={22} color={color} strokeWidth={2} />
+                {badge != null && (
+                  <View
+                    style={{
+                      position: 'absolute',
+                      top: -4,
+                      right: -8,
+                      minWidth: 18,
+                      height: 18,
+                      borderRadius: 9,
+                      backgroundColor: t.colors.primary,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      paddingHorizontal: 5,
+                    }}
+                  >
+                    <PaperText
+                      variant="labelSmall"
+                      style={{
+                        fontSize: 11,
+                        lineHeight: 14,
+                        fontWeight: '700',
+                        color: t.colors.onPrimary,
+                      }}
+                    >
+                      {badge}
+                    </PaperText>
+                  </View>
+                )}
+              </View>
+              <PaperText
+                variant="labelSmall"
+                style={{
+                  fontSize: 12,
+                  lineHeight: 17,
+                  fontWeight: '450',
+                  color,
+                  textAlign: 'center',
+                }}
+              >
+                {label}
+              </PaperText>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
   );
 }
 

@@ -7,9 +7,9 @@ export function PersonaCard({ name, description, avatar, type = 'Default', class
   const badge = badges[type];
 
   return (
-    <div className={`bg-[#FFFFFF] rounded-[12px] p-[16px] flex flex-col gap-[12px] ${className}`}>
+    <div className={`bg-[var(--color-surface)] rounded-[12px] p-[16px] flex flex-col gap-[12px] ${className}`}>
       <div className="flex items-center gap-[12px]">
-        <div className="w-[40px] h-[40px] rounded-full bg-[#F0F0F0] flex items-center justify-center overflow-hidden shrink-0">
+        <div className="w-[40px] h-[40px] rounded-full bg-[var(--color-surface-variant)] flex items-center justify-center overflow-hidden shrink-0">
           {avatar ? (
             <img src={avatar} alt={name} className="w-full h-full object-cover" />
           ) : (
@@ -18,14 +18,14 @@ export function PersonaCard({ name, description, avatar, type = 'Default', class
         </div>
         <div className="flex flex-col gap-[2px] flex-1 min-w-0">
           <div className="flex items-center gap-[8px]">
-            <span className="text-[16px] leading-[22px] font-[500] text-[#191C1A] truncate">{name}</span>
+            <span className="text-[16px] leading-[22px] font-[500] text-[var(--color-on-surface)] truncate">{name}</span>
             {badge && (
               <span className={`px-[8px] py-[2px] rounded-full text-[11px] font-[500] shrink-0 ${badge.color}`}>
                 {badge.label}
               </span>
             )}
           </div>
-          <p className="text-[13px] leading-[18px] font-[450] text-[#6D6C6A] line-clamp-2">{description}</p>
+          <p className="text-[13px] leading-[18px] font-[450] text-[var(--color-secondary-text)] line-clamp-2">{description}</p>
         </div>
       </div>
     </div>

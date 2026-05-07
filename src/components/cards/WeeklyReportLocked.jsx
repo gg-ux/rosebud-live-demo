@@ -1,15 +1,30 @@
-export function WeeklyReportLocked({ className = '' }) {
+import { Lock } from 'lucide-react';
+
+// Matches Figma 4477:5510 (Weekly Report Locked):
+// - bg surface, 12px radius, padding 20px, column center gap 18px
+// - icon+title row gap 6px (Title Medium W3: 16/22 medium 500)
+// - body Body Medium centered, onSurface
+// - footer Body Medium W06 in secondaryTextOnSurface
+export function WeeklyReportLocked({
+  title = 'Unlocks Sunday',
+  body = 'Get a weekly in-depth AI analysis of your themes, patterns, and more.',
+  footer = 'Requires 1 more entry',
+  className = '',
+}) {
   return (
-    <div className={`bg-[#FFFFFF] rounded-[12px] px-[20px] py-[20px] flex flex-col items-center gap-[18px] ${className}`}>
+    <div className={`bg-[var(--color-surface)] rounded-[12px] p-[20px] flex flex-col items-center gap-[18px] ${className}`}>
       <div className="flex items-center gap-[6px]">
-        <svg viewBox="0 0 20 20" fill="#191C1A" className="w-[16px] h-[16px]">
-          <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-        </svg>
-        <span className="text-[16px] leading-[22px] font-[500] text-[#191C1A]">Weekly Report</span>
+        <Lock size={16} strokeWidth={2.2} className="text-[var(--color-on-surface)]" />
+        <span className="text-[16px] leading-[22px] font-[500] text-[var(--color-on-surface)]">{title}</span>
       </div>
-      <p className="text-[14px] leading-[20px] font-[450] text-[#6D6C6A] text-center">
-        Analysis will be ready in 4 days. Keep writing to unlock personalized insights.
+      <p className="text-[15px] leading-[20px] font-[450] text-[var(--color-on-surface)] text-center">
+        {body}
       </p>
+      {footer && (
+        <p className="text-[15px] leading-[20px] font-[450] text-[var(--color-secondary-text-on-surface)] text-center">
+          {footer}
+        </p>
+      )}
     </div>
   );
 }

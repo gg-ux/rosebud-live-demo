@@ -155,8 +155,10 @@ export function Sidebar({ open }) {
 
   return (
     <aside
-      className={`shrink-0 sticky top-[56px] self-start h-[calc(100vh-56px)] overflow-hidden transition-[width] duration-200 ease-out border-r border-[var(--color-outline-light)] bg-[var(--color-surface)] ${
-        open ? 'w-[240px]' : 'w-0'
+      className={`shrink-0 sticky top-[56px] self-start h-[calc(100vh-56px)] overflow-hidden transition-[width] duration-200 ease-out bg-[var(--color-surface)] ${
+        open
+          ? 'w-[240px] border-r border-[var(--color-outline-light)]'
+          : 'w-0 border-r-0'
       }`}
       aria-hidden={!open}
     >
@@ -166,7 +168,7 @@ export function Sidebar({ open }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search…"
-          className="w-full px-[10px] py-[6px] rounded-[8px] bg-[var(--color-surface-variant)] border border-[var(--color-outline-light)] text-[13px] leading-[18px] font-[450] text-[var(--color-on-surface)] placeholder:text-[var(--color-secondary-text)] outline-none focus:border-[var(--color-primary)] transition-colors"
+          className="w-full px-[10px] py-[6px] rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-outline-light)] text-[13px] leading-[18px] font-[450] text-[var(--color-on-surface)] placeholder:text-[var(--color-secondary-text)] outline-none focus:border-[var(--color-primary)] transition-colors"
         />
         <div className="flex-1 overflow-y-auto flex flex-col gap-[10px]">
           {filtered.length === 0 ? (

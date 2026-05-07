@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Sun, Moon, ChevronRight, ChevronDown, Star, ArrowRight, Menu as MenuIcon, X } from 'lucide-react';
+import { Sun, ChevronRight, ChevronDown, Star, ArrowRight, Menu as MenuIcon, X } from 'lucide-react';
 import { usePageActions } from '../components/Layout';
 import { DesignSystemSwitcher } from '../components/DesignSystemSwitcher';
 
@@ -212,15 +212,20 @@ function TealCTA({ children = 'Get in touch' }) {
 /* ══════════════════════════════════════════════════════════ */
 
 export function DesignSystemWebsite() {
-  const [theme, setTheme] = useState('light');
   const [activeSection, setActiveSection] = useState('how-to-use');
   const [collapsed, setCollapsed] = useState({});
   const [sidebarSearch, setSidebarSearch] = useState('');
   const [openAccordion, setOpenAccordion] = useState(0);
 
+  // The marketing site at rosebud.app is light-only. Force light while
+  // this page is mounted; restore the user's preference on unmount.
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
+    const prev = document.documentElement.getAttribute('data-theme');
+    document.documentElement.setAttribute('data-theme', 'light');
+    return () => {
+      if (prev) document.documentElement.setAttribute('data-theme', prev);
+    };
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -238,15 +243,13 @@ export function DesignSystemWebsite() {
     return () => observer.disconnect();
   }, []);
 
+  // No theme toggle on this page — page is locked to light mode.
   usePageActions(
-    <button
-      onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
-      className="p-[8px] rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-outline-light)] text-[var(--color-on-surface)] hover:opacity-80 transition-opacity cursor-pointer"
-      aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-    >
-      {theme === 'light' ? <Sun size={18} /> : <Moon size={18} />}
-    </button>,
-    [theme]
+    <span className="inline-flex items-center gap-[5px] px-[8px] py-[4px] rounded-full bg-[var(--color-surface-variant)] border border-[var(--color-outline-light)] text-[10px] font-[600] uppercase tracking-[0.06em] text-[var(--color-secondary-text)]">
+      <Sun size={11} />
+      Light only
+    </span>,
+    []
   );
 
   return (
@@ -261,7 +264,7 @@ export function DesignSystemWebsite() {
               value={sidebarSearch}
               onChange={(e) => setSidebarSearch(e.target.value)}
               placeholder="Search..."
-              className="mt-[14px] w-full px-[10px] py-[6px] rounded-[8px] bg-[var(--color-surface-variant)] border border-[var(--color-outline-light)] text-[13px] leading-[18px] font-[450] text-[var(--color-on-surface)] placeholder:text-[var(--color-secondary-text)] outline-none focus:border-[var(--color-primary)] transition-colors"
+              className="mt-[14px] w-full px-[10px] py-[6px] rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-outline-light)] text-[13px] leading-[18px] font-[450] text-[var(--color-on-surface)] placeholder:text-[var(--color-secondary-text)] outline-none focus:border-[var(--color-primary)] transition-colors"
             />
           </div>
           <div className="flex-1 overflow-y-auto px-[12px] py-[12px] flex flex-col gap-[8px]">
@@ -291,7 +294,7 @@ export function DesignSystemWebsite() {
                           href={`#${item.id}`}
                           className={`block px-[10px] py-[6px] rounded-[8px] text-[13px] leading-[18px] font-[500] transition-colors ${
                             activeSection === item.id
-                              ? 'bg-[var(--color-background)] text-[var(--color-on-background)] font-[600]'
+                              ? 'bg-[var(--color-surface-variant)] text-[var(--color-on-background)] font-[600]'
                               : 'text-[var(--color-on-surface)] hover:bg-[var(--color-surface-variant)]'
                           }`}
                         >

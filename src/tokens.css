@@ -226,12 +226,18 @@
   --color-error-container: #93000A;
   --color-on-error-container: #FFB4AB;
 
-  --color-background: #0A0C0A;
+  /* Neutral darks for the live-demo chrome (no green/sage cast).
+     Native's actual theme uses slightly tinted darks (rgb(10,12,10) bg,
+     rgb(65,73,66) sage surfaceVariant) — those tints stay inside the
+     Paper-rendered components on the Mobile App page via the ported
+     theme. The site chrome itself uses neutral darks so search inputs,
+     hover states, and table headers don't read as greenish. */
+  --color-background: #0F0F11;
   --color-on-background: #E1E3DE;
-  --color-surface: #242428;
+  --color-surface: #1A1A1C;
   --color-on-surface: #E1E3DE;
-  --color-surface-variant: #141416;
-  --color-on-surface-variant: #C0C9BF;
+  --color-surface-variant: #161617;
+  --color-on-surface-variant: #C0C0BF;
 
   --color-outline: #414942;
   --color-outline-light: #323234;
@@ -262,6 +268,13 @@
   --color-shadow: rgba(0, 0, 0, 0.3);
 }
 
+/* Icons in src/icons/ are static SVGs hard-coded with fill="black".
+   In dark mode, invert them so they remain visible. Apply the
+   `.icon-dark-invert` class to the img tag. */
+[data-theme="dark"] .icon-dark-invert {
+  filter: invert(0.92);
+}
+
 /* ══════════════════════════════════════════════════════════
    LIGHT THEME
    ══════════════════════════════════════════════════════════ */
@@ -289,11 +302,14 @@
   --color-error-container: #FFDAD6;
   --color-on-error-container: #410002;
 
-  --color-background: #F6F6F6;
+  --color-background: #F0F0F0;
   --color-on-background: #191C1A;
   --color-surface: #FFFFFF;
   --color-on-surface: #191C1A;
-  --color-surface-variant: #FCFCFC;
+  /* Neutral subtle background (vs native's sage-tinted surfaceVariant which
+     is for Material outlined containers — different semantic from how this
+     token is used in the live demo for inputs/hover states). */
+  --color-surface-variant: #F4F4F5;
   --color-on-surface-variant: #414942;
 
   --color-outline: #C0C0BF;

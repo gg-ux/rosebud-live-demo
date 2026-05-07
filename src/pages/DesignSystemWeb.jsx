@@ -19,6 +19,7 @@ import {
 import { usePageActions } from '../components/Layout';
 import chakraTheme from '../theme/index.js';
 import { DesignSystemSwitcher } from '../components/DesignSystemSwitcher';
+import { useTheme } from '../hooks/useTheme';
 
 /* ══════════════════════════════════════════════════════════
    DESIGN SYSTEM (WEB)
@@ -245,14 +246,10 @@ function SmallCaps({ children, ...rest }) {
    ══════════════════════════════════════════════════════════ */
 
 export function DesignSystemWeb() {
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useTheme();
   const [activeSection, setActiveSection] = useState('how-to-use');
   const [collapsed, setCollapsed] = useState({});
   const [sidebarSearch, setSidebarSearch] = useState('');
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -288,7 +285,7 @@ export function DesignSystemWeb() {
               value={sidebarSearch}
               onChange={(e) => setSidebarSearch(e.target.value)}
               placeholder="Search..."
-              className="mt-[14px] w-full px-[10px] py-[6px] rounded-[8px] bg-[var(--color-surface-variant)] border border-[var(--color-outline-light)] text-[13px] leading-[18px] font-[450] text-[var(--color-on-surface)] placeholder:text-[var(--color-secondary-text)] outline-none focus:border-[var(--color-primary)] transition-colors"
+              className="mt-[14px] w-full px-[10px] py-[6px] rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-outline-light)] text-[13px] leading-[18px] font-[450] text-[var(--color-on-surface)] placeholder:text-[var(--color-secondary-text)] outline-none focus:border-[var(--color-primary)] transition-colors"
             />
           </div>
           <div className="flex-1 overflow-y-auto px-[12px] py-[12px] flex flex-col gap-[8px]">
@@ -324,7 +321,7 @@ export function DesignSystemWeb() {
                           className={`
                             block px-[10px] py-[6px] rounded-[8px] text-[13px] leading-[18px] font-[500] transition-colors
                             ${activeSection === item.id
-                              ? 'bg-[var(--color-background)] text-[var(--color-on-background)] font-[600]'
+                              ? 'bg-[var(--color-surface-variant)] text-[var(--color-on-background)] font-[600]'
                               : 'text-[var(--color-on-surface)] hover:bg-[var(--color-surface-variant)]'
                             }
                           `}
@@ -361,7 +358,8 @@ export function DesignSystemWeb() {
           {/* ═══ GETTING STARTED ═══ */}
 
           <PageSection id="source" title="Source of truth" description="Where these tokens come from in the actual web codebase.">
-            <Box bg="bg" rounded="md" border="1px solid" borderColor="border" p={5}>
+            {/* Site-chrome meta block — uses live-demo CSS variables (not Chakra tokens) so it matches the Mobile App and Website pages. */}
+            <Box bg="var(--color-surface)" rounded="md" border="1px solid" borderColor="var(--color-outline-light)" p={5}>
               <Text fontSize="14px" mb={2}><strong>Stack:</strong> Next.js 15 + Chakra UI 2.5.5 + Emotion + framer-motion (Pages Router).</Text>
               <Text fontSize="14px" mb={3}><strong>Theme files (ported verbatim into <PathTag>src/theme/</PathTag>):</strong></Text>
               <Box as="ul" pl={5} fontSize="13px" color="textSecondary" sx={{ '& > li': { mb: 1 } }}>
@@ -379,7 +377,8 @@ export function DesignSystemWeb() {
           </PageSection>
 
           <PageSection id="how-to-use" title="How to use this page with Claude" description="Copy-paste these prompts when you want Claude to build new web prototypes that match Rosebud's web design system.">
-            <Box bg="bgSecondary" rounded="md" border="1px solid" borderColor="border" p={6}>
+            {/* Site-chrome callout — uses live-demo CSS variables so it matches the other two pages. */}
+            <Box bg="var(--color-surface-variant)" rounded="md" border="1px solid" borderColor="var(--color-outline-light)" p={6}>
               <SmallCaps mb={3}>1 · Bootstrap a new prototype page</SmallCaps>
               <Text fontSize="14px" color="textSecondary" mb={3}>
                 Drop a new file under <PathTag>src/pages/</PathTag> and add a route in <PathTag>main.jsx</PathTag>. Use this prompt verbatim:

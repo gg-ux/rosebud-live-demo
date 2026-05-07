@@ -1,5 +1,10 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Smartphone, AppWindow, Globe, ArrowRight } from 'lucide-react';
+import { Smartphone, AppWindow, Globe, ArrowRight, Copy, Check, Sun, Moon } from 'lucide-react';
+import { usePageActions } from '../components/Layout';
+import { useTheme } from '../hooks/useTheme';
+
+const CONTACT_EMAIL = 'grace@rosebud.app';
 
 const ITEMS = [
   {
@@ -58,17 +63,17 @@ function DashboardCard({ item }) {
         </div>
         <ArrowRight
           size={18}
-          className="text-[#C0C0BF] group-hover:text-[#191C1A] group-hover:translate-x-[3px] transition-all"
+          className="text-[var(--color-secondary-text)]/60 group-hover:text-[var(--color-on-surface)] group-hover:translate-x-[3px] transition-all"
         />
       </div>
-      <h2 className="text-[19px] md:text-[21px] leading-[24px] md:leading-[26px] font-[700] tracking-[-0.01em] text-[#191C1A] mb-[6px]">
+      <h2 className="text-[19px] md:text-[21px] leading-[24px] md:leading-[26px] font-[700] tracking-[-0.01em] text-[var(--color-on-surface)] mb-[6px]">
         {item.title}
       </h2>
-      <p className="text-[13px] leading-[19px] font-[450] text-[#6D6C6A] mb-[14px]">
+      <p className="text-[13px] leading-[19px] font-[450] text-[var(--color-secondary-text)] mb-[14px]">
         {item.description}
       </p>
       {item.meta && (
-        <span className="mt-auto text-[11px] font-[500] tracking-[0.02em] text-[#6D6C6A]/80">
+        <span className="mt-auto text-[11px] font-[500] tracking-[0.02em] text-[var(--color-secondary-text)]/80">
           {item.meta}
         </span>
       )}
@@ -77,15 +82,27 @@ function DashboardCard({ item }) {
 }
 
 export function Dashboard() {
+  const [theme, setTheme] = useTheme();
+  usePageActions(
+    <button
+      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      className="p-[8px] rounded-[8px] bg-[var(--color-surface)] border border-[var(--color-outline-light)] text-[var(--color-on-surface)] hover:opacity-80 transition-opacity cursor-pointer"
+      aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+    >
+      {theme === 'light' ? <Sun size={18} /> : <Moon size={18} />}
+    </button>,
+    [theme]
+  );
+
   return (
     <div className="min-h-[calc(100vh-56px)] bg-[var(--color-background)] text-[var(--color-on-background)] flex flex-col">
-      <div className="relative max-w-[1100px] w-full mx-auto px-[20px] md:px-[24px] py-[40px] md:py-[64px] flex flex-col gap-[28px] md:gap-[40px] flex-1">
+      <div className="relative max-w-[1100px] w-full mx-auto px-[20px] md:px-[24px] pt-[40px] md:pt-[64px] pb-[20px] md:pb-[24px] flex flex-col gap-[28px] md:gap-[40px] flex-1">
         {/* Hero */}
         <div className="flex flex-col items-start">
-          <h1 className="text-[32px] md:text-[44px] leading-[36px] md:leading-[50px] font-[700] tracking-[-0.025em] text-[#191C1A] mb-[10px]">
+          <h1 className="text-[32px] md:text-[44px] leading-[36px] md:leading-[50px] font-[700] tracking-[-0.025em] text-[var(--color-on-background)] mb-[10px]">
             Rosebud Design System
           </h1>
-          <p className="text-[15px] md:text-[17px] leading-[22px] md:leading-[26px] font-[450] text-[#6D6C6A] max-w-[640px]">
+          <p className="text-[15px] md:text-[17px] leading-[22px] md:leading-[26px] font-[450] text-[var(--color-secondary-text)] max-w-[640px]">
             A calm, warm visual language for tools that help people grow. Disciplined color, editorial typography, soft organic shapes — one voice across mobile, web, and marketing.
           </p>
         </div>
@@ -96,7 +113,35 @@ export function Dashboard() {
             <DashboardCard key={item.path} item={item} />
           ))}
         </div>
+
+        {/* Footer credit */}
+        <DashboardFooter />
       </div>
     </div>
+  );
+}
+
+function DashboardFooter() {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(CONTACT_EMAIL);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch { /* ignore */ }
+  };
+  return (
+    <footer className="mt-auto pt-[24px] text-center text-[12px] leading-[18px] font-[450] text-[var(--color-secondary-text)]/80">
+      Designed by Grace Guo · {CONTACT_EMAIL}
+      <button
+        type="button"
+        onClick={handleCopy}
+        aria-label={copied ? 'Email copied' : 'Copy email'}
+        className="inline-flex items-center align-text-bottom ml-[4px] p-[2px] rounded-[4px] text-[var(--color-secondary-text)]/80 hover:text-[var(--color-on-surface)] hover:bg-[var(--color-surface-variant)] transition-colors cursor-pointer"
+      >
+        {copied ? <Check size={11} className="text-[#5ABA9D]" /> : <Copy size={11} />}
+      </button>
+      {' · '}{new Date().getFullYear()}
+    </footer>
   );
 }

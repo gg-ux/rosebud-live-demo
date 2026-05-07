@@ -1,12 +1,12 @@
 export function ReflectionCard({ emoji = '🪞', title = 'Reflection', body, className = '' }) {
   return (
-    <div className={`bg-[#F0F0F0] rounded-[12px] p-[16px] flex flex-col gap-[14px] ${className}`}>
+    <div className={`bg-[var(--color-surface)] rounded-[12px] p-[16px] flex flex-col gap-[14px] ${className}`}>
       <div className="flex flex-col gap-[10px]">
         <div className="flex items-center gap-[5px]">
           <span className="text-[15px]">{emoji}</span>
-          <span className="text-[15px] leading-[21px] font-[500] text-[#191C1A]">{title}</span>
+          <span className="text-[15px] leading-[21px] font-[500] text-[var(--color-secondary-text-on-surface)]">{title}</span>
         </div>
-        <p className="text-[16px] leading-[22px] font-[450] text-[#191C1A]">{body}</p>
+        <p className="text-[16px] leading-[22px] font-[450] text-[var(--color-on-surface)]">{body}</p>
       </div>
     </div>
   );
